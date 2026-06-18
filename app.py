@@ -1,156 +1,169 @@
 import streamlit as st
 import random
-import time
+import matplotlib.pyplot as plt
+import numpy as np
 
-# 1. 웹페이지 기본 설정
-st.set_page_config(page_title="미니 MLB 시뮬레이터", layout="centered")
-st.title("⚾ 초간단 MLB 야구 시뮬레이터 v1.0")
-st.write("버튼을 눌러 투수와 타자의 대결을 진행하세요!")
+# --- [1. 게임 상태 및 데이터 초기화] ---
+def init_game():
+    if 'inning' not in st.session_state:
+        st.session_state.inning = 1
+        st.session_state.half = "초"
+        st.session_state.outs = 0
+        st.session_state.strikes = 0
+        st.session_state.balls = 0
+        st.session_state.score = {"AWAY": 0, "HOME": 0}
+        st.session_state.log = ["게임을 시작합니다. 구종과 코스를 선택하세요!"]
+        
+        # 실제 MLB 투수 데이터 예시 (추후 파일 분리 가능)
+        st.session_state.pitcher = {
+            "name": "Gerrit Cole",
+            "pitches": {
+                "포심 직구": {"speed": 97, "control": 85, "break": 0},
+                "슬라이더": {"speed": 88, "control": 75, "break": 80},
+                "체인지업": {"speed": 89, "control": 70, "break": 75},
+                "커브": {"speed": 83, "control": 65, "break": 90}
+            }
+        }
+        # 현재 던진 공의 위치 저장 (X, Y)
+        st.session_state.last_pitch_coord = None
+        st.session_state.last_pitch_result = ""
 
-# 2. 게임 상태(Session State) 초기화
-# 스트림릿은 버튼을 누르면 코드가 처음부터 다시 실행되므로, 경기 데이터를 저장해두어야 합니다.
-if 'inning' not in st.session_state:
-    st.session_state.inning = 1
-    st.session_state.half = "초"  # 초 또는 말
-    st.session_state.outs = 0
-    st.session_state.strikes = 0
-    st.session_state.balls = 0
-    st.session_state.score = {"AWAY": 0, "HOME": 0}
-    st.session_state.bases = [False, False, False]  # 1루, 2루, 3루 주자 여부
-    st.session_state.log = []  # 경기 중계 기록
-
-# 3. 게임 리셋 함수
-def reset_game():
-    st.session_state.inning = 1
-    st.session_state.half = "초"
-    st.session_state.outs = 0
-    st.session_state.strikes = 0
-    st.session_state.balls = 0
-    st.session_state.score = {"AWAY": 0, "HOME": 0}
-    st.session_state.bases = [False, False, False]
-    st.session_state.log = ["경기가 초기화되었습니다."]
-
-# 4. 투구 결과 계산 로직 (가장 단순한 확률 모델)
-def play_pitch():
-    # 확률 설정 (추후 이 부분을 선수 스탯 기반으로 디테일하게 업그레이드합니다)
-    pitch_result = random.choices(
-        ["스트라이크", "볼", "안타", "아웃", "홈런"],
-        weights=[30, 30, 15, 20, 5],
-        k=1
-    )[0]
+# --- [2. 스트라이크 존 그래픽 생성 함수] ---
+def draw_strike_zone(pitch_coord=None):
+    fig, ax = plt.subplots(figsize=(4, 4))
     
-    current_team = "AWAY" if st.session_state.half == "초" else "HOME"
+    # 스트라이크 존 경계 설정 (X: -1~1, Y: 1.5~3.5 사이가 스트라이크 존 가정)
+    sz_x = [-1, 1, 1, -1, -1]
+    sz_y = [1.5, 1.5, 3.5, 3.5, 1.5]
+    ax.plot(sz_x, sz_y, color="black", linewidth=2, label="Strike Zone")
     
-    if pitch_result == "스트라이크":
+    # 9분할 가이드라인 내부선 그리기
+    ax.plot([-0.33, -0.33], [1.5, 3.5], color="gray", linestyle="--", linewidth=1)
+    ax.plot([0.33, 0.33], [1.5, 3.5], color="gray", linestyle="--", linewidth=1)
+    ax.plot([-1, 1], [2.16, 2.16], color="gray", linestyle="--", linewidth=1)
+    ax.plot([-1, 1], [2.83, 2.83], color="gray", linestyle="--", linewidth=1)
+    
+    # 공이 던져진 위치 표시
+    if pitch_coord:
+        x, y = pitch_coord
+        # 스트라이크/볼 여부에 따라 공 색상 변경
+        is_strike = (-1 <= x <= 1) and (1.5 <= y <= 3.5)
+        color = "red" if is_strike else "green"
+        ax.scatter(x, y, color=color, s=200, edgecolors="black", zorder=5)
+        ax.text(x + 0.1, y + 0.1, "Pitch", fontsize=10, weight="bold")
+
+    # 그래프 스타일 설정
+    ax.set_xlim(-2, 2)
+    ax.set_ylim(0.5, 4.5)
+    ax.set_aspect('equal')
+    ax.axis('off') # 축 숨기기
+    fig.patch.set_facecolor('#f0f2f6') # 스트림릿 배경색과 맞춤
+    
+    return fig
+
+# --- [3. 투구 실행 로직] ---
+def execute_pitch(pitch_type, zone_section):
+    pitcher = st.session_state.pitcher
+    pitch_info = pitcher["pitches"][pitch_type]
+    
+    # 1. 사용자가 선택한 구역(1~9번 또는 볼 지역)에 따른 기본 좌표 설정
+    # 1~9번은 스트라이크 존 내부, 10번은 외곽 볼 유인구
+    sections = {
+        1: (-0.66, 3.16), 2: (0, 3.16), 3: (0.66, 3.16),
+        4: (-0.66, 2.5),  5: (0, 2.5),  6: (0.66, 2.5),
+        7: (-0.66, 1.83), 8: (0, 1.83), 9: (0.66, 1.83),
+        10: (1.3, 3.8) # 의도적인 유인구 (우상단 볼)
+    }
+    
+    base_x, base_y = sections[zone_section]
+    
+    # 2. 투수의 제구력(control)에 따른 흔들림(오차) 계산
+    # 제구력이 높을수록(최대 100) 오차가 줄어듭니다.
+    error_range = (100 - pitch_info["control"]) / 200
+    final_x = base_x + random.uniform(-error_range, error_range)
+    final_y = base_y + random.uniform(-error_range, error_range)
+    
+    st.session_state.last_pitch_coord = (final_x, final_y)
+    
+    # 3. 판정 (스트라이크 존 안에 들어왔는가?)
+    is_strike = (-1 <= final_x <= 1) and (1.5 <= final_y <= 3.5)
+    
+    # 변화구인 경우 무브먼트(Break) 시각 효과 로그 추가
+    break_text = f" (변화각: {pitch_info['break']})" if pitch_info['break'] > 0 else ""
+    speed_text = f"{pitch_info['speed'] + random.randint(-2, 2)} mph"
+
+    if is_strike:
         st.session_state.strikes += 1
-        st.session_state.log.insert(0, f"⚾ 스트라이크! (C: {st.session_state.balls}B {st.session_state.strikes}S)")
+        result_msg = f"🔥 스트라이크! - {pitcher['name']}의 {pitch_type}({speed_text}){break_text}"
         if st.session_state.strikes >= 3:
             st.session_state.outs += 1
             st.session_state.strikes = 0
             st.session_state.balls = 0
-            st.session_state.log.insert(0, f"❌ 삼진 아웃!! (아웃: {st.session_state.outs})")
-
-    elif pitch_result == "볼":
+            result_msg += " ❌ 삼진 아웃!!"
+    else:
         st.session_state.balls += 1
-        st.session_state.log.insert(0, f"🟢 볼! (C: {st.session_state.balls}B {st.session_state.strikes}S)")
+        result_msg = f"🟢 볼! - 코스를 벗어난 {pitch_type}({speed_text})"
         if st.session_state.balls >= 4:
             st.session_state.strikes = 0
             st.session_state.balls = 0
-            # 볼넷 주자 이동 (단순화: 1루 비어있으면 1루로, 꽉 차있으면 밀어내기 등은 다음 버전에 고도화)
-            if not st.session_state.bases[0]:
-                st.session_state.bases[0] = True
-                st.session_state.log.insert(0, f"🚶 볼넷! 타자 주자 1루로 나갑니다.")
-            else:
-                st.session_state.score[current_team] += 1
-                st.session_state.log.insert(0, f"🚶 밀어내기 볼넷! 1점 득점!")
+            result_msg += " 🚶 볼넷 출루!"
 
-    elif pitch_result == "아웃":
-        st.session_state.outs += 1
-        st.session_state.strikes = 0
-        st.session_state.balls = 0
-        st.session_state.log.insert(0, f"⚾ 범타 아웃! (아웃: {st.session_state.outs})")
+    st.session_state.log.insert(0, result_msg)
 
-    elif pitch_result == "안타":
-        st.session_state.strikes = 0
-        st.session_state.balls = 0
-        # 주자 진루 (단순하게 모든 주자 1루씩 이동으로 처리)
-        runs = 0
-        if st.session_state.bases[2]: runs += 1
-        st.session_state.bases[2] = st.session_state.bases[1]
-        st.session_state.bases[1] = st.session_state.bases[0]
-        st.session_state.bases[0] = True
-        
-        st.session_state.score[current_team] += runs
-        st.session_state.log.insert(0, f"🔥 안타! 주자 진루! (득점: +{runs})")
-
-    elif pitch_result == "홈런":
-        st.session_state.strikes = 0
-        st.session_state.balls = 0
-        # 주자 전원 득점 + 타자 득점
-        runners = st.session_state.bases.count(True)
-        total_runs = runners + 1
-        st.session_state.score[current_team] += total_runs
-        st.session_state.bases = [False, False, False]
-        st.session_state.log.insert(0, f"🚀 💥 홈런!!!! {total_runs}점 홈런이 터집니다!")
-
-    # 공수 교대 검사 (3아웃)
+    # 3아웃 공수교대 처리
     if st.session_state.outs >= 3:
         st.session_state.outs = 0
         st.session_state.strikes = 0
         st.session_state.balls = 0
-        st.session_state.bases = [False, False, False]
+        st.session_state.half = "말" if st.session_state.half == "초" else "초"
+        if st.session_state.half == "초": st.session_state.inning += 1
+        st.session_state.log.insert(0, f"🔄 공수 교대! {st.session_state.inning}회 {st.session_state.half} 시작.")
+
+# --- [4. 메인 UI 화면 그리기] ---
+def draw_ui():
+    st.set_page_config(page_title="MLB 투구 시뮬레이터", layout="wide")
+    st.title("⚾ MLB 스트라이크 존 투구 시뮬레이터")
+    
+    # 전광판 상단 배치
+    st.info(f"현재 경기: {st.session_state.inning}회{st.session_state.half} | 아웃: {st.session_state.outs}🔴 | 스트라이크: {st.session_state.strikes}🟡 | 볼: {st.session_state.balls}🟢")
+    
+    # 좌우 분할 (왼쪽: 컨트롤러 및 로그, 오른쪽: 스트라이크 존 그래픽)
+    col_ctrl, col_zone = st.columns([1, 1])
+    
+    with col_ctrl:
+        st.subheader(f"투수: {st.session_state.pitcher['name']}")
         
-        if st.session_state.half == "초":
-            st.session_state.half = "말"
-            st.session_state.log.insert(0, f"🔄 공수 교대! {st.session_state.inning}이닝 말로 넘어갑니다.")
-        else:
-            st.session_state.inning += 1
-            st.session_state.half = "초"
-            st.session_state.log.insert(0, f"🔄 이닝 종료! {st.session_state.inning}이닝 초로 넘어갑니다.")
+        # 구종 선택 라디오 버튼
+        pitch_options = list(st.session_state.pitcher["pitches"].keys())
+        selected_pitch = st.radio("🔮 던질 구종을 선택하세요:", pitch_options)
+        
+        # 투구 코스 선택 (9분할 존 + 유인구)
+        zone_options = {
+            1: "1번 (좌상단)", 2: "2번 (상단 중앙)", 3: "3번 (우상단)",
+            4: "4번 (좌측 중앙)", 5: "5번 (한가운데 한복판)", 6: "6번 (우측 중앙)",
+            7: "7번 (좌하단)", 8: "8번 (하단 중앙)", 9: "9번 (우하단)",
+            10: "10번 (빠지는 유인구 볼)"
+        }
+        selected_zone = st.selectbox("🎯 조준할 코스를 선택하세요:", options=list(zone_options.keys()), format_func=lambda x: zone_options[x])
+        
+        # 투구 버튼
+        if st.button("⚾ 공 던지기!", type="primary", use_container_width=True):
+            execute_pitch(selected_pitch, selected_zone)
+            st.rerun()
+            
+        # 중계 로그
+        st.markdown("---")
+        st.subheader("📋 투구 분석 기록")
+        for line in st.session_state.log[:5]:
+            st.write(line)
 
-# 5. UI 화면 배치 (전광판)
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric(label="원정 팀 (AWAY)", value=st.session_state.score["AWAY"])
-with col2:
-    st.metric(label="이닝", value=f"{st.session_state.inning}회 {st.session_state.half}")
-with col3:
-    st.metric(label="홈 팀 (HOME)", value=st.session_state.score["HOME"])
+    with col_zone:
+        st.subheader("🎯 스트라이크 존 현황")
+        # 최근 투구 좌표를 넘겨서 실시간으로 점을 찍음
+        fig = draw_strike_zone(st.session_state.last_pitch_coord)
+        st.pyplot(fig)
 
-st.markdown("---")
-
-# 6. UI 화면 배치 (현재 볼카운트 및 주자 상황)
-col_game1, col_game2 = st.columns([1, 1])
-
-with col_game1:
-    st.subheader("📊 카운트")
-    st.write(f"**🔴 OUT:** {'●' * st.session_state.outs}{'○' * (3 - st.session_state.outs)}")
-    st.write(f"**🟡 STRIKE:** {'●' * st.session_state.strikes}{'○' * (3 - st.session_state.strikes)}")
-    st.write(f"**🟢 BALL:** {'●' * st.session_state.balls}{'○' * (4 - st.session_state.balls)}")
-
-with col_game2:
-    st.subheader("🏃 주자 상황")
-    b1 = "◆" if st.session_state.bases[0] else "◇"
-    b2 = "◆" if st.session_state.bases[1] else "◇"
-    b3 = "◆" if st.session_state.bases[2] else "◇"
-    st.write(f"&nbsp;&nbsp;&nbsp;&nbsp;{b2}&nbsp;&nbsp;&nbsp;&nbsp; (2루)")
-    st.write(f"&nbsp;&nbsp;{b3}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{b1} (3루 / 1루)")
-
-st.markdown("---")
-
-# 7. 조작 버튼
-col_btn1, col_btn2 = st.columns(2)
-with col_btn1:
-    if st.button("⚾ 다음 공 투구", type="primary", use_container_width=True):
-        play_pitch()
-        st.rerun()
-
-with col_btn2:
-    if st.button("🔄 게임 리셋", use_container_width=True):
-        reset_game()
-        st.rerun()
-
-# 8. 중계 로그 출력
-st.subheader("📋 경기 중계")
-for line in st.session_state.log[:10]: # 최근 10개 기록만 노출
-    st.text(line)
+# --- [5. 메인 진입점] ---
+if __name__ == "__main__":
+    init_game()
+    draw_ui()
