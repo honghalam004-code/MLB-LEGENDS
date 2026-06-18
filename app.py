@@ -1,413 +1,626 @@
 import streamlit as st
 import random
+import time
 
 def main():
-    # ----------------------------------------------------------------
-    # 1. 고해상도 시네마틱 와이드 레이아웃 및 화이트 UI 스타일링
-    # ----------------------------------------------------------------
-    st.set_page_config(page_title="EA SPORTS: MVP BASEBALL PRO 2026", layout="wide")
+    # ==========================================
+    # 1. APPLICATION SETUP & THEME CONFIGURATION
+    # ==========================================
+    st.set_page_config(page_title="MVP BASEBALL: ULTIMATE 700", layout="wide", initial_sidebar_state="collapsed")
     
     st.markdown("""
         <style>
-        .main { background-color: #f8fafc; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        .stSelectbox, .stTextInput, .stSlider, .stRadio { 
-            background: #ffffff !important; color: #0f172a !important; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-        div[data-testid="stBlock"] { padding: 12px; }
-        h2, h3 { color: #0f172a !important; font-weight: 800 !important; letter-spacing: -0.5px; }
-        .stButton>button {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
-            color: white !important; font-weight: 800 !important; padding: 12px 24px !important; border-radius: 12px !important;
-        }
+        .main { background-color: #f8fafc; color: #0f172a; font-family: 'Inter', -apple-system, sans-serif; }
+        .stSelectbox, .stSlider, .stRadio, .stNumberInput { background: #ffffff !important; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #1e293b !important; font-weight: 900 !important; }
+        .stButton>button { background: linear-gradient(to right, #1d4ed8, #2563eb) !important; color: white !important; font-weight: 800 !important; padding: 16px !important; border-radius: 12px !important; transition: all 0.2s; }
+        .stButton>button:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .data-card { background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         </style>
     """, unsafe_allow_html=True)
 
-    # ----------------------------------------------------------------
-    # 2. 게임 상태 관리 (세션 데이터 오케스트레이션)
-    # ----------------------------------------------------------------
-    if 'game_started' not in st.session_state:
-        st.session_state.game_started = False
-    if 'away_team' not in st.session_state: st.session_state.away_team = "NY Yankees"
-    if 'home_team' not in st.session_state: st.session_state.home_team = "LA Dodgers"
-    if 'pitcher_name' not in st.session_state: st.session_state.pitcher_name = "C. Kershaw"
+    # ==========================================
+    # 2. MASSIVE DATABASE: MLB 30 TEAMS & PITCHERS
+    # ==========================================
+    mlb_database = {
+        "AL EAST": {
+            "NY Yankees (뉴욕 양키스)": ["게릿 콜 (G. Cole)", "마커스 스트로먼 (M. Stroman)", "카를로스 로돈 (C. Rodon)", "클레이 홈즈 (C. Holmes)"],
+            "Baltimore Orioles (볼티모어 오리올스)": ["코빈 번스 (C. Burnes)", "그레이슨 로드리게스 (G. Rodriguez)", "카일 브래디쉬 (K. Bradish)"],
+            "Boston Red Sox (보스턴 레드삭스)": ["루카스 지올리토 (L. Giolito)", "브라얀 벨로 (B. Bello)", "켄리 잰슨 (K. Jansen)"],
+            "Tampa Bay Rays (탬파베이 레이스)": ["잭 에플린 (Z. Eflin)", "에런 시발리 (A. Civale)", "피트 페어뱅크스 (P. Fairbanks)"],
+            "Toronto Blue Jays (토론토 블루제이스)": ["케빈 가우스먼 (K. Gausman)", "크리스 배싯 (C. Bassitt)", "호세 베리오스 (J. Berrios)"]
+        },
+        "AL CENTRAL": {
+            "Cleveland Guardians (클리블랜드)": ["셰인 비버 (S. Bieber)", "태너 바이비 (T. Bibee)", "에마누엘 클라세 (E. Clase)"],
+            "Minnesota Twins (미네소타 트윈스)": ["파블로 로페즈 (P. Lopez)", "조 라이언 (J. Ryan)", "요안 두란 (J. Duran)"],
+            "Detroit Tigers (디트로이트 타이거스)": ["타릭 스쿠발 (T. Skubal)", "잭 플래허티 (J. Flaherty)", "마에다 겐타 (K. Maeda)"],
+            "KC Royals (캔자스시티 로열스)": ["콜 레이건스 (C. Ragans)", "세스 루고 (S. Lugo)", "마이클 와카 (M. Wacha)"],
+            "Chicago White Sox (시카고 화이트삭스)": ["딜런 시즈 (D. Cease)", "마이클 코펙 (M. Kopech)", "개럿 크로셰 (G. Crochet)"]
+        },
+        "AL WEST": {
+            "Houston Astros (휴스턴 애스트로스)": ["저스틴 벌랜더 (J. Verlander)", "프램버 발데스 (F. Valdez)", "조시 헤이더 (J. Hader)"],
+            "Texas Rangers (텍사스 레인저스)": ["네이선 이볼디 (N. Eovaldi)", "맥스 슈어저 (M. Scherzer)", "제이콥 디그롬 (J. deGrom)"],
+            "Seattle Mariners (시애틀 매리너스)": ["루이스 카스티요 (L. Castillo)", "조지 커비 (G. Kirby)", "안드레스 무뇨스 (A. Munoz)"],
+            "LA Angels (로스앤젤레스 에인절스)": ["패트릭 산도발 (P. Sandoval)", "타일러 앤더슨 (T. Anderson)", "카를로스 에스테베스 (C. Estevez)"],
+            "Oakland Athletics (오클랜드 애슬레틱스)": ["폴 블랙번 (P. Blackburn)", "JP 시어스 (J. Sears)", "메이슨 밀러 (M. Miller)"]
+        },
+        "NL EAST": {
+            "Atlanta Braves (애틀랜타 브레이브스)": ["스펜서 스트라이더 (S. Strider)", "맥스 프리드 (M. Fried)", "크리스 세일 (C. Sale)"],
+            "Philadelphia Phillies (필라델피아)": ["잭 휠러 (Z. Wheeler)", "애런 놀라 (A. Nola)", "호세 알바라도 (J. Alvarado)"],
+            "Miami Marlins (마이애미 말린스)": ["헤수스 루자르도 (J. Luzardo)", "에우리 페레즈 (E. Perez)", "태너 스캇 (T. Scott)"],
+            "NY Mets (뉴욕 메츠)": ["센가 코다이 (K. Senga)", "루이스 세베리노 (L. Severino)", "에드윈 디아즈 (E. Diaz)"],
+            "Washington Nationals (워싱턴)": ["조시아 그레이 (J. Gray)", "맥켄지 고어 (M. Gore)", "카일 피니건 (K. Finnegan)"]
+        },
+        "NL CENTRAL": {
+            "Milwaukee Brewers (밀워키 브루어스)": ["프레디 페랄타 (F. Peralta)", "웨이드 마일리 (W. Miley)", "데빈 윌리엄스 (D. Williams)"],
+            "Chicago Cubs (시카고 컵스)": ["저스틴 스틸 (J. Steele)", "이마나가 쇼타 (S. Imanaga)", "카일 헨드릭스 (K. Hendricks)"],
+            "Cincinnati Reds (신시내티 레즈)": ["헌터 그린 (H. Greene)", "그레이엄 애시크래프트 (G. Ashcraft)", "알렉시스 디아즈 (A. Diaz)"],
+            "Pittsburgh Pirates (피츠버그 파이어리츠)": ["미치 켈러 (M. Keller)", "폴 스킨스 (P. Skenes)", "데이비드 베드너 (D. Bednar)"],
+            "STL Cardinals (세인트루이스 카디널스)": ["소니 그레이 (S. Gray)", "마일스 마이콜라스 (M. Mikolas)", "라이언 헬슬리 (R. Helsley)"]
+        },
+        "NL WEST": {
+            "LA Dodgers (로스앤젤레스 다저스)": ["오타니 쇼헤이 (S. Ohtani)", "야마모토 요시노부 (Y. Yamamoto)", "클레이튼 커쇼 (C. Kershaw)", "타일러 글래스노우 (T. Glasnow)"],
+            "AZ Diamondbacks (애리조나)": ["잭 갤런 (Z. Gallen)", "메릴 켈리 (M. Kelly)", "에두아르도 로드리게스 (E. Rodriguez)"],
+            "SD Padres (샌디에이고 파드리스)": ["유 다르빗슈 (Y. Darvish)", "조 머스그로브 (J. Musgrove)", "마이클 킹 (M. King)"],
+            "SF Giants (샌프란시스코 자이언츠)": ["로건 웹 (L. Webb)", "블레이크 스넬 (B. Snell)", "카밀로 도발 (C. Doval)"],
+            "Colorado Rockies (콜로라도 로키스)": ["카일 프리랜드 (K. Freeland)", "저스틴 로렌스 (J. Lawrence)", "라이언 펠트너 (R. Feltner)"]
+        }
+    }
 
-    # --- MLB 30개 전체 구단 데이터셋 완벽 탑재 ---
-    mlb_teams = [
-        "AZ Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", 
-        "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Guardians", 
-        "Colorado Rockies", "Detroit Tigers", "Houston Astros", "KC Royals", 
-        "LA Angels", "LA Dodgers", "Miami Marlins", "Milwaukee Brewers", 
-        "Minnesota Twins", "NY Mets", "NY Yankees", "Oakland Athletics", 
-        "Philadelphia Phillies", "Pittsburgh Pirates", "SD Padres", "SF Giants", 
-        "Seattle Mariners", "STL Cardinals", "Tampa Bay Rays", "Texas Rangers", 
-        "Toronto Blue Jays", "Washington Nationals"
-    ]
+    # ==========================================
+    # 3. SESSION STATE MANAGEMENT
+    # ==========================================
+    if 'game_active' not in st.session_state: st.session_state.game_active = False
+    if 'weather_wind' not in st.session_state: st.session_state.weather_wind = 0
+    if 'stadium_type' not in st.session_state: st.session_state.stadium_type = "Open Air"
 
-    # ----------------------------------------------------------------
-    # [위치 1] 초기 설정 화면 (아무것도 못하고 고르는 빌드 마크업)
-    # ----------------------------------------------------------------
-    if not st.session_state.game_started:
+    # ==========================================
+    # 4. GAME LOBBY: PRE-GAME CONFIGURATION
+    # ==========================================
+    if not st.session_state.game_active:
         st.markdown("""
-            <div style="background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); padding: 60px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.05); border: 2px solid #e2e8f0; max-width: 800px; margin: 40px auto;">
-                <div style="background: #ef4444; color: white; font-family: 'Arial Black', sans-serif; font-size: 14px; font-weight: 900; display: inline-block; padding: 4px 12px; border-radius: 4px; margin-bottom: 15px; letter-spacing: 2px;">EA SPORTS</div>
-                <h1 style="color: #0f172a; margin: 0; font-family: 'Impact', sans-serif; font-size: 56px; letter-spacing: 1px;">MVP BASEBALL <span style="color:#2563eb;">2026</span></h1>
-                <p style="color: #475569; margin-top: 10px; font-size: 16px; font-weight: 500;">경기 시작 전, 대진할 구단과 선발 투수를 등록하십시오.</p>
+            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid #e2e8f0; max-width: 1000px; margin: 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                <span style="background: #ef4444; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 14px;">ULTIMATE PRO ENGINE 2026</span>
+                <h1 style="font-size: 50px; font-weight: 900; margin: 10px 0; color: #0f172a;">MVP BASEBALL: <span style="color: #2563eb;">CATCHER'S VIEW</span></h1>
+                <p style="color: #64748b; font-size: 18px;">메이저리그 30개 구단 전체 로스터와 환경 변수를 설정하고 게임을 시작하세요.</p>
             </div>
         """, unsafe_allow_html=True)
         
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            sel_away = st.selectbox("⚾ 원정 팀 (AWAY TEAM)", mlb_teams, index=18)
-        with col2:
-            sel_home = st.selectbox("🏠 홈 팀 (HOME TEAM)", mlb_teams, index=13)
-        with col3:
-            sel_pitcher = st.text_input("👤 등판할 투수 이름 입력", "C. Sale")
-            
-        st.markdown("<div style='text-align:center; margin-top:30px;'>", unsafe_allow_html=True)
-        if st.button("🎮 ENTER STADIUM (경기장 입장)", use_container_width=True):
-            st.session_state.away_team = sel_away
-            st.session_state.home_team = sel_home
-            st.session_state.pitcher_name = sel_pitcher
-            st.session_state.game_started = True
+        # --- Away Team Selection ---
+        st.markdown("### ✈️ AWAY TEAM (원정 팀 설정)")
+        a_col1, a_col2, a_col3 = st.columns(3)
+        with a_col1: a_div = st.selectbox("원정팀 지구 선택", list(mlb_database.keys()), key="ad")
+        with a_col2: a_team = st.selectbox("원정팀 선택", list(mlb_database[a_div].keys()), key="at")
+        with a_col3: a_pitcher = st.selectbox("원정 선발 투수", mlb_database[a_div][a_team], key="ap")
+
+        # --- Home Team Selection ---
+        st.markdown("### 🏠 HOME TEAM (홈 팀 설정)")
+        h_col1, h_col2, h_col3 = st.columns(3)
+        with h_col1: h_div = st.selectbox("홈팀 지구 선택", list(mlb_database.keys()), index=5, key="hd")
+        with h_col2: h_team = st.selectbox("홈팀 선택", list(mlb_database[h_div].keys()), index=0, key="ht")
+        with h_col3: h_pitcher = st.selectbox("홈 선발 투수 (현재 마운드)", mlb_database[h_div][h_team], key="hp")
+
+        # --- Environment Settings ---
+        st.markdown("### 🌤️ STADIUM & WEATHER (구장 및 날씨 환경)")
+        e_col1, e_col2, e_col3 = st.columns(3)
+        with e_col1: stadium_env = st.selectbox("구장 환경", ["개방형 구장 (Open Air)", "돔 구장 (Dome Stadium)"])
+        with e_col2: weather = st.selectbox("날씨", ["맑음 (Clear)", "흐림 (Cloudy)", "비 (Rain - 공이 미끄러움)"])
+        with e_col3: wind = st.slider("풍속 (mph - 타구 및 변화구 궤적 영향)", -15, 15, 0, help="음수는 역풍/좌측, 양수는 순풍/우측")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🏟️ STADIUM ENTER (경기장 입장하여 플레이 볼!)", use_container_width=True):
+            st.session_state.away_team = a_team.split(" (")[0]
+            st.session_state.home_team = h_team.split(" (")[0]
+            st.session_state.pitcher_name = h_pitcher
+            st.session_state.stadium_env = stadium_env
+            st.session_state.weather = weather
+            st.session_state.wind = wind
+            st.session_state.game_active = True
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.stop() # 조건 충족 시까지 하단 코드를 차단하는 가드레일
+        st.stop() # LOBBY GUARDRAIL
 
-    # ----------------------------------------------------------------
-    # [위치 2] 중간: 포수 시점 리얼 3D 궤적 그래픽 시뮬레이션 엔진
-    # ----------------------------------------------------------------
-    st.markdown(f"## 🏟️ LIVE MATCHUP: {st.session_state.away_team} VS {st.session_state.home_team}")
-
-    # 스트림릿 수명주기 데이터 바인딩 우회 연산
-    away_abbr = st.session_state.away_team[:3].upper()
-    home_abbr = st.session_state.home_team[:3].upper()
-    p_name = st.session_state.pitcher_name
-
-    # ----------------------------------------------------------------
-    # [위치 3] 최하단: 정밀 제어 구종 커맨드 센터 설계
-    # ----------------------------------------------------------------
-    st.markdown("---")
-    st.markdown("### ⚙️ PITCH COMMAND CENTER (구종 및 투구 매커니즘 튜닝)")
-    
-    ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([1.2, 2, 2])
-    
-    with ctrl_col1:
-        selected_pitch = st.radio(
-            "🔮 던질 구질 선택 (Pitch Selection)", 
-            ["포심 직구 (Fastball)", "슬라이더 (Slider)", "체인지업 (Changeup)", "파워 커브 (Curve)"], 
-            horizontal=False
-        )
-    
-    with ctrl_col2:
-        if "포심 직구" in selected_pitch:
-            speed = st.slider("🔥 최고 구속 설정 (Velocity - mph)", 92, 106, 99)
-            break_val = 0.0 # 직구는 자체 무브먼트 최소화
-        elif "슬라이더" in selected_pitch:
-            speed = st.slider("🔮 슬라이더 구속 (Velocity - mph)", 84, 96, 88)
-            break_val = st.slider("횡방향 무브먼트 (Horizontal Break)", 1.0, 4.0, 2.5)
-        elif "체인지업" in selected_pitch:
-            speed = st.slider("💤 체인지업 구속 (Velocity - mph)", 80, 92, 84)
-            break_val = st.slider("종방향 하강 무브먼트 (Sink)", 1.0, 3.5, 2.0)
-        else:
-            speed = st.slider("🟢 파워 커브 구속 (Velocity - mph)", 70, 86, 76)
-            break_val = st.slider("폭포수 낙차 무브먼트 (Vertical Drop)", 2.0, 6.0, 4.5)
-
-    with ctrl_col3:
-        control_stat = st.slider("🎯 핀포인트 커맨드 제구 스탯", 1, 100, 85)
-        st.markdown(f"""
-            <div style="background:#f1f5f9; padding:15px; border-radius:12px; border:1px solid #cbd5e1; margin-top:10px;">
-                <b style="color:#1e3a8a;">[선택된 구질 요약 스펙]</b><br>
-                • 타입: {selected_pitch.split(' ')[0]}<br>
-                • 회전 속도: {int(speed * 26.3)} RPM<br>
-                • 제구 허용 오차 반경: {round((100-control_stat)*0.35, 2)} cm
+    # ==========================================
+    # 5. LIVE GAME UI: HEADER & SCOREBOARD
+    # ==========================================
+    st.markdown(f"""
+        <div style="background: linear-gradient(90deg, #1e293b, #0f172a); border-radius: 15px; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h3 style="margin:0; color:#cbd5e1; font-size:16px; font-weight:normal;">LIVE MATCHUP</h3>
+                <h1 style="margin:0; font-size:32px; color:white;">{st.session_state.away_team} vs {st.session_state.home_team}</h1>
             </div>
-        """, unsafe_allow_html=True)
+            <div style="text-align:right;">
+                <span style="background: #3b82f6; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">MOUND: {st.session_state.pitcher_name}</span>
+                <br>
+                <span style="color:#94a3b8; font-size:12px;">{st.session_state.stadium_env} | WIND: {st.session_state.wind} mph</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
-    # ----------------------------------------------------------------
-    # 4. 코어 그래픽스 렌더링 파이프라인 (HTML5 Canvas + Embedded Core JS)
-    # ----------------------------------------------------------------
-    # 화이트 스타일 테마 및 리얼 포수 시점 물리 그래픽 탑재
-    core_game_engine_html = """
-    <div style="background: #ffffff; padding: 25px; border-radius: 24px; box-shadow: 0 15px 45px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; max-width: 960px; margin: 0 auto; font-family: system-ui, sans-serif;">
+    # ==========================================
+    # 6. PITCH COMMAND CENTER (LOWER CONTROLS)
+    # ==========================================
+    st.markdown("### ⚙️ PITCHING ARSENAL (구종 및 투구 매커니즘 정밀 제어)")
+    
+    # 9가지 구종 선택
+    pitch_types = [
+        "포심 패스트볼 (Four-Seam)", "투심/싱커 (Sinker)", "커터 (Cutter)", 
+        "슬라이더 (Slider)", "스위퍼 (Sweeper)", "파워 커브 (Curveball)", 
+        "슬러브 (Slurve)", "체인지업 (Changeup)", "스플리터 (Splitter)"
+    ]
+    
+    c1, c2, c3, c4 = st.columns([1.5, 1, 1, 1])
+    with c1:
+        sel_pitch = st.selectbox("⚾ 구종 (Pitch Type)", pitch_types)
+    with c2:
+        # 구종별 기본 구속 세팅
+        default_speed = 95
+        if "싱커" in sel_pitch or "커터" in sel_pitch: default_speed = 92
+        if "슬라이더" in sel_pitch or "스플리터" in sel_pitch: default_speed = 87
+        if "체인지업" in sel_pitch: default_speed = 84
+        if "커브" in sel_pitch or "스위퍼" in sel_pitch: default_speed = 80
+        p_speed = st.slider("속도 (Velocity - mph)", 70, 105, default_speed)
+    with c3:
+        p_control = st.slider("제구력 (Command - 1~100)", 1, 100, 85)
+    with c4:
+        p_spin = st.slider("회전수 (Spin Rate - RPM)", 1500, 3300, 2400, step=50)
+
+    # Calculate Break values dynamically in Python before passing to JS
+    # h_break: Horizontal movement, v_break: Vertical movement
+    h_break = 0.0
+    v_break = 0.0
+    
+    if "포심" in sel_pitch: v_break = -1.5 # 라이징 무브먼트 환상
+    if "싱커" in sel_pitch: h_break = -2.5; v_break = 3.5
+    if "커터" in sel_pitch: h_break = 1.5; v_break = 0.5
+    if "슬라이더" in sel_pitch: h_break = 4.5; v_break = 1.5
+    if "스위퍼" in sel_pitch: h_break = 8.5; v_break = 0.5 # 횡 무브먼트 극대화
+    if "커브" in sel_pitch: h_break = 2.0; v_break = 7.5 # 폭포수 낙차
+    if "슬러브" in sel_pitch: h_break = 5.0; v_break = 4.5
+    if "체인지업" in sel_pitch: h_break = -2.0; v_break = 4.0
+    if "스플리터" in sel_pitch: h_break = 0.0; v_break = 6.5 # 홈플레이트 앞 급락
+
+    # ==========================================
+    # 7. ULTIMATE JAVASCRIPT GAME ENGINE (HTML/CANVAS)
+    # ==========================================
+    engine_html = f"""
+    <div style="background: #ffffff; padding: 25px; border-radius: 20px; border: 1px solid #cbd5e1; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 1000px; margin: 0 auto; position: relative;">
         
-        <div style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; margin-bottom: 20px;">
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div>
-                    <span style="font-size: 10px; color: #64748b; display:block; font-weight:800; letter-spacing:1px;">AWAY</span>
-                    <span style="font-size: 20px; font-weight: 900; color: #0f172a;">__AWAY__</span>
-                </div>
-                <div id="score-away" style="font-size: 36px; font-weight: 900; color: #2563eb; background: #fff; padding: 2px 14px; border-radius: 8px; border: 1px solid #cbd5e1;">0</div>
+        <div style="position: absolute; top: 40px; left: 40px; background: rgba(15, 23, 42, 0.85); color: white; padding: 15px 25px; border-radius: 12px; font-family: 'Arial Black', sans-serif; border: 2px solid rgba(255,255,255,0.2); z-index: 100; backdrop-filter: blur(4px);">
+            <div style="display: flex; justify-content: space-between; width: 220px; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 5px;">
+                <span style="color:#94a3b8; font-size:12px;">AWAY</span>
+                <span style="font-size: 20px;">{st.session_state.away_team[:3].upper()}</span>
+                <span id="score-away" style="font-size: 24px; color:#38bdf8;">0</span>
             </div>
-            
-            <div style="text-align: center;">
-                <div id="match-inning" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; font-size: 13px; font-weight: 800; padding: 5px 18px; border-radius: 20px; letter-spacing: 0.5px;">1회초 (TOP 1ST)</div>
-                <div style="display: flex; justify-content: center; gap: 12px; margin-top: 10px; font-family: monospace; font-size: 13px; font-weight:900;">
-                    <div style="color:#334155;">B <span id="b-indicators"></span></div>
-                    <div style="color:#334155;">S <span id="s-indicators"></span></div>
-                    <div style="color:#334155;">O <span id="o-indicators"></span></div>
-                </div>
+            <div style="display: flex; justify-content: space-between; width: 220px; margin-bottom: 12px;">
+                <span style="color:#94a3b8; font-size:12px;">HOME</span>
+                <span style="font-size: 20px;">{st.session_state.home_team[:3].upper()}</span>
+                <span id="score-home" style="font-size: 24px; color:#38bdf8;">0</span>
             </div>
-            
-            <div style="display: flex; align-items: center; gap: 20px;">
-                <div id="score-home" style="font-size: 36px; font-weight: 900; color: #2563eb; background: #fff; padding: 2px 14px; border-radius: 8px; border: 1px solid #cbd5e1;">0</div>
-                <div style="text-align: right;">
-                    <span style="font-size: 10px; color: #64748b; display:block; font-weight:800; letter-spacing:1px;">HOME</span>
-                    <span style="font-size: 20px; font-weight: 900; color: #0f172a;">__HOME__</span>
-                </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #cbd5e1; background: #000; padding: 5px 10px; border-radius: 6px;">
+                <span id="inning-text">TOP 1ST</span>
+                <span>
+                    <span style="color:#22c55e" id="lamp-b">○○○</span> 
+                    <span style="color:#eab308" id="lamp-s">○○</span> 
+                    <span style="color:#ef4444" id="lamp-o">○○</span>
+                </span>
             </div>
         </div>
 
-        <canvas id="mvpCanvas" width="910" height="440" style="border-radius: 16px; background: #ffffff; border: 2px solid #cbd5e1; display: block; margin: 0 auto; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);"></canvas>
+        <canvas id="ultraCanvas" width="950" height="500" style="background: #f1f5f9; border-radius: 12px; border: 1px solid #94a3b8; display: block; margin: 0 auto; cursor: crosshair;"></canvas>
         
-        <div id="live-audio-board" style="margin-top: 15px; background: #0f172a; border: 1px solid #1e293b; color: #f8fafc; font-family: sans-serif; padding: 15px; height: 65px; overflow-y: auto; font-size: 14px; border-radius: 12px; line-height: 1.6;">
-            [🎙️ EA SPORTS BROADCAST] 포수 시점 카메라 중계가 켜졌습니다. 선발 투수 __PITCHER__ 선수가 사인을 교환하고 투구 모션에 들어갑니다. 우측 K-ZONE 에 마우스를 올리고 클릭하여 볼끝을 조절해 보세요!
+        <div style="margin-top: 15px; background: #0f172a; padding: 15px; border-radius: 10px; border-left: 5px solid #2563eb;">
+            <div style="color: #64748b; font-size: 12px; font-weight: bold; margin-bottom: 4px;">🎙️ LIVE PLAY-BY-PLAY COMMENTARY</div>
+            <div id="commentary-box" style="color: #f8fafc; font-family: sans-serif; font-size: 15px; height: 60px; overflow-y: auto; line-height: 1.5;">
+                경기가 시작되었습니다. 타석에 첫 타자가 들어섭니다. 우측의 투명한 K-ZONE을 클릭하여 투구 위치를 결정하십시오.
+            </div>
+        </div>
+
+        <div id="radar-gun" style="position: absolute; bottom: 120px; left: 40px; background: rgba(0, 0, 0, 0.8); border: 3px solid #ef4444; border-radius: 10px; padding: 10px 20px; color: #ef4444; font-family: 'Courier New', monospace; font-size: 32px; font-weight: bold; text-shadow: 0 0 10px #ef4444; display: none;">
+            99 MPH
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('mvpCanvas');
+        const canvas = document.getElementById('ultraCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 동적 연동용 JSON 모델 인젝션
-        const runtimeSpecs = {
-            pName: "__PITCHER__",
-            type: "__TYPE__",
-            speed: __SPEED__,
-            control: __CONTROL__,
-            break: __BREAK__
-        };
+        // Python -> JS Inject Data
+        const P_NAME = "{st.session_state.pitcher_name}";
+        const P_TYPE = "{sel_pitch.split(' (')[0]}";
+        const P_SPEED = {p_speed};
+        const P_CONTROL = {p_control};
+        const P_H_BREAK = {h_break};
+        const P_V_BREAK = {v_break};
+        const ENV_WIND = {st.session_state.wind};
+        const WEATHER = "{st.session_state.weather}";
 
-        let db = {
-            awayScore: 0, homeScore: 0, inning: 1, isTop: true,
-            b: 0, s: 0, o: 0,
-            bases: [false, false, false],
-            batterName: "M. Trout"
-        };
+        // Game State Engine
+        let db = {{ 
+            away: 0, home: 0, inning: 1, isTop: true, 
+            b: 0, s: 0, o: 0, bases: [false, false, false],
+            pitchCount: 0, strikesThrown: 0
+        }};
 
-        let pointer = { x: 0, y: 0 };
-        // 포수 시점 물리 초기 좌표 (투수 마운드는 먼 배경 상단 중앙 240, 160)
-        let ballSim = { active: false, x: 240, y: 160, tx: 0, ty: 0, pct: 0, size: 2.5, startX: 240, startY: 160 };
-        let pitHistory = [];
+        // Advanced Catcher's View Physics System
+        // Origin (Pitcher's Release Point): (250, 150) -> Far background, center-top
+        // Destination (Catcher's Mitt): (ball.tx, ball.ty) -> Near foreground, center-bottom
+        let ball = {{ active: false, x: 250, y: 150, tx: 0, ty: 0, z: 0, size: 2.0 }};
+        let aim = {{ x: 0, y: 0 }};
+        let pitchTrail = []; // Array of {{x, y, isStrike}}
 
-        canvas.addEventListener('mousemove', (e) => {
-            const boundary = canvas.getBoundingClientRect();
-            pointer.x = (e.clientX - boundary.left) * (canvas.width / boundary.width);
-            pointer.y = (e.clientY - boundary.top) * (canvas.height / boundary.height);
-        });
+        // Commentary Database (Massive Arrays for Variety)
+        const comments = {{
+            strikeout: [
+                "루킹 삼진! 타자 얼어붙습니다!",
+                "헛스윙 삼진! 배트가 허공을 가릅니다!",
+                `기가 막힌 구위입니다. ${P_NAME}의 삼진 쇼!`,
+                "타이밍을 완전히 빼앗았습니다. 스트라이크 아웃!"
+            ],
+            walk: [
+                "포볼입니다. 타자가 걸어나갑니다.",
+                "제구가 흔들리며 볼넷을 허용합니다.",
+                "풀카운트 승부 끝에 결국 1루를 내줍니다."
+            ],
+            homerun: [
+                "좌측 담장! 좌측 담장!! 넘어갔습니다! 홈런!!",
+                "까마득하게 날아갑니다. 의심할 여지 없는 대형 홈런!",
+                "배트 중심에 정확히 맞았습니다. 굿바이 베이스볼!"
+            ],
+            hit: [
+                "깔끔한 안타! 1루에 출루합니다.",
+                "빈 곳을 찌르는 적시타! 주자 움직입니다.",
+                "잘 맞은 타구, 중견수 앞 안타입니다."
+            ],
+            out_ground: [
+                "내야 땅볼입니다. 유격수 잡아서 1루에... 아웃!",
+                "투수 앞 땅볼, 침착하게 처리합니다.",
+                "힘없는 타구, 2루수가 걷어냅니다."
+            ],
+            out_fly: [
+                "높이 뜬 공, 외야수가 콜을 외치고 잡아냅니다.",
+                "우익수 쪽 뜬공, 워닝 트랙 앞에서 잡힙니다.",
+                "평범한 플라이 아웃입니다."
+            ],
+            strike_look: [
+                "보더라인을 완벽하게 걸치는 스트라이크!",
+                "타자 지켜만 봅니다. 원 스트라이크.",
+                "예리하게 파고듭니다."
+            ],
+            strike_swing: [
+                "크게 헛스윙합니다!",
+                "볼끝이 살아서 들어오네요. 헛스윙!",
+                "타자 타이밍이 전혀 맞지 않습니다."
+            ],
+            ball: [
+                "아슬아슬하게 존을 벗어났습니다.",
+                "유인구에 속지 않네요. 볼.",
+                "바깥쪽 깊숙한 공, 볼입니다."
+            ]
+        }};
 
-        canvas.addEventListener('mousedown', () => {
-            if (ballSim.active) return;
-            // 우측의 하이 콘트라스트 K-ZONE 정밀 타겟팅 세팅 바운더리 검증
-            if (pointer.x > 490 && pointer.x < 870 && pointer.y > 40 && pointer.y < 400) {
-                let rngError = (100 - runtimeSpecs.control) * 0.45;
-                ballSim.tx = pointer.x + (Math.random() - 0.5) * rngError;
-                ballSim.ty = pointer.y + (Math.random() - 0.5) * rngError;
+        function pickRandom(arr) {{ return arr[Math.floor(Math.random() * arr.length)]; }}
+
+        function log(msg, color="#ffffff") {{
+            const box = document.getElementById('commentary-box');
+            box.innerHTML = `<span style="color:${color}; font-weight:bold;">[현장]</span> ${msg}<br>` + box.innerHTML;
+        }}
+
+        function updateScoreboard() {{
+            document.getElementById('score-away').innerText = db.away;
+            document.getElementById('score-home').innerText = db.home;
+            document.getElementById('inning-text').innerText = `${db.isTop ? 'TOP' : 'BOT'} ${db.inning}`;
+            
+            const lamp = (count, max) => '●'.repeat(count) + '○'.repeat(max - count);
+            document.getElementById('lamp-b').innerText = lamp(db.b, 3);
+            document.getElementById('lamp-s').innerText = lamp(db.s, 2);
+            document.getElementById('lamp-o').innerText = lamp(db.o, 3);
+        }}
+
+        // Mouse Tracking
+        canvas.addEventListener('mousemove', (e) => {{
+            const rect = canvas.getBoundingClientRect();
+            aim.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            aim.y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        }});
+
+        // Trigger Pitch
+        canvas.addEventListener('mousedown', () => {{
+            if (ball.active) return;
+            // Target zone validation (Right side of canvas)
+            if (aim.x > 530 && aim.x < 870 && aim.y > 60 && aim.y < 440) {{
                 
-                ballSim.x = 240; ballSim.y = 160;
-                ballSim.pct = 0; ballSim.size = 2.5;
-                ballSim.active = true;
-            }
-        });
+                // 1. Calculate Command Error Margin (Reverse engineered from 1-100 control)
+                let errorRadius = (100 - P_CONTROL) * 0.6;
+                // Weather condition effect: Rain decreases control by adding more error
+                if (WEATHER === "비 (Rain - 공이 미끄러움)") errorRadius *= 1.3;
 
-        function pushCommentary(msg) {
-            const board = document.getElementById('live-audio-board');
-            board.innerHTML = `<span style="color:#3b82f6; font-weight:bold;">[LIVE]</span> ${msg}<br>` + board.innerHTML;
-        }
+                let finalTx = aim.x + (Math.random() - 0.5) * errorRadius;
+                let finalTy = aim.y + (Math.random() - 0.5) * errorRadius;
 
-        function updateHUD() {
-            document.getElementById('score-away').innerText = db.awayScore;
-            document.getElementById('score-home').innerText = db.homeScore;
-            document.getElementById('match-inning').innerText = `${db.inning}회${db.isTop ? '초' : '말'} (TOP 1ST)`;
+                // 2. Wind Physics Effect
+                finalTx += (ENV_WIND * 1.2);
+
+                ball.tx = finalTx;
+                ball.ty = finalTy;
+                
+                // 3. Reset Physics State
+                ball.x = 250; 
+                ball.y = 150; 
+                ball.z = 0; // z is progress from 0.0 to 1.0
+                ball.size = 2.0;
+                ball.active = true;
+                
+                document.getElementById('radar-gun').style.display = 'none';
+            }}
+        }});
+
+        // Advanced AI Resolution Engine
+        function resolvePitch() {{
+            db.pitchCount++;
             
-            const renderLamps = (c, m, col) => '<span style="color:'+col+'; margin-right:4px;">●</span>'.repeat(c) + '<span style="color:#e2e8f0; margin-right:4px;">○</span>'.repeat(m-c);
-            document.getElementById('b-indicators').innerHTML = renderLamps(db.b, 3, '#22c55e');
-            document.getElementById('s-indicators').innerHTML = renderLamps(db.s, 2, '#eab308');
-            document.getElementById('o-indicators').innerHTML = renderLamps(db.o, 3, '#ef4444');
-        }
-
-        function runAIEngine() {
-            const insideStrike = (ballSim.tx >= 580 && ballSim.tx <= 760 && ballSim.ty >= 130 && ballSim.ty <= 310);
-            const dynamicSpeed = runtimeSpecs.speed + Math.floor(Math.random() * 4) - 2;
+            // Strike Zone Definition (Scaled to right side canvas UI)
+            // Center is roughly x:700, y:250. Zone is 180x200
+            const inZone = (ball.tx >= 610 && ball.tx <= 790 && ball.ty >= 150 && ball.ty <= 350);
             
-            let pitchWeight = (dynamicSpeed - 85) * 0.015;
-            const batterSwingProbability = insideStrike ? (0.64 - pitchWeight) : (0.22 + pitchWeight);
-            const triggeredSwing = Math.random() < batterSwingProbability;
+            // Radar Gun Display
+            const displaySpeed = P_SPEED + Math.floor(Math.random() * 3) - 1;
+            const radar = document.getElementById('radar-gun');
+            radar.innerText = `${displaySpeed} MPH`;
+            radar.style.display = 'block';
 
-            if (triggeredSwing) {
-                let missRate = 0.47 + pitchWeight;
-                if (Math.random() > missRate) {
-                    const hitResolution = Math.random();
-                    if (hitResolution < 0.12) {
-                        let activeRunners = db.bases.filter(x=>x).length + 1;
-                        if(db.isTop) db.awayScore += activeRunners; else db.homeScore += activeRunners;
+            // Batter Math
+            let speedAdvantage = (displaySpeed - 88) * 0.01;
+            let breakAdvantage = (Math.abs(P_H_BREAK) + Math.abs(P_V_BREAK)) * 0.02;
+            let batterSwingProb = inZone ? 0.65 : 0.20;
+            
+            if (db.s === 2) batterSwingProb += 0.2; // Protect plate with 2 strikes
+            if (db.b === 3) batterSwingProb -= 0.2; // Take pitch on 3 balls
+
+            const isSwing = Math.random() < batterSwingProb;
+
+            if (isSwing) {{
+                // Contact Math
+                let contactProb = 0.75 - speedAdvantage - breakAdvantage;
+                if (!inZone) contactProb -= 0.3; // Harder to hit balls out of zone
+
+                const isContact = Math.random() < contactProb;
+
+                if (isContact) {{
+                    const hitQuality = Math.random();
+                    if (hitQuality < 0.05 + (inZone ? 0.05 : 0)) {{
+                        // HOME RUN
+                        let runs = db.bases.filter(b => b).length + 1;
+                        if (db.isTop) db.away += runs; else db.home += runs;
                         db.bases = [false, false, false];
-                        pushCommentary(`<span style="color:#ef4444; font-weight:800;">[GRAND SLAM HOMERUN]</span> 완벽하게 받쳐놓고 쳤습니다! 담장을 훌쩍 넘기는 초대형 아치를 그립니다! (${dynamicSpeed} mph)`);
-                    } else if (hitResolution < 0.46) {
-                        let homeIn = db.bases[2] ? 1 : 0;
+                        db.s = 0; db.b = 0;
+                        log(`[${P_TYPE} - ${displaySpeed}mph] ` + pickRandom(comments.homerun), "#ef4444");
+                    }} 
+                    else if (hitQuality < 0.35) {{
+                        // BASE HIT
+                        let runs = db.bases[2] ? 1 : 0;
                         db.bases[2] = db.bases[1]; db.bases[1] = db.bases[0]; db.bases[0] = true;
-                        if(db.isTop) db.awayScore += homeIn; else db.homeScore += homeIn;
-                        pushCommentary(`[HIT] 클린 히트! 우중간을 꿰뚫는 안타가 터집니다. 주자 스피드업! (${dynamicSpeed} mph)`);
-                    } else {
-                        db.outs++; pushCommentary(`[OUT] 2루수 땅볼! 2루수가 잡아서 안전하게 1루로 송구하여 아웃 카운트를 올립니다.`);
-                    }
-                    db.s = 0; db.b = 0;
-                } else {
-                    db.strikes++; db.s++; pushCommentary(`[STRIKE] 헛스윙! 볼끝의 무브먼트에 배트 타이밍이 완전히 밀렸습니다. (${dynamicSpeed} mph)`);
-                }
-            } else {
-                if (insideStrike) {
-                    db.s++; pushCommentary(`[STRIKE] 루킹 스트라이크! 존 구석에 완벽히 꽂히는 스트라이크 판정입니다. (${dynamicSpeed} mph)`);
-                } else {
-                    db.b++; pushCommentary(`[BALL] 타자가 예리하게 볼을 골라내며 출루 싸움을 벌입니다.`);
-                }
-            }
+                        if (db.isTop) db.away += runs; else db.home += runs;
+                        db.s = 0; db.b = 0;
+                        log(`[${P_TYPE} - ${displaySpeed}mph] ` + pickRandom(comments.hit), "#eab308");
+                    }} 
+                    else {{
+                        // OUT
+                        db.o++;
+                        db.s = 0; db.b = 0;
+                        let outMsg = Math.random() > 0.5 ? pickRandom(comments.out_ground) : pickRandom(comments.out_fly);
+                        log(`[${P_TYPE} - ${displaySpeed}mph] ` + outMsg, "#94a3b8");
+                    }}
+                }} else {{
+                    // SWING AND MISS
+                    db.s++;
+                    log(`[${P_TYPE} - ${displaySpeed}mph] ` + pickRandom(comments.strike_swing), "#22c55e");
+                }}
+            }} else {{
+                // TAKE PITCH
+                if (inZone) {{
+                    db.s++;
+                    log(`[${P_TYPE} - ${displaySpeed}mph] ` + pickRandom(comments.strike_look), "#22c55e");
+                }} else {{
+                    db.b++;
+                    log(`[${P_TYPE} - ${displaySpeed}mph] ` + pickRandom(comments.ball), "#3b82f6");
+                }}
+            }}
 
-            if(db.s >= 3) { db.o++; db.s = 0; db.b = 0; pushCommentary(`[삼진 아웃] 투수의 삼진 결정구가 완벽하게 작동했습니다!`); }
-            if(db.b >= 4) { db.bases[0] = true; db.s = 0; db.b = 0; pushCommentary(`[베이스 포볼] 제구가 흔들리며 주자를 볼넷으로 내보냅니다.`); }
-            if(db.o >= 3) { db.o = 0; db.s = 0; db.b = 0; db.bases = [false,false,false]; db.isTop = !db.isTop; if(db.isTop) db.inning++; pushCommentary(`[이닝 교대] 공수교대, 야수조가 덕아웃으로 복귀합니다.`); }
+            // State Checks
+            if (db.s >= 3) {{
+                db.o++; db.s = 0; db.b = 0;
+                log(pickRandom(comments.strikeout), "#ef4444");
+            }}
+            if (db.b >= 4) {{
+                db.bases[0] = true; db.s = 0; db.b = 0;
+                log(pickRandom(comments.walk), "#eab308");
+            }}
+            if (db.o >= 3) {{
+                db.o = 0; db.s = 0; db.b = 0; db.bases = [false,false,false];
+                db.isTop = !db.isTop;
+                if (db.isTop) db.inning++;
+                log("공수 교대! 이닝이 종료되었습니다.", "#ffffff");
+            }}
+
+            updateScoreboard();
+            pitchTrail.push({{ x: ball.tx, y: ball.ty, strike: inZone }});
+            if(pitchTrail.length > 9) pitchTrail.shift();
+        }}
+
+        // ==========================================
+        // 8. HIGH-FIDELITY RENDER LOOP (60 FPS)
+        // ==========================================
+        function drawStadium() {{
+            // Sky & Environment (Reacts to weather)
+            let skyColor1 = "#38bdf8"; let skyColor2 = "#bae6fd";
+            if (WEATHER.includes("흐림")) {{ skyColor1 = "#64748b"; skyColor2 = "#94a3b8"; }}
+            if (WEATHER.includes("비")) {{ skyColor1 = "#475569"; skyColor2 = "#64748b"; }}
             
-            pitHistory.push({ x: ballSim.tx, y: ballSim.ty, strikeFlag: insideStrike });
-            if(pitHistory.length > 7) pitHistory.shift();
-            updateHUD();
-        }
+            let skyGrad = ctx.createLinearGradient(0, 0, 0, 200);
+            skyGrad.addColorStop(0, skyColor1); skyGrad.addColorStop(1, skyColor2);
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, 500, 200);
 
-        function gameGraphicsLoop() {
-            // 화이트 스타일 캔버스 베이스 초기화 리셋
-            ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // --- [1] 좌측 구역: EA Retro 야구장 (원근법 포수 시점 배치) ---
-            let grassPalette = ctx.createLinearGradient(240, 360, 240, 100);
-            grassPalette.addColorStop(0, '#16a34a'); grassPalette.addColorStop(1, '#166534');
-            ctx.fillStyle = grassPalette;
+            // Outfield Grass (Perspective)
+            ctx.fillStyle = "#166534";
+            ctx.beginPath(); ctx.moveTo(250, 400); ctx.lineTo(480, 100); ctx.lineTo(20, 100); ctx.fill();
             
-            // 포수 마스크 뷰 부채꼴 시야각 드로잉
-            ctx.beginPath();
-            ctx.moveTo(240, 380); // 포수 홈 플레이트 백스탑
-            ctx.lineTo(410, 110); // 우측 외야 펜스 방향 라인
-            ctx.lineTo(70, 110);  // 좌측 외야 펜스 방향 라인
-            ctx.closePath(); ctx.fill();
+            // Grass Patterns (Mowed lines)
+            ctx.fillStyle = "rgba(255,255,255,0.03)";
+            ctx.beginPath(); ctx.moveTo(250, 400); ctx.lineTo(350, 100); ctx.lineTo(280, 100); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(250, 400); ctx.lineTo(150, 100); ctx.lineTo(220, 100); ctx.fill();
 
-            // 리얼 마운드 흙 및 플레이트 마킹
-            ctx.fillStyle = "#b45309"; ctx.beginPath(); ctx.ellipse(240, 160, 25, 8, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffffff"; ctx.fillRect(232, 158, 16, 2); // 투수 투판 고화질 렌더
+            // Infield Dirt
+            ctx.fillStyle = "#b45309";
+            ctx.beginPath(); ctx.ellipse(250, 150, 35, 12, 0, 0, Math.PI*2); ctx.fill(); // Mound
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(240, 148, 20, 3); // Rubber
 
-            // 원근법 다이아몬드 베이스 라인 가공
-            const buildCatcherBase = (bx, by, stateFlag) => {
-                ctx.fillStyle = stateFlag ? "#ef4444" : "#f1f5f9";
-                ctx.strokeStyle = stateFlag ? "#f87171" : "#94a3b8";
-                ctx.lineWidth = 2;
-                ctx.save(); ctx.translate(bx, by); ctx.rotate(45 * Math.PI / 180);
+            // Bases (Perspective Math)
+            const drawBase = (x, y, active) => {{
+                ctx.fillStyle = active ? "#ef4444" : "#e2e8f0";
+                ctx.strokeStyle = active ? "#f87171" : "#94a3b8";
+                ctx.lineWidth = 1;
+                ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI/4);
                 ctx.fillRect(-6, -6, 12, 12); ctx.strokeRect(-6, -6, 12, 12); ctx.restore();
-            };
-            buildCatcherBase(310, 225, db.bases[0]); // 1루
-            buildCatcherBase(240, 140, db.bases[1]); // 2루
-            buildCatcherBase(170, 225, db.bases[2]); // 3루
+            }};
+            drawBase(340, 250, db.bases[0]); // 1B
+            drawBase(250, 150, db.bases[1]); // 2B (On Mound in this 2D projection)
+            drawBase(160, 250, db.bases[2]); // 3B
 
-            // 포수 앞 홈플레이트 오각형 시네마틱 화이트 마킹
-            ctx.fillStyle = "#e2e8f0";
-            ctx.beginPath(); ctx.moveTo(240, 350); ctx.lineTo(255, 362); ctx.lineTo(255, 370); ctx.lineTo(225, 370); ctx.lineTo(225, 362);
-            ctx.closePath(); ctx.fill();
+            // Home Plate (Large, close up)
+            ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(250, 370); ctx.lineTo(265, 385); ctx.lineTo(265, 395); ctx.lineTo(235, 395); ctx.lineTo(235, 385); ctx.closePath();
+            ctx.fill(); ctx.stroke();
 
-            // 마운드 위의 투수 엔티티 실루엣 (원근 축소)
-            ctx.fillStyle = "#1e293b"; ctx.beginPath(); ctx.arc(240, 150, 4, 0, Math.PI*2); ctx.fill();
-            ctx.fillRect(238, 154, 4, 8);
-
-            // 우타자 시네마틱 스탠딩 위젯 배팅 기어
-            ctx.fillStyle = "#2563eb"; ctx.beginPath(); ctx.arc(195, 340, 8, 0, Math.PI*2); ctx.fill(); // 타자 머리
-            ctx.strokeStyle = "#78350f"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(195, 342); ctx.lineTo(215, 315); ctx.stroke(); // 배트 라인
-
-            // 센트럴 디바이더 파티션 라인
-            ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(455, 10); ctx.lineTo(455, 430); ctx.stroke();
-
-            // --- [2] 우측 구역: UHD 디지털 브로드캐스트 스트라이크 존 ---
-            ctx.fillStyle = "rgba(37, 99, 235, 0.02)"; ctx.fillRect(580, 130, 180, 180);
-            ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 4; ctx.strokeRect(580, 130, 180, 180); // 주 스트라이크 사각형
+            // The Pitcher (Entity in distance)
+            ctx.fillStyle = "#0f172a";
+            ctx.beginPath(); ctx.arc(250, 135, 5, 0, Math.PI*2); ctx.fill(); // Head
+            ctx.fillRect(246, 140, 8, 12); // Body
             
-            // 9분할 인디케이터 라인 처리
-            ctx.strokeStyle = "rgba(37, 99, 235, 0.15)"; ctx.lineWidth = 1.5;
-            for(let i=1; i<3; i++) {
-                ctx.beginPath(); ctx.moveTo(580 + (i * 60), 130); ctx.lineTo(580 + (i * 60), 310); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(580, 130 + (i * 60)); ctx.lineTo(760, 130 + (i * 60)); ctx.stroke();
-            }
-            ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1; ctx.strokeRect(510, 60, 320, 320); // 외곽 보더 존
+            // Divider
+            ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(500, 10); ctx.lineTo(500, 490); ctx.stroke();
+        }}
 
-            // 레이저 조준 크로스헤어 피드백 메커니즘
-            if (pointer.x > 490 && pointer.x < 870 && pointer.y > 40 && pointer.y < 400 && !ballSim.active) {
-                ctx.strokeStyle = "rgba(37, 99, 235, 0.25)"; ctx.setLineDash([3, 4]);
-                ctx.beginPath(); ctx.moveTo(pointer.x, 40); ctx.lineTo(pointer.x, 380);
-                ctx.beginPath(); ctx.moveTo(510, pointer.y); ctx.lineTo(830, pointer.y); ctx.stroke(); ctx.setLineDash([]);
-                
-                ctx.strokeStyle = "#ea580c"; ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 14, 0, Math.PI * 2); ctx.stroke();
-            }
+        function drawKZone() {{
+            // White clean backdrop for broadcast UI
+            ctx.fillStyle = "#ffffff"; ctx.fillRect(501, 0, 449, 500);
 
-            // 히스토리 점 투구 맵 출력
-            pitHistory.forEach(p => {
-                ctx.fillStyle = p.strikeFlag ? "#22c55e" : "#ef4444";
+            // Main Strike Zone Box
+            const zx = 610, zy = 150, zw = 180, zh = 200;
+            ctx.fillStyle = "rgba(37, 99, 235, 0.05)"; ctx.fillRect(zx, zy, zw, zh);
+            ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 3; ctx.strokeRect(zx, zy, zw, zh);
+            
+            // 9-Grid Lines
+            ctx.strokeStyle = "rgba(37, 99, 235, 0.2)"; ctx.lineWidth = 1;
+            for(let i=1; i<3; i++) {{
+                ctx.beginPath(); ctx.moveTo(zx + (i*zw/3), zy); ctx.lineTo(zx + (i*zw/3), zy+zh); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(zx, zy + (i*zh/3)); ctx.lineTo(zx+zw, zy + (i*zh/3)); ctx.stroke();
+            }}
+
+            // Pitch Heatmap History
+            pitchTrail.forEach((p, idx) => {{
+                ctx.fillStyle = p.strike ? "#22c55e" : "#ef4444";
                 ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-            });
+                ctx.globalAlpha = 0.3 + (0.7 * (idx / 9)); // Fade older pitches
+                ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                ctx.globalAlpha = 1.0;
+            }});
 
-            // --- [3] 리얼타임 물리 변화구 시뮬레이션 물리 모델 연산 ---
-            if (ballSim.active) {
-                ballSim.pct += 0.045; // 비행 속도 가속 프레임 비율
+            // Laser Crosshair Aiming Logic
+            if (!ball.active && aim.x > 510 && aim.x < 940) {{
+                ctx.strokeStyle = "rgba(234, 88, 12, 0.4)"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(aim.x, 20); ctx.lineTo(aim.x, 480); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(520, aim.y); ctx.lineTo(930, aim.y); ctx.stroke();
+                ctx.setLineDash([]);
                 
-                // 베지에 형태의 원근 보간 가중치 수학 연산
-                ballSim.x = ballSim.startX + (ballSim.tx - ballSim.startX) * ballSim.pct;
-                ballSim.y = ballSim.startY + (ballSim.ty - ballSim.startY) * ballSim.pct;
-                
-                // 포수 시점 3D 입체 변형: 공이 다가올수록 크기가 기하급수적으로 팽창
-                ballSim.size = 2.0 + (ballSim.pct * 8.5);
+                ctx.strokeStyle = "#ea580c"; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(aim.x, aim.y, 15, 0, Math.PI*2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(aim.x, aim.y, 2, 0, Math.PI*2); ctx.fill();
+            }}
+        }}
 
-                // 구종별 고유의 실제 낙차/커브 브레이킹 효과 주입 연산
-                if (ballSim.pct < 0.85) {
-                    if (runtimeSpecs.type.includes("Slider")) ballSim.x += runtimeSpecs.break * 0.9;
-                    if (runtimeSpecs.type.includes("Changeup")) ballSim.y += runtimeSpecs.break * 0.7;
-                    if (runtimeSpecs.type.includes("Curve")) {
-                        ballSim.y += runtimeSpecs.break * 1.3;
-                        ballSim.x -= runtimeSpecs.break * 0.4; // 종/횡 동시 브레이킹 야구 역학
-                    }
-                }
+        function drawBallPhysics() {{
+            if (!ball.active) return;
+            
+            // Advance Time (Speed dictates frame delta)
+            let frameSpeed = 0.02 + (P_SPEED * 0.0003);
+            ball.z += frameSpeed;
+            
+            if (ball.z > 1.0) ball.z = 1.0;
 
-                // 공 3D 글로우 화이트 쉐이딩 처리
-                ctx.fillStyle = "#ffffff";
-                ctx.strokeStyle = "#64748b"; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.arc(ballSim.x, ballSim.y, ballSim.size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            // Base Linear Interpolation (Start 250,150 -> End tx,ty)
+            let baseX = 250 + (ball.tx - 250) * ball.z;
+            let baseY = 150 + (ball.ty - 150) * ball.z;
 
-                if (ballSim.pct >= 1.0) {
-                    ballSim.active = false;
-                    runAIEngine();
-                }
-            }
+            // Magnus Effect (Breaking Ball Physics) Applied parabolically
+            // Break is most prominent in the latter half of the flight
+            let breakFactor = Math.pow(ball.z, 2); 
+            let applyH = P_H_BREAK * breakFactor * 1.5;
+            let applyV = P_V_BREAK * breakFactor * 1.5;
 
-            requestAnimationFrame(gameGraphicsLoop);
-        }
+            ball.x = baseX + applyH;
+            ball.y = baseY + applyV;
+            
+            // Optical Illusion / Perspective (Ball gets massive as it hits the mitt)
+            // Starts at size 2.0 (far), ends at size 14.0 (near)
+            ball.size = 2.0 + (Math.pow(ball.z, 3) * 12.0);
 
-        updateHUD();
-        gameGraphicsLoop();
+            // Render Ball Entity
+            ctx.fillStyle = "#ffffff";
+            ctx.strokeStyle = "#64748b";
+            ctx.lineWidth = 1 + ball.z; // Seams get thicker as it approaches
+            
+            ctx.shadowColor = "rgba(0,0,0,0.3)"; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; // Shadow depth
+            ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            ctx.shadowColor = "transparent";
+
+            // Collision / Arrival Resolution
+            if (ball.z >= 1.0) {{
+                ball.active = false;
+                resolvePitch();
+            }}
+        }}
+
+        // Main 60FPS Game Loop
+        function loop() {{
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawStadium();
+            drawKZone();
+            drawBallPhysics();
+            
+            // Draw Weather Rain overlay
+            if (WEATHER.includes("비")) {{
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                for(let i=0; i<30; i++) {{
+                    let rx = Math.random() * 500;
+                    let ry = Math.random() * 500;
+                    ctx.fillRect(rx, ry, 1, 10);
+                }}
+            }}
+
+            requestAnimationFrame(loop);
+        }}
+
+        // Init
+        updateScoreboard();
+        loop();
     </script>
     """
 
-    # --- 데이터 문자열 교체 조립 및 샌드박스 컴포넌트 렌더링 ---
-    assembled_engine = (
-        core_game_engine_html
-        .replace("__AWAY__", away_abbr)
-        .replace("__HOME__", home_abbr)
-        .replace("__PITCHER__", p_name)
-        .replace("__TYPE__", selected_pitch)
-        .replace("__SPEED__", str(speed))
-        .replace("__CONTROL__", str(control_stat))
-        .replace("__BREAK__", str(break_val))
-    )
+    st.components.v1.html(engine_html, height=720)
 
-    st.components.v1.html(assembled_engine, height=680)
-
-    # 경기 전면 초기화 리셋 제어 장치
-    st.write("")
-    if st.button("🔄 RETURN TO MATCH CONFIG (구단 및 투수 재설정)"):
-        st.session_state.game_started = False
-        st.rerun()
+    # ==========================================
+    # 9. RESET CONTROLS & FOOTER
+    # ==========================================
+    st.markdown("---")
+    r_col1, r_col2 = st.columns([1, 5])
+    with r_col1:
+        if st.button("🔄 LOBBY 복귀", use_container_width=True):
+            st.session_state.game_active = False
+            st.rerun()
+    with r_col2:
+        st.markdown("<p style='color:#94a3b8; font-size:12px; margin-top:15px;'>© 2026 EA SPORTS MVP BASEBALL PRO SIMULATOR. All rights reserved. Physics engine calculates magnus effect, wind resistance, and 3D perspective projection.</p>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
