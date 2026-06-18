@@ -6,7 +6,7 @@ def main():
     # -----------------------------------------------------------------
     # 1. 고대비 시인성 극대화 화이트 테마 가이드 스타일
     # -----------------------------------------------------------------
-    st.set_page_config(page_title="MLB PERFECT TRACKER PRO 2026", layout="wide")
+    st.set_page_config(page_title="MLB PERFECT REAL TRACKER", layout="wide")
     
     st.markdown("""
         <style>
@@ -20,15 +20,13 @@ def main():
             width: 100%; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
         }
         .mode-box { background: #ffffff; padding: 20px; border-radius: 12px; border: 2px solid #e2e8f0; margin-bottom: 15px; }
-        .hud-title { font-size: 24px; font-weight: 900; color: #0f172a; letter-spacing: -1px; margin-bottom: 5px; }
         </style>
     """, unsafe_allow_html=True)
 
     # -----------------------------------------------------------------
-    # 2. 현실 고증 MLB 30개 구단 전체 오리지널 데이터베이스
+    # 2. 현실 고증 MLB 30개 구단 전체 데이터베이스
     # -----------------------------------------------------------------
     mlb_30_teams = {
-        # 아메리칸 리그 동부 (ALE)
         "NY Yankees (뉴욕 양키스)": {
             "pitcher": "게릿 콜", "speed": 99, "control": 92, "pitches": ["포심 직구", "너클 커브", "슬라이더"],
             "lineup": [{"name": "후안 소토", "contact": 93, "power": 94}, {"name": "애런 저지", "contact": 89, "power": 100}, {"name": "지안카를로 스탠튼", "contact": 72, "power": 95}]
@@ -49,7 +47,6 @@ def main():
             "pitcher": "케빈 가우스먼", "speed": 96, "control": 89, "pitches": ["포심 직구", "스플리터", "슬라이더"],
             "lineup": [{"name": "블라디미르 게레로 Jr.", "contact": 94, "power": 91}, {"name": "보 비셋", "contact": 81, "power": 65}, {"name": "조지 스프링어", "contact": 77, "power": 74}]
         },
-        # 아메리칸 리그 중부 (ALC)
         "Cleveland Guardians (클리블랜드 가디언스)": {
             "pitcher": "태너 바이비", "speed": 95, "control": 87, "pitches": ["포심 직구", "슬라이더", "체인지업"],
             "lineup": [{"name": "스티븐 관", "contact": 95, "power": 52}, {"name": "호세 라미레즈", "contact": 88, "power": 93}, {"name": "조시 네일러", "contact": 82, "power": 86}]
@@ -70,7 +67,6 @@ def main():
             "pitcher": "가렛 크로셰", "speed": 100, "control": 88, "pitches": ["포심 직구", "커터", "슬라이더"],
             "lineup": [{"name": "루이스 로베르트 Jr.", "contact": 75, "power": 83}, {"name": "앤드류 본", "contact": 77, "power": 71}, {"name": "개빈 시트", "contact": 73, "power": 65}]
         },
-        # 아메리칸 리그 서부 (ALW)
         "Houston Astros (휴스턴 애스트로스)": {
             "pitcher": "프램버 발데스", "speed": 96, "control": 86, "pitches": ["싱커", "커브", "체인지업"],
             "lineup": [{"name": "호세 알투베", "contact": 91, "power": 75}, {"name": "요단 알바레즈", "contact": 93, "power": 98}, {"name": "카일 터커", "contact": 89, "power": 91}]
@@ -91,7 +87,6 @@ def main():
             "pitcher": "JP 시어스", "speed": 93, "control": 82, "pitches": ["포심 직구", "스위퍼", "체인지업"],
             "lineup": [{"name": "브렌트 루커", "contact": 83, "power": 94}, {"name": "로렌스 버틀러", "contact": 80, "power": 82}, {"name": "셰이 랭겔리어스", "contact": 72, "power": 85}]
         },
-        # 내셔널 리그 동부 (NLE)
         "Philadelphia Phillies (필라델피아 필리스)": {
             "pitcher": "잭 휠러", "speed": 99, "control": 94, "pitches": ["포심 직구", "싱커", "스위퍼"],
             "lineup": [{"name": "트레이 터너", "contact": 90, "power": 76}, {"name": "브라이스 하퍼", "contact": 89, "power": 95}, {"name": "카일 슈와버", "contact": 72, "power": 98}]
@@ -112,7 +107,6 @@ def main():
             "pitcher": "샌디 알칸타라", "speed": 99, "control": 91, "pitches": ["싱커", "체인지업", "슬라이더"],
             "lineup": [{"name": "제이크 버거", "contact": 76, "power": 85}, {"name": "헤수스 산체스", "contact": 78, "power": 78}, {"name": "자비에 에드워즈", "contact": 81, "power": 52}]
         },
-        # 내셔널 리그 중부 (NLC)
         "Milwaukee Brewers (밀워키 브루어스)": {
             "pitcher": "프레디 페랄타", "speed": 96, "control": 84, "pitches": ["포심 직구", "슬라이더", "체인지업"],
             "lineup": [{"name": "윌리 아다메스", "contact": 79, "power": 88}, {"name": "윌리엄 콘트레라스", "contact": 87, "power": 81}, {"name": "잭슨 چو리오", "contact": 83, "power": 79}]
@@ -126,14 +120,13 @@ def main():
             "lineup": [{"name": "코디 벨린저", "contact": 83, "power": 78}, {"name": "스즈키 세이야", "contact": 86, "power": 83}, {"name": "이안 햅", "contact": 80, "power": 80}]
         },
         "Cincinnati Reds (신시내티 레즈)": {
-            "pitcher": "헌터 Greene", "speed": 101, "control": 85, "pitches": ["포심 직구", "슬라이더"],
+            "pitcher": "헌터 그린", "speed": 101, "control": 85, "pitches": ["포심 직구", "슬라이더"],
             "lineup": [{"name": "엘리 데 라 크루즈", "contact": 81, "power": 89}, {"name": "스펜서 스티어", "contact": 80, "power": 78}, {"name": "조나단 인디아", "contact": 83, "power": 66}]
         },
         "Pittsburgh Pirates (피츠버그 파이리츠)": {
             "pitcher": "폴 스킨스", "speed": 102, "control": 92, "pitches": ["싱커", "슬라이더", "스플리터"],
             "lineup": [{"name": "브라이언 레이놀즈", "contact": 86, "power": 82}, {"name": "오닐 크루즈", "contact": 78, "power": 86}, {"name": "키브라이언 헤이즈", "contact": 79, "power": 62}]
         },
-        # 내셔널 리그 서부 (NLW)
         "LA Dodgers (로스앤젤레스 다저스)": {
             "pitcher": "오타니 쇼헤이", "speed": 101, "control": 82, "pitches": ["포심 직구", "스위퍼", "스플리터"],
             "lineup": [{"name": "무키 베츠", "contact": 93, "power": 79}, {"name": "프레디 프리먼", "contact": 94, "power": 84}, {"name": "오타니 쇼헤이", "contact": 91, "power": 99}]
@@ -160,30 +153,23 @@ def main():
         st.session_state.game_active = False
 
     # -----------------------------------------------------------------
-    # 3. 경기 매치업 대기실 인터페이스
+    # 3. 경기 매치업 선택 대기실
     # -----------------------------------------------------------------
     if not st.session_state.game_active:
         st.markdown("""
             <div style="background: #ffffff; padding: 30px; border-radius: 15px; text-align: center; border: 3px solid #0f172a; max-width: 900px; margin: 30px auto;">
-                <h1 style="color: #0f172a; margin: 0; font-size: 34px; font-weight: 900; letter-spacing:-1px;">⚾ MLB PERFECT REAL TRACKER V2</h1>
-                <p style="color: #475569; font-weight: 600; margin-top: 5px;">화이트 고대비 가시성 동기화 • 30개 전구단 풀 로스터 • 정밀 시소 피칭 연산</p>
+                <h1 style="color: #0f172a; margin: 0; font-size: 34px; font-weight: 900; letter-spacing:-1px;">⚾ MLB PERFECT REAL TRACKER V3</h1>
+                <p style="color: #475569; font-weight: 600; margin-top: 5px;">직구 궤적 수정 완료 • 하단 대형 해설창 탑재 • 30개 전구단 오리지널 엔진</p>
             </div>
         """, unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         with c1:
-            team_away = st.selectbox("🎯 AWAY 공격 팀 선택 (타선 라인업)", list(mlb_30_teams.keys()), index=25) # 다저스 기본
+            team_away = st.selectbox("🎯 AWAY 공격 팀 선택", list(mlb_30_teams.keys()), index=25)
         with c2:
-            team_home = st.selectbox("🏠 HOME 수비 팀 선택 (선발 투수)", list(mlb_30_teams.keys()), index=0) # 양키스 기본
+            team_home = st.selectbox("🏠 HOME 수비 팀 선택", list(mlb_30_teams.keys()), index=0)
             
         p_data = mlb_30_teams[team_home]
-        
-        st.markdown(f"""
-            <div class='mode-box'>
-                <b>📋 선택된 홈에이스 매치 프로필</b><br>
-                • 선발 투수: {p_data['pitcher']} | 베이스 평속: {p_data['speed']} mph | 기본 컨트롤 제구: {p_data['control']}/100
-            </div>
-        """, unsafe_allow_html=True)
         
         if st.button("🏟️ 야구장 입장 (포수 시점 활성화)"):
             st.session_state.away_name = team_away.split(" (")[0]
@@ -197,55 +183,50 @@ def main():
             st.rerun()
         st.stop()
 
-    # -----------------------------------------------------------------
-    # 4. 상호 억제식 시소 시스템 밸런서 제어 탭 구성
-    # -----------------------------------------------------------------
     st.markdown(f"### 📡 MATCHUP: {st.session_state.away_name} vs {st.session_state.home_name}")
-    
     tab_p, tab_h = st.tabs(["🎯 투수/포수 1인칭 미트 모드", "💥 플레이어 타격 챌린지 모드"])
 
     # -----------------------------------------------------------------
-    # [TAB 1] 사진과 100% 일치하는 리얼 포수 시점 투구 엔진
+    # [TAB 1] 직구 궤적 교정 + 대형 해설창 포수 시점 모드
     # -----------------------------------------------------------------
     with tab_p:
-        st.markdown("<p style='color:#475569; font-weight:700;'>투수가 던지는 공이 내 눈앞으로 튀어나옵니다. 마우스로 미트를 대고 클릭하세요.</p>", unsafe_allow_html=True)
-        
         col_set1, col_set2 = st.columns([1, 2])
         with col_set1:
             sel_pitch_1 = st.radio("🔮 구종 메인 셀렉트", st.session_state.pitch_list, key="p_pitch")
         with col_set2:
-            balance_p = st.slider("⚖️ 피칭 스타일 다이내믹 시소 스위치", 0, 100, 50, key="p_balance",
-                                  help="왼쪽으로 당기면 파괴적인 구속/실투 폭등, 오른쪽은 정밀 칼제구/구속 감소")
+            balance_p = st.slider("⚖️ 피칭 스타일 다이내믹 시소 스위치", 0, 100, 50, key="p_balance")
 
-        # 시소 알고리즘 연산
         p_max = st.session_state.base_speed + 5
         p_min = st.session_state.base_speed - 15
         live_speed_p = int(p_max - (balance_p / 100.0) * (p_max - p_min))
         live_control_p = int(5 + (balance_p / 100.0) * 91)
 
-        st.markdown(f"📊 **투구 계수 세팅 완료:** 구속 **{live_speed_p} mph** | 제구력 수치 **{live_control_p} / 100**")
+        st.markdown(f"📊 **투구 스펙:** 구속 **{live_speed_p} mph** | 제구력 수치 **{live_control_p} / 100**")
 
-        # 구종 성격별 아크 브레이킹 가중치 공식
-        if "직구" in sel_pitch_1 or "커터" in sel_pitch_1: hb, vb = (1.5, -2.5)
-        elif "스위퍼" in sel_pitch_1 or "슬라이더" in sel_pitch_1: hb, vb = (16.0, 3.5)
-        elif "커브" in sel_pitch_1 or "너클 커브" in sel_pitch_1: hb, vb = (5.0, 17.5)
-        else: hb, vb = (-2.5, 12.0) # 스플리터/포크볼/체인지업
+        # 무브먼트 계수 설정
+        if "직구" in sel_pitch_1 or "싱커" in sel_pitch_1 or "커터" in sel_pitch_1:
+            hb, vb = (0.0, -1.0)
+        elif "스위퍼" in sel_pitch_1 or "슬라이더" in sel_pitch_1:
+            hb, vb = (17.0, 2.0)
+        elif "커브" in sel_pitch_1 or "너클 커브" in sel_pitch_1:
+            hb, vb = (4.0, 18.0)
+        else:
+            hb, vb = (-2.0, 11.0)
 
         lineup_json_p = json.dumps(st.session_state.away_roster, ensure_ascii=False)
 
-        # 캔버스 결합 렌더링 임베딩 HTML
         canvas_html_p = f"""
         <div style="background: #ffffff; padding: 5px; border-radius: 12px; border: 2px solid #0f172a; max-width: 920px; margin: 0 auto;">
-            <div style="background: #0f172a; color: #ffffff; padding: 8px 15px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: bold; font-family: monospace; font-size:14px; margin-bottom:8px;">
+            <div style="background: #0f172a; color: #ffffff; padding: 10px 15px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: bold; font-family: monospace; font-size:15px; margin-bottom:8px;">
                 <div>[타석] {st.session_state.away_name.upper()} <span id="p-score-away" style="color:#f43f5e; font-weight:900;">0</span></div>
-                <div id="p-bso-text" style="color:#fbbf24;">B○○ S○○ O○○</div>
+                <div id="p-bso-text" style="color:#fbbf24; font-size:16px; letter-spacing:1px;">B○○ S○○ O○○</div>
                 <div>[수비] {st.session_state.home_name.upper()} <span id="p-score-home" style="color:#3b82f6; font-weight:900;">0</span></div>
             </div>
 
             <canvas id="canvasPitchMode" width="900" height="480" style="background: #f8fafc; border: 2px solid #0f172a; display: block; margin: 0 auto; cursor: none;"></canvas>
             
-            <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; border-left: 4px solid #0f172a;">
-                <span id="p-ticker">💡 [안내] 화면 전체가 포수 마스크 뷰입니다. 중앙 멀리 서있는 투수를 보며 마우스를 조준해 포구하세요.</span>
+            <div style="background: #0f172a; color: #ffffff; padding: 22px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-top: 10px; border-left: 8px solid #3b82f6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); text-align: left; line-height: 1.5;">
+                <span id="p-ticker" style="color: #f8fafc;">⚾ [준비 완료] 마우스를 움직여 포수 미트를 조준하고 클릭하여 공을 받으세요!</span>
             </div>
         </div>
 
@@ -257,6 +238,7 @@ def main():
             const CONTROL = {live_control_p};
             const HB = {hb};
             const VB = {vb};
+            const PITCH_NAME = "{sel_pitch_1}";
             const ROSTER = {lineup_json_p};
 
             let state = {{ away: 0, home: 0, b: 0, s: 0, o: 0, idx: 0 }};
@@ -281,16 +263,16 @@ def main():
                 isMisfire = Math.random() * 100 < risk;
 
                 if (isMisfire) {{
-                    ball.tx = 450 + (Math.random() - 0.5) * 110;
-                    ball.ty = 240 + (Math.random() - 0.5) * 110;
+                    ball.tx = 450 + (Math.random() - 0.5) * 120;
+                    ball.ty = 240 + (Math.random() - 0.5) * 120;
                 }} else {{
-                    let o_range = (100 - CONTROL) * 0.38;
+                    let o_range = (100 - CONTROL) * 0.35;
                     ball.tx = pointer.x + (Math.random() - 0.5) * o_range;
                     ball.ty = pointer.y + (Math.random() - 0.5) * o_range;
                 }}
 
-                noiseX = (Math.random() - 0.5) * 8.0;
-                noiseY = (Math.random() - 0.5) * 8.0;
+                noiseX = (Math.random() - 0.5) * 5.0;
+                noiseY = (Math.random() - 0.5) * 5.0;
 
                 ball.x = 450; ball.y = 150;
                 ball.time = 0; ball.size = 2;
@@ -299,46 +281,46 @@ def main():
             }});
 
             function setTicker(m) {{
-                document.getElementById('p-ticker').innerHTML = `💬 ${{m}}`;
+                document.getElementById('p-ticker').innerHTML = m;
             }}
 
             function evaluateAtBat() {{
                 const b_stat = ROSTER[state.idx];
                 const strikeZone = (ball.tx >= 330 && ball.tx <= 570 && ball.ty >= 130 && ball.ty <= 370);
                 
-                let swingChance = strikeZone ? 0.74 : 0.22;
-                if (isMisfire) swingChance = 0.94;
+                let swingChance = strikeZone ? 0.72 : 0.25;
+                if (isMisfire) swingChance = 0.90;
 
                 if (Math.random() < swingChance) {{
-                    let contactMiss = 0.36 - (b_stat.contact - 70) * 0.006;
+                    let contactMiss = 0.34 - (b_stat.contact - 70) * 0.006;
                     if (isMisfire) contactMiss = 0.01;
 
                     if (Math.random() > contactMiss) {{
                         let pw_coef = (b_stat.power - 70) * 0.009;
-                        if (isMisfire) pw_coef += 0.55;
+                        if (isMisfire) pw_coef += 0.50;
                         const dice = Math.random() + pw_coef;
 
-                        if (dice > 1.12) {{
+                        if (dice > 1.15) {{
                             state.away += 1; state.s = 0; state.b = 0;
-                            setTicker(`<span style="color:#ef4444;">장외 홈런 폭발!</span> ${{b_stat.name}} 타자가 궤적 중간을 완전히 쪼개버렸습니다!`);
-                        }} else if (dice > 0.42) {{
+                            setTicker(`<span style="color:#f43f5e; font-weight:900;">💥 대형 홈런 상황!</span> 타자 ${b_stat.name}가 실투를 완벽한 타이밍에 걷어올려 담장을 넘겼습니다!`);
+                        }} else if (dice > 0.45) {{
                             state.s = 0; state.b = 0;
-                            setTicker(`[안타] 회전 각도를 이겨내고 깔끔한 라인드라이브 안타를 만듭니다.`);
+                            setTicker(`<span style="color:#22c55e; font-weight:900;">⚾ 안타 발생:</span> 구종의 회전을 뚫어내고 깨끗한 우전 안타를 생산합니다.`);
                         }} else {{
                             state.o++; state.s = 0; state.b = 0;
-                            setTicker(`[범타] 내야 팝플라이 아웃. 볼끝 수직 낙하에 걸려들었습니다.`);
+                            setTicker(`<span style="color:#e2e8f0;">내야 아웃:</span> 볼끝 회전에 빗맞으며 평범한 플라이 구질로 물러납니다.`);
                         }}
                     }} else {{
-                        state.s++; setTicker(`[헛스윙] 홈플레이트 직전의 엄청난 아크 굴절에 배트가 완전히 밀렸습니다.`);
+                        state.s++; setTicker(`<span style="color:#fbbf24; font-weight:900;">🔥 헛스윙!!</span> 미트 속으로 파고드는 ${PITCH_NAME}의 위력에 방망이가 헛돌았습니다.`);
                     }}
                 }} else {{
-                    if (strikeZone) {{ state.s++; setTicker(`[스트라이크] 존 모서리를 완벽하게 스치는 보더라인 투구.`); }}
-                    else {{ state.b++; setTicker(`[볼] 예리하게 존 바깥으로 멀어지는 공.`); }}
+                    if (strikeZone) {{ state.s++; setTicker(`<span style="color:#3b82f6; font-weight:900;">⚾ 스트라이크!</span> 보더라인 경계면을 자르며 정교하게 꽂힙니다.`); }}
+                    else {{ state.b++; setTicker(`<span style="color:#a8a29e;">볼 판정:</span> 타자가 배트를 멈추며 예리하게 참아냈습니다.`); }}
                 }}
 
-                if (state.s >= 3) {{ state.o++; state.s = 0; state.b = 0; setTicker(`🎯 삼진 아웃!! 결정구 궤적 제어 성공.`); }}
-                if (state.b >= 4) {{ state.s = 0; state.b = 0; setTicker(`[볼넷] 베이스 출루 허용.`); }}
-                if (state.o >= 3) {{ state.o = 0; state.s = 0; state.b = 0; state.idx = (state.idx + 1) % ROSTER.length; setTicker(`🔄 쓰리아웃 공수교대 완료.`); }}
+                if (state.s >= 3) {{ state.o++; state.s = 0; state.b = 0; setTicker(`<span style="color:#ef4444; font-weight:900;">🎯 삼진 아웃!!</span> 완벽하게 꺾이는 결정구로 타자를 제압했습니다.`); }}
+                if (state.b >= 4) {{ state.s = 0; state.b = 0; setTicker(`<span style="color:#fbbf24;">볼넷 출루:</span> 제구가 흔들리며 주자를 내보냅니다.`); }}
+                if (state.o >= 3) {{ state.o = 0; state.s = 0; state.b = 0; state.idx = (state.idx + 1) % ROSTER.length; setTicker(`🔄 쓰리아웃 공수교대 완료. 다음 이닝으로 전환합니다.`); }}
 
                 document.getElementById('p-score-away').innerText = state.away;
                 document.getElementById('p-score-home').innerText = state.home;
@@ -349,68 +331,72 @@ def main():
             }}
 
             function loop() {{
-                ctx = cx;
-                ctx.clearRect(0, 0, 900, 480);
+                cx.clearRect(0, 0, 900, 480);
                 
-                // 고대비 화이트 테마 원근 베이스 스탠드 라인
-                ctx.fillStyle = "#f1f5f9"; ctx.fillRect(0,0,900,480);
+                // 고대비 화이트 테마 배경
+                cx.fillStyle = "#f1f5f9"; cx.fillRect(0,0,900,480);
 
-                // 중앙 대형 스트라이크 존 박스
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(330, 130, 240, 240);
-                ctx.strokeStyle = "#475569"; ctx.lineWidth = 3; ctx.strokeRect(330, 130, 240, 240);
+                // 원근 홈플레이트 드로잉
+                cx.fillStyle = "#e2e8f0";
+                cx.beginPath();
+                cx.moveTo(380, 420); cx.lineTo(520, 420);
+                cx.lineTo(550, 460); cx.lineTo(450, 480); cx.lineTo(350, 460);
+                cx.closePath(); cx.fill();
 
-                // 존 격자 가이드선
-                ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1;
+                // 중앙 스트라이크 존 박스
+                cx.fillStyle = "#ffffff"; cx.fillRect(330, 130, 240, 240);
+                cx.strokeStyle = "#475569"; cx.lineWidth = 3; cx.strokeRect(330, 130, 240, 240);
+
+                // 격자선
+                cx.strokeStyle = "#cbd5e1"; cx.lineWidth = 1;
                 for(let i=1; i<3; i++) {{
-                    ctx.beginPath(); ctx.moveTo(330 + (i*80), 130); ctx.lineTo(330 + (i*80), 370); ctx.stroke();
-                    ctx.beginPath(); ctx.moveTo(330, 130 + (i*80)); ctx.lineTo(570, 130 + (i*80)); ctx.stroke();
+                    cx.beginPath(); cx.moveTo(330 + (i*80), 130); cx.lineTo(330 + (i*80), 370); cx.stroke();
+                    cx.beginPath(); cx.moveTo(330, 130 + (i*80)); cx.lineTo(570, 130 + (i*80)); cx.stroke();
                 }}
 
-                // 저 멀리 투수 마운드 플레이트 원근선 투영
-                ctx.fillStyle = "#94a3b8"; ctx.fillRect(440, 146, 20, 5);
+                // 투수 마운드
+                cx.fillStyle = "#94a3b8"; cx.fillRect(440, 146, 20, 5);
 
-                // 누적 히트 마킹 렌더
+                // 투구 마킹 고정 렌더
                 marks.forEach(m => {{
-                    ctx.fillStyle = m.mis ? "#fbbf24" : (m.sz ? "#10b981" : "#ef4444");
-                    ctx.beginPath(); ctx.arc(m.x, m.y, 7, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5; ctx.stroke();
+                    cx.fillStyle = m.mis ? "#fbbf24" : (m.sz ? "#10b981" : "#ef4444");
+                    cx.beginPath(); cx.arc(m.x, m.y, 7, 0, Math.PI*2); cx.fill();
+                    cx.strokeStyle = "#ffffff"; cx.lineWidth = 1.5; cx.stroke();
                 }});
 
-                // 역동적 3D 포물선 물리 연산 루틴
                 if (ball.active) {{
-                    // 구속 지표에 맞춰 프레임 비행 속도 보정 연산
                     let frameStep = 0.032 + (SPEED / 100) * 0.018;
                     ball.time += frameStep;
 
-                    // 뱀처럼 꺾이며 돌진하는 3D 복합 아치 무브먼트 수식
-                    let twistX = Math.sin(ball.time * Math.PI) * 65.0;
-                    let twistY = -Math.sin(ball.time * Math.PI) * 40.0;
+                    // [고증 완료] 직구 계열일 경우 뱀처럼 휘어지는 트위스트 연산을 무조건 0으로 차단!!
+                    let isFastball = PITCH_NAME.includes("직구") || PITCH_NAME.includes("싱커") || PITCH_NAME.includes("커터");
+                    let twistX = isFastball ? 0 : Math.sin(ball.time * Math.PI) * 65.0;
+                    let twistY = isFastball ? 0 : -Math.sin(ball.time * Math.PI) * 40.0;
 
                     let lx = 450 + (ball.tx - 450) * ball.time;
                     let ly = 150 + (ball.ty - 150) * ball.time;
 
-                    // 미트 바로 앞까지 돌진할 때 팽창하는 원근감 배율
                     ball.size = 2.0 + (Math.pow(ball.time, 4.0) * 36.0);
-
                     let b_factor = Math.pow(ball.time, 2.4);
-                    ball.x = lx + twistX + ((HB + noiseX) * b_factor * 2.5);
-                    ball.y = ly + twistY + ((VB + noiseY) * b_factor * 2.5);
+                    
+                    ball.x = lx + twistX + ((HB + (isFastball ? 0 : noiseX)) * b_factor * 2.5);
+                    ball.y = ly + twistY + ((VB + (isFastball ? 0 : noiseY)) * b_factor * 2.5);
 
                     trajectory.push({{ x: ball.x, y: ball.y }});
 
-                    // [가시성 100%] 백색 배경에 칼같이 꽂히는 굵은 블랙/레드 레이저 트랙
-                    ctx.beginPath();
-                    ctx.strokeStyle = isMisfire ? "#f43f5e" : "#0f172a";
-                    ctx.lineWidth = 6;
+                    // 굵고 선명한 궤적 드로잉
+                    cx.beginPath();
+                    cx.strokeStyle = isMisfire ? "#f43f5e" : "#0f172a";
+                    cx.lineWidth = 6;
                     for (let i = 0; i < trajectory.length; i++) {{
-                        if (i === 0) ctx.moveTo(trajectory[i].x, trajectory[i].y);
-                        else ctx.lineTo(trajectory[i].x, trajectory[i].y);
+                        if (i === 0) cx.moveTo(trajectory[i].x, trajectory[i].y);
+                        else cx.lineTo(trajectory[i].x, trajectory[i].y);
                     }}
-                    ctx.stroke();
+                    cx.stroke();
 
-                    // 야구공 본체 묘사
-                    ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#0f172a"; ctx.lineWidth = 3;
-                    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                    // 야구공
+                    cx.fillStyle = "#ffffff"; cx.strokeStyle = "#0f172a"; cx.lineWidth = 3;
+                    cx.beginPath(); cx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2); cx.fill(); cx.stroke();
 
                     if (ball.time >= 1.0) {{
                         ball.active = false;
@@ -418,65 +404,65 @@ def main():
                     }}
                 }}
 
-                // 포수 가죽 미트 조준선 마커 그리기
+                // 포수 미트 마커
                 if (!ball.active) {{
-                    ctx.fillStyle = "rgba(146, 64, 14, 0.9)";
-                    ctx.strokeStyle = "#451a03"; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 25, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+                    cx.fillStyle = "rgba(146, 64, 14, 0.9)";
+                    cx.strokeStyle = "#451a03"; cx.lineWidth = 2;
+                    cx.beginPath(); cx.arc(pointer.x, pointer.y, 25, 0, Math.PI*2); cx.fill(); cx.stroke();
                     
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
-                    ctx.beginPath(); ctx.moveTo(pointer.x-10, pointer.y); ctx.lineTo(pointer.x+10, pointer.y);
-                    ctx.moveTo(pointer.x, pointer.y-10); ctx.lineTo(pointer.x, pointer.y+10); ctx.stroke();
+                    cx.strokeStyle = "#ffffff"; cx.lineWidth = 2;
+                    cx.beginPath(); cx.moveTo(pointer.x-10, pointer.y); cx.lineTo(pointer.x+10, pointer.y);
+                    cx.moveTo(pointer.x, pointer.y-10); cx.lineTo(pointer.x, pointer.y+10); cx.stroke();
                 }}
 
-                ctx.fillStyle = "#0f172a"; ctx.font = "bold 13px sans-serif";
-                ctx.fillText(`현재 타자: ${{ROSTER[state.idx].name}} (파워 ${{ROSTER[state.idx].power}})`, 20, 445);
-                ctx.fillStyle = "#64748b";
-                ctx.fillText(`투수: {st.session_state.pitcher_name} (${{SPEED}} mph)`, 20, 465);
+                cx.fillStyle = "#0f172a"; cx.font = "bold 14px sans-serif";
+                cx.fillText(`타자: ${{ROSTER[state.idx].name}} (파워 ${{ROSTER[state.idx].power}})`, 20, 445);
+                cx.fillStyle = "#64748b";
+                cx.fillText(`투수 원근 릴리즈 시스템 V3`, 20, 465);
 
                 requestAnimationFrame(loop);
             }}
             loop();
         </script>
         """
-        st.components.v1.html(canvas_html_p, height=580)
+        st.components.v1.html(canvas_html_p, height=620)
 
     # -----------------------------------------------------------------
-    # [TAB 2] 유저 플레이어 전용 리얼 타격 챌린지 모드
+    # [TAB 2] 플레이어 전용 타격 챌린지 모드 (직구 교정 버전)
     # -----------------------------------------------------------------
     with tab_h:
-        st.markdown("<p style='color:#475569; font-weight:700;'>상대 AI 투수가 던지는 지옥 같은 궤적을 눈으로 확인하고 정확한 타이밍에 클릭해 때려내세요!</p>", unsafe_allow_html=True)
-        
         col_set3, col_set4 = st.columns([1, 2])
         with col_set3:
             sel_pitch_2 = st.radio("🔮 AI 투수 투구 구종 지정", st.session_state.pitch_list, key="h_pitch")
         with col_set4:
             balance_h = st.slider("⚖️ AI 투수 구속 제구 조절 벨트", 0, 100, 50, key="h_balance")
 
-        # 시소 알고리즘 동일 연동
         live_speed_h = int(p_max - (balance_h / 100.0) * (p_max - p_min))
         live_control_h = int(5 + (balance_h / 100.0) * 91)
 
         st.markdown(f"📊 **상대 AI 투수 세팅:** 구속 **{live_speed_h} mph** | 제구력 수치 **{live_control_h} / 100**")
 
-        if "직구" in sel_pitch_2 or "커터" in sel_pitch_2: thb, tvb = (0.5, -1.5)
-        elif "스위퍼" in sel_pitch_2 or "슬라이더" in sel_pitch_2: thb, tvb = (15.0, 2.5)
-        elif "커브" in sel_pitch_2 or "너클 커브" in sel_pitch_2: thb, tvb = (4.0, 16.0)
-        else: thb, tvb = (-1.5, 11.0)
+        if "직구" in sel_pitch_2 or "싱커" in sel_pitch_2 or "커터" in sel_pitch_2:
+            thb, tvb = (0.0, -1.0)
+        elif "스위퍼" in sel_pitch_2 or "슬라이더" in sel_pitch_2:
+            thb, tvb = (16.0, 2.0)
+        elif "커브" in sel_pitch_2 or "너클 커브" in sel_pitch_2:
+            thb, tvb = (4.0, 17.0)
+        else:
+            thb, tvb = (-1.0, 11.0)
 
-        # 타자 모드 임베딩 전용 스크립트 작성
         canvas_html_h = f"""
         <div style="background: #ffffff; padding: 5px; border-radius: 12px; border: 2px solid #0f172a; max-width: 920px; margin: 0 auto;">
-            <div style="background: #1e293b; color: #ffffff; padding: 8px 15px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: bold; font-family: monospace; font-size:14px; margin-bottom:8px;">
+            <div style="background: #1e293b; color: #ffffff; padding: 10px 15px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: bold; font-family: monospace; font-size:14px; margin-bottom:8px;">
                 <div>[플레이어 안타 개수] <span id="h-score-player" style="color:#10b981; font-weight:900;">0</span></div>
-                <div id="h-count-text" style="color:#fbbf24;">S: 0 | O: 0</div>
-                <div>AI PITCHER SPEED: {live_speed_h} mph</div>
+                <div id="h-count-text" style="color:#fbbf24; font-size:15px;">S: 0 | O: 0</div>
+                <div>AI SPEED: {live_speed_h} mph</div>
             </div>
 
             <canvas id="canvasBatterMode" width="900" height="480" style="background: #f8fafc; border: 2px solid #0f172a; display: block; margin: 0 auto;"></canvas>
             
-            <div style="background: #f1f5f9; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; margin-top: 8px; border-left: 4px solid #10b981;">
-                <span id="h-ticker">🎯 [타격 요령] 화면을 클릭하면 공이 투수 손을 떠납니다. 홈플레이트 사각존에 완벽하게 겹쳐지며 공이 최대 크기가 되는 순간 한 번 더 클릭해 스윙하세요!</span>
+            <div style="background: #1e293b; color: #ffffff; padding: 22px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-top: 10px; border-left: 8px solid #10b981; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); text-align: left; line-height: 1.5;">
+                <span id="h-ticker" style="color: #fbbf24;">🎯 [타격 대기] 화면을 클릭하여 투구를 유도한 후, 공이 가장 커지는 임팩트 타이밍에 맞춰 한 번 더 대형 스윙 클릭을 가하세요!</span>
             </div>
         </div>
 
@@ -488,6 +474,7 @@ def main():
             const H_CONTROL = {live_control_h};
             const H_HB = {thb};
             const H_VB = {tvb};
+            const H_PITCH = "{sel_pitch_2}";
 
             let b_state = {{ hit: 0, s: 0, o: 0 }};
             let h_ball = {{ active: false, x: 450, y: 150, tx: 450, ty: 250, time: 0, size: 2 }};
@@ -501,28 +488,27 @@ def main():
                     let range = (100 - H_CONTROL) * 0.45;
                     targetX = 450 + (Math.random() - 0.5) * range;
                     targetY = 240 + (Math.random() - 0.5) * range;
-                    h_noiseX = (Math.random() - 0.5) * 7.0;
-                    h_noiseY = (Math.random() - 0.5) * 7.0;
+                    h_noiseX = (Math.random() - 0.5) * 6.0;
+                    h_noiseY = (Math.random() - 0.5) * 6.0;
 
                     h_ball.x = 450; h_ball.y = 150; h_ball.time = 0; h_ball.size = 2;
                     h_trail = []; isSwung = false;
                     h_ball.active = true;
-                    document.getElementById('h-ticker').innerText = "⚾ AI 투수 투구 완료! 날아오는 타이밍을 매칭하세요!";
+                    document.getElementById('h-ticker').innerHTML = "<span style='color:#ffffff;'>⚾ 투구 시작! 공이 직선 또는 회전 궤적으로 질주합니다! 집중하세요!</span>";
                 }} else {{
                     if (isSwung) return;
                     isSwung = true;
 
-                    // 프레임 타격 지점 타이밍 계산식 (time 변수가 0.85 ~ 0.96일 때 임팩트)
                     let t_diff = h_ball.time;
                     if (t_diff >= 0.83 && t_diff <= 0.96) {{
                         b_state.hit++; b_state.s = 0;
-                        document.getElementById('h-ticker').innerHTML = `💥 <span style="color:#10b981; font-weight:bold;">JUST HITTED!! 정타 안타!</span> 회전을 부수고 뻗어나가는 타구입니다!`;
+                        document.getElementById('h-ticker').innerHTML = `💥 <span style="color:#10b981; font-weight:bold;">JUST HIT!! 정타 작렬!</span> 배트 중심에 정확히 맞으며 야구장 외야를 가르는 안타를 터트렸습니다!`;
                     }} else if (t_diff < 0.83) {{
                         b_state.s++;
-                        document.getElementById('h-ticker').innerText = "❌ 얼리 스윙! 배트가 너무 급하게 돌았습니다.";
+                        document.getElementById('h-ticker').innerHTML = "<span style='color:#ef4444;'>❌ 얼리 스윙:</span> 성급했습니다! 공이 홈플레이트에 채 도달하기 전에 배트가 먼저 돌았습니다.";
                     }} else {{
                         b_state.s++;
-                        document.getElementById('h-ticker').innerText = "❌ 레이트 스윙! 150km 볼끝에 완벽하게 밀렸습니다.";
+                        document.getElementById('h-ticker').innerHTML = "<span style='color:#ef4444;'>❌ 레이트 스윙:</span> 타이밍이 완전히 늦었습니다! 강속구 볼끝에 타이밍을 빼앗겼습니다.";
                     }}
                     checkInningStatus();
                 }}
@@ -539,32 +525,39 @@ def main():
                 cx2.clearRect(0, 0, 900, 480);
                 cx2.fillStyle = "#f8fafc"; cx2.fillRect(0,0,900,480);
 
-                // 고대비 전면 스트라이크 타격 마크 스퀘어 존
+                // 원근 홈플레이트
+                cx2.fillStyle = "#e2e8f0";
+                cx2.beginPath();
+                cx2.moveTo(380, 420); cx2.lineTo(520, 420);
+                cx2.lineTo(550, 460); cx2.lineTo(450, 480); cx2.lineTo(350, 460);
+                cx2.closePath(); cx2.fill();
+
+                // 스트라이크 존 박스
                 cx2.fillStyle = "#ffffff"; cx2.fillRect(340, 140, 220, 220);
                 cx2.strokeStyle = "#1e293b"; cx2.lineWidth = 3; cx2.strokeRect(340, 140, 220, 220);
 
-                // 원근 구장 중앙 마운드 기준선
+                // 마운드
                 cx2.fillStyle = "#94a3b8"; cx2.fillRect(442, 148, 16, 4);
 
                 if (h_ball.active) {{
                     let frameStep = 0.030 + (H_SPEED / 100) * 0.015;
                     h_ball.time += frameStep;
 
-                    let arcX = Math.sin(h_ball.time * Math.PI) * 60.0;
-                    let arcY = -Math.sin(h_ball.time * Math.PI) * 35.0;
+                    let isFastball = H_PITCH.includes("직구") || H_PITCH.includes("싱커") || H_PITCH.includes("커터");
+                    let arcX = isFastball ? 0 : Math.sin(h_ball.time * Math.PI) * 60.0;
+                    let arcY = isFastball ? 0 : -Math.sin(h_ball.time * Math.PI) * 35.0;
 
                     let lx = 450 + (targetX - 450) * h_ball.time;
                     let ly = 150 + (targetY - 150) * h_ball.time;
 
                     h_ball.size = 2.0 + (Math.pow(h_ball.time, 4.0) * 44.0);
-
                     let bf = Math.pow(h_ball.time, 2.4);
-                    h_ball.x = lx + arcX + ((H_HB + h_noiseX) * bf * 2.4);
-                    h_ball.y = ly + arcY + ((H_VB + h_noiseY) * bf * 2.4);
+                    
+                    h_ball.x = lx + arcX + ((H_HB + (isFastball ? 0 : h_noiseX)) * bf * 2.4);
+                    h_ball.y = ly + arcY + ((H_VB + (isFastball ? 0 : h_noiseY)) * bf * 2.4);
 
                     h_trail.push({{ x: h_ball.x, y: h_ball.y }});
 
-                    // 궤적 패스 드로잉
                     cx2.beginPath(); cx2.strokeStyle = "#64748b"; cx2.lineWidth = 4;
                     for(let i=0; i<h_trail.length; i++) {{
                         if (i===0) cx2.moveTo(h_trail[i].x, h_trail[i].y);
@@ -572,15 +565,14 @@ def main():
                     }}
                     cx2.stroke();
 
-                    // 야구공
                     cx2.fillStyle = "#ffffff"; cx2.strokeStyle = "#0f172a"; cx2.lineWidth = 3;
-                    cx2.beginPath(); ctx.arc(h_ball.x, h_ball.y, h_ball.size, 0, Math.PI*2); cx2.fill(); cx2.stroke();
+                    cx2.beginPath(); cx2.arc(h_ball.x, h_ball.y, h_ball.size, 0, Math.PI*2); cx2.fill(); cx2.stroke();
 
                     if (h_ball.time >= 1.0) {{
                         h_ball.active = false;
                         if (!isSwung) {{
                             b_state.s++;
-                            document.getElementById('h-ticker').innerText = "⚠️ 지켜보았습니다! 꽉 찬 코스 루킹 스트라이크.";
+                            document.getElementById('h-ticker').innerHTML = "<span style='color:#fbbf24;'>⚠️ 루킹 스트라이크:</span> 미트 안으로 정직하게 빨려 들어가는 공을 그저 지켜보았습니다.";
                             checkInningStatus();
                         }}
                     }}
@@ -594,7 +586,7 @@ def main():
             loopBatter();
         </script>
         """
-        st.components.v1.html(canvas_html_h, height=580)
+        st.components.v1.html(canvas_html_h, height=620)
 
     st.markdown("---")
     if st.button("🔄 전구단 선택 로비 화면으로 리셋"):
