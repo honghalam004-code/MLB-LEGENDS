@@ -3,191 +3,229 @@ import random
 
 # --- [1. 게임 상태 및 데이터 초기화] ---
 def init_game():
-    if 'inning' not in st.session_state:
+    if 'game_initialized' not in st.session_state:
+        st.session_state.game_initialized = True
         st.session_state.inning = 1
         st.session_state.half = "초"
         st.session_state.outs = 0
         st.session_state.strikes = 0
         st.session_state.balls = 0
         st.session_state.score = {"AWAY": 0, "HOME": 0}
-        # 주자 상태 (1루, 2루, 3루)
         st.session_state.bases = [False, False, False]
-        st.session_state.log = ["게임을 시작합니다. 구종과 코스를 선택하세요!"]
+        st.session_state.log = ["🎮 마우스로 스트라이크 존 안팎을 클릭하여 투구하세요!"]
+        st.session_state.pitcher_name = "Gerrit Cole"
+        st.session_state.batter_name = "Aaron Judge"
         
-        # 투수 데이터 기본 세팅
-        st.session_state.pitcher = {
-            "name": "Gerrit Cole",
-            "pitches": {
-                "포심 직구": {"speed": 97, "control": 85},
-                "슬라이더": {"speed": 88, "control": 75},
-                "체인지업": {"speed": 89, "control": 70},
-                "커브": {"speed": 83, "control": 65}
-            }
-        }
-        # 마지막 투구 정보 (SVG 애니메이션용)
-        st.session_state.last_pitch_data = None
+        # 최근 투구 정보 및 자바스크립트 통신용 카운터
+        st.session_state.last_click_x = None
+        st.session_state.last_click_y = None
+        st.session_state.pitch_count = 0
 
-# --- [2. 화려한 야구장 & 스트라이크 존 그래픽 (SVG 사용)] ---
-# requirements.txt 없이 파일 하나로 그래픽을 구현하는 핵심 함수입니다.
-def draw_game_graphics_svg(pitch_data=None):
-    # 야구장 다이아몬드 및 주자 상태 시각화
-    b1_color = "#FF4B4B" if st.session_state.bases[0] else "#fff" # 1루
-    b2_color = "#FF4B4B" if st.session_state.bases[1] else "#fff" # 2루
-    b3_color = "#FF4B4B" if st.session_state.bases[2] else "#fff" # 3루
-
-    # 마지막 투구에 따른 공 색상 및 위치 계산
-    pitch_circle = ""
-    if pitch_data:
-        actual_zone = pitch_data['zone']
-        is_strike = actual_zone in range(1, 10)
-        ball_color = "#FF4B4B" if is_strike else "#29B6F6" # 스트라이크 빨강, 볼 파랑
+# --- [2. 자바스크립트 클릭 이벤트를 처리하는 쿼리 파라미터 로직] ---
+# HTML Canvas에서 클릭한 좌표를 스트림릿 세션 상태로 전달받는 트릭입니다.
+query_params = st.query_params
+if "click_x" in query_params and "click_y" in query_params and "p_count" in query_params:
+    cx = float(query_params["click_x"])
+    cy = float(query_params["click_y"])
+    pc = int(query_params["p_count"])
+    
+    # 새로운 투구 클릭인 경우에만 로직 실행 (중복 실행 방지)
+    if pc > st.session_state.get('pitch_count', 0):
+        st.session_state.pitch_count = pc
+        st.session_state.last_click_x = cx
+        st.session_state.last_click_y = cy
         
-        # 9분할 존 좌표 계산 (SVG 내부 좌표)
-        row = (actual_zone - 1) // 3
-        col = (actual_zone - 1) % 3
+        # 스트라이크/볼 판정 (캔버스 기준 스트라이크 존: X 350~550, Y 100~300)
+        is_strike = (350 <= cx <= 550) and (100 <= cy <= 300)
+        speed = random.randint(85, 99)
         
-        if actual_zone == 10: # 유인구 구역
-            cx, cy = 200, 50
+        if is_strike:
+            st.session_state.strikes += 1
+            msg = f"🔥 스트라이크! ({speed} mph) - 존 구석을 찌릅니다!"
+            if st.session_state.strikes >= 3:
+                st.session_state.outs += 1
+                st.session_state.strikes = 0
+                st.session_state.balls = 0
+                msg += " ❌ 삼진 아웃!!"
         else:
-            cx = 100 + (col * 100)
-            cy = 150 + (row * 100)
-            
-        # 역동적인 투구 애니메이션 효과를 위한 SVG 코드
-        pitch_circle = f"""
-            <circle cx="{cx}" cy="{cy}" r="15" fill="{ball_color}" stroke="#000" stroke-width="2">
-                <animate attributeName="r" from="0" to="15" dur="0.3s" begin="0.1s" fill="freeze" />
-                <animate attributeName="opacity" from="0" to="1" dur="0.3s" begin="0.1s" fill="freeze" />
-            </circle>
-            <text x="{cx}" y="{cy+5}" font-family="Arial" font-size="12" text-anchor="middle" fill="white" font-weight="bold">{actual_zone}</text>
-        """
-
-    # 전체 그래픽을 구성하는 SVG 코드 (야구장 + 전광판 + 존)
-    svg_html = f"""
-    <div style="display: flex; justify-content: center; background-color: #f0f2f6; padding: 10px; border-radius: 10px;">
-        <svg width="600" height="400" viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg">
-            <rect width="600" height="400" fill="#228B22" rx="10"/>
-            
-            <path d="M 300 350 L 500 200 L 300 50 L 100 200 Z" fill="none" stroke="#fff" stroke-width="3"/>
-            <circle cx="300" cy="200" r="10" fill="#DAA520"/> <rect x="285" y="335" width="30" height="30" fill="#fff" stroke="#000" transform="rotate(45 300 350)"/> <rect x="485" y="185" width="30" height="30" fill="{b1_color}" stroke="#000" transform="rotate(45 500 200)"/> <rect x="285" y="35" width="30" height="30" fill="{b2_color}" stroke="#000" transform="rotate(45 300 50)"/> <rect x="85" y="185" width="30" height="30" fill="{b3_color}" stroke="#000" transform="rotate(45 100 200)"/> <g transform="translate(350, 80)">
-                <rect width="300" height="300" fill="#fff" stroke="#333" stroke-width="3" opacity="0.8"/>
-                <line x1="100" y1="0" x2="100" y2="300" stroke="#ccc" stroke-dasharray="5,5"/>
-                <line x1="200" y1="0" x2="200" y2="300" stroke="#ccc" stroke-dasharray="5,5"/>
-                <line x1="0" y1="100" x2="300" y2="100" stroke="#ccc" stroke-dasharray="5,5"/>
-                <line x1="0" y1="200" x2="300" y2="200" stroke="#ccc" stroke-dasharray="5,5"/>
+            st.session_state.balls += 1
+            msg = f"🟢 볼! ({speed} mph) - 타자가 잘 골라냈습니다."
+            if st.session_state.balls >= 4:
+                st.session_state.strikes = 0
+                st.session_state.balls = 0
+                st.session_state.bases[0] = True
+                msg += " 🚶 볼넷 출루!"
                 
-                <rect x="50" y="-40" width="200" height="30" fill="#eee" stroke="#aaa" rx="5"/>
-                <text x="150" y="-20" font-family="Arial" font-size="12" text-anchor="middle" fill="#555">10번 (외곽 유인구 영역)</text>
-                
-                {pitch_circle}
-            </g>
-            
-            <g transform="translate(450, 10)">
-                <rect width="140" height="60" fill="#333" rx="5" opacity="0.9"/>
-                <text x="70" y="25" font-family="monospace" font-size="18" text-anchor="middle" fill="#FFD700">AWAY {st.session_state.score["AWAY"]}</text>
-                <text x="70" y="50" font-family="monospace" font-size="18" text-anchor="middle" fill="#FFD700">HOME {st.session_state.score["HOME"]}</text>
-            </g>
-        </svg>
-    </div>
-    """
-    return svg_html
-
-# --- [3. 투구 실행 로직 (그래픽 데이터 저장 추가)] ---
-def execute_pitch(pitch_type, zone_section):
-    pitcher = st.session_state.pitcher
-    pitch_info = pitcher["pitches"][pitch_type]
-    
-    # 제구력 반영 (실패 확률)
-    if random.randint(1, 100) > pitch_info["control"]:
-        actual_zone = random.choice([z for z in range(1, 11) if z != zone_section])
-        control_miss = True
-    else:
-        actual_zone = zone_section
-        control_miss = False
+        st.session_state.log.insert(0, msg)
         
-    # 그래픽 애니메이션을 위한 투구 데이터 저장
-    st.session_state.last_pitch_data = {
-        'zone': actual_zone,
-        'type': pitch_type,
-        'is_strike': actual_zone in range(1, 10)
-    }
+        # 3아웃 공수교대
+        if st.session_state.outs >= 3:
+            st.session_state.outs = 0
+            st.session_state.strikes = 0
+            st.session_state.balls = 0
+            st.session_state.bases = [False, False, False]
+            st.session_state.half = "말" if st.session_state.half == "초" else "초"
+            if st.session_state.half == "초": st.session_state.inning += 1
+            st.session_state.log.insert(0, f"🔄 공수 교대! {st.session_state.inning}회 {st.session_state.half} 시작.")
+        
+        # 좌표 찌꺼기 제거 후 리턴하여 화면 갱신
+        st.query_params.clear()
+        st.rerun()
+
+# --- [3. 통합 그래픽 엔진 (HTML5 Canvas + 타자 애니메이션)] ---
+def draw_interactive_game():
+    b1 = "#FF4B4B" if st.session_state.bases[0] else "#fff"
+    b2 = "#FF4B4B" if st.session_state.bases[1] else "#fff"
+    b3 = "#FF4B4B" if st.session_state.bases[2] else "#fff"
     
-    is_strike = actual_zone in range(1, 10)
-    speed_text = f"{pitch_info['speed'] + random.randint(-2, 2)} mph"
-    miss_text = " (제구 난조!)" if control_miss else ""
+    # 마지막 투구 점 표시용 자바스크립트 변수
+    last_x = st.session_state.last_click_x if st.session_state.last_click_x else -100
+    last_y = st.session_state.last_click_y if st.session_state.last_click_y else -100
+    next_count = st.session_state.pitch_count + 1
 
-    if is_strike:
-        st.session_state.strikes += 1
-        result_msg = f"🔥 스트라이크! - {pitcher['name']}의 {pitch_type}({speed_text}){miss_text}"
-        if st.session_state.strikes >= 3:
-            st.session_state.outs += 1
-            st.session_state.strikes = 0
-            st.session_state.balls = 0
-            result_msg += " ❌ 삼진 아웃!!"
-    else:
-        st.session_state.balls += 1
-        result_msg = f"🟢 볼! - 코스를 벗어난 {pitch_type}({speed_text}){miss_text}"
-        if st.session_state.balls >= 4:
-            st.session_state.strikes = 0
-            st.session_state.balls = 0
-            # 볼넷 주자 이동 (단순화: 1루만 채움)
-            st.session_state.bases[0] = True 
-            result_msg += " 🚶 볼넷 출루!"
+    html_code = f"""
+    <div style="display: flex; flex-direction: column; align-items: center; background-color: #f0f2f6; padding: 10px; border-radius: 10px;">
+        <canvas id="baseballCanvas" width="800" height="400" style="border: 2px solid #333; background-color: #228B22; border-radius: 8px; cursor: crosshair;"></canvas>
+    </div>
 
-    st.session_state.log.insert(0, result_msg)
+    <script>
+        const canvas = document.getElementById('baseballCanvas');
+        const ctx = canvas.getContext('2d');
 
-    # 공수교대
-    if st.session_state.outs >= 3:
-        st.session_state.outs = 0
-        st.session_state.strikes = 0
-        st.session_state.balls = 0
-        st.session_state.bases = [False, False, False] # 주자 초기화
-        st.session_state.half = "말" if st.session_state.half == "초" else "초"
-        if st.session_state.half == "초": st.session_state.inning += 1
-        st.session_state.log.insert(0, f"🔄 공수 교대! {st.session_state.inning}회 {st.session_state.half} 시작.")
+        // 1. 야구장 다이아몬드 그리기
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(200, 350); // 홈
+        ctx.lineTo(320, 230); // 1루
+        ctx.lineTo(200, 110); // 2루
+        ctx.lineTo(80, 230);  // 3루
+        ctx.closePath();
+        ctx.stroke();
 
-# --- [4. 메인 UI 화면 그리기 (그래픽 통합)] ---
+        // 투수 마운드
+        ctx.fillStyle = "#DAA520";
+        ctx.beginPath();
+        ctx.arc(200, 230, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 베이스 컬러링 (주자 상황 반영)
+        function drawBase(x, y, color) {{
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(45 * Math.PI / 180);
+            ctx.fillStyle = color;
+            ctx.strokeStyle = "#000";
+            ctx.fillRect(-10, -10, 20, 20);
+            ctx.strokeRect(-10, -10, 20, 20);
+            ctx.restore();
+        }}
+        drawBase(200, 350, "#ffffff"); // 홈
+        drawBase(320, 230, "{b1}");   // 1루
+        drawBase(200, 110, "{b2}");   // 2루
+        drawBase(80, 230, "{b3}");    // 3루
+
+        // 2. 타자 (Batter) 그래픽 그리기 (홈 플레이트 좌측에 배치)
+        ctx.fillStyle = "#1E90FF"; // 헬멧/유니폼 색상
+        ctx.beginPath();
+        ctx.arc(165, 320, 8, 0, Math.PI * 2); // 타자 머리
+        ctx.fill();
+        ctx.fillRect(160, 328, 10, 22); // 타자 몸통
+        
+        // 타자 배트 (지포스 느낌의 대각선 라인)
+        ctx.strokeStyle = "#D2691E";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(165, 325);
+        ctx.lineTo(145, 295); // 위로 비스듬히 들고 있는 배트
+        ctx.stroke();
+
+        // 3. 스트라이크 존 격자 그리기 (우측 영역)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.fillRect(350, 100, 200, 200);
+        ctx.strokeStyle = "#333333";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(350, 100, 200, 200);
+
+        // 9분할 점선 구획
+        ctx.strokeStyle = "#999999";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        // 가로선
+        ctx.beginPath(); ctx.moveTo(350, 166); ctx.lineTo(550, 166); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(350, 233); ctx.lineTo(550, 233); ctx.stroke();
+        // 세로선
+        ctx.beginPath(); ctx.moveTo(416, 100); ctx.lineTo(416, 300); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(483, 100); ctx.lineTo(483, 300); ctx.stroke();
+        ctx.setLineDash([]); // 점선 해제
+
+        // 텍스트 안내 정보
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 14px Arial";
+        ctx.fillText("🎯 여기를 클릭해서 투구하세요", 350, 85);
+        ctx.fillText("타자: {st.session_state.batter_name}", 110, 390);
+
+        // 4. 전광판 GUI (우측 상단)
+        ctx.fillStyle = "#333333";
+        ctx.fillRect(600, 20, 180, 80);
+        ctx.fillStyle = "#FFD700";
+        ctx.font = "16px monospace";
+        ctx.fillText("AWAY TEAM: {st.session_state.score['AWAY']}", 615, 45);
+        ctx.fillText("HOME TEAM: {st.session_state.score['HOME']}", 615, 75);
+
+        // 5. 마지막 투구 위치에 공 그리기
+        let lx = {last_x};
+        let ly = {last_y};
+        if (lx > 0 && ly > 0) {{
+            let isStrike = (lx >= 350 && lx <= 550 && ly >= 100 && ly <= 300);
+            ctx.fillStyle = isStrike ? "#FF4B4B" : "#29B6F6";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(lx, ly, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }}
+
+        // 6. 마우스 클릭 이벤트 리스너 (부모 스트림릿 창으로 데이터 전송)
+        canvas.addEventListener('click', function(event) {{
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            
+            // 스트림릿 URL 파라미터를 변경하여 강제 rerun 및 데이터 전송 유도
+            const origin = window.location.origin + window.location.pathname;
+            window.parent.location.href = origin + `?click_x=${{x}}&click_y=${{y}}&p_count={next_count}`;
+        }});
+    </script>
+    """
+    st.components.v1.html(html_code, height=450)
+
+# --- [4. 메인 UI 화면 구성] ---
 def draw_ui():
-    st.set_page_config(page_title="MLB Legends 시뮬레이터", layout="wide")
-    st.title("⚾ MLB Legends: 투구 시뮬레이터")
+    st.set_page_config(page_title="MLB 마우스 클릭 투구게임", layout="wide")
+    st.title("⚾ MLB Legends: 인터랙티브 투구 게임")
     
-    # 1. 게임 상태 바 (상단 프리뷰 화면처럼)
+    # 경기 현황판
     st.info(f"현재 경기: {st.session_state.inning}회{st.session_state.half} | 아웃: {st.session_state.outs}🔴 | 스트라이크: {st.session_state.strikes}🟡 | 볼: {st.session_state.balls}🟢")
     
-    # 2. 핵심 게임 그래픽 화면 표시 (새로 추가)
-    # 야구장, 전광판, 애니메이션 투구 점이 통합된 SVG 화면
-    game_gfx_html = draw_game_graphics_svg(st.session_state.last_pitch_data)
-    st.components.v1.html(game_gfx_html, height=420)
+    # 그래픽 화면 렌더링
+    draw_interactive_game()
     
     st.markdown("---")
-
-    # 3. 컨트롤러 및 로그 분할
-    col_ctrl, col_log = st.columns([1, 1])
     
-    with col_ctrl:
-        st.subheader(f"투수: {st.session_state.pitcher['name']}")
-        
-        # 구종 선택 (라디오 버튼 -> 가로 세팅으로 더 게임답게)
-        pitch_options = list(st.session_state.pitcher["pitches"].keys())
-        selected_pitch = st.radio("🔮 구종 선택:", pitch_options, horizontal=True)
-        
-        # 투구 코스 선택
-        zone_options = {
-            1: "1번 (좌상단)", 2: "2번 (상단 중앙)", 3: "3번 (우상단)",
-            4: "4번 (좌측 중앙)", 5: "5번 (한가운데)", 6: "6번 (우측 중앙)",
-            7: "7번 (좌하단)", 8: "8번 (하단 중앙)", 9: "9번 (우하단)",
-            10: "10번 (외곽 유인구)"
-        }
-        selected_zone = st.selectbox("🎯 조준 코스:", options=list(zone_options.keys()), format_func=lambda x: zone_options[x])
-        
-        # 투구 버튼 (Image 0의 'NEXT PITCH'처럼)
-        if st.button("⚾ 공 던지기! (NEXT PITCH)", type="primary", use_container_width=True):
-            execute_pitch(selected_pitch, selected_zone)
-            st.rerun()
-            
-    with col_log:
-        st.subheader("📋 투구 분석 및 중계")
-        for line in st.session_state.log[:6]: # 로그 개수 늘림
+    # 하단 텍스트 중계 및 가이드
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.subheader("📋 투구 및 매치업 라이브 중계")
+        for line in st.session_state.log[:5]:
             st.write(line)
+            
+    with col2:
+        st.subheader("⚙️ 현재 매치업 정보")
+        st.write(f"**현재 투수:** 🧢 {st.session_state.pitcher_name} (OVR: 94)")
+        st.write(f"**현재 타자:** 🪓 {st.session_state.batter_name} (OVR: 96)")
+        st.caption("스트라이크 존(중앙 하얀 격자) 안을 클릭하면 스트라이크, 바깥을 클릭하면 볼로 판정됩니다.")
 
 # --- [5. 메인 진입점] ---
 if __name__ == "__main__":
