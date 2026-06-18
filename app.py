@@ -40,7 +40,7 @@ def main():
     cb_speed = st.sidebar.slider("커브 구속 (mph)", 65, 88, 78)
     cb_control = st.sidebar.slider("커브 제구력 (1-100)", 1, 100, 70, key="cb_c")
 
-    # 구종 라디오 버튼 (현재 어떤 구종을 장착하고 던질지 캔버스 전송용)
+    # 구종 라디오 버튼
     selected_pitch = st.radio("🔮 현재 장착할 구종 선택:", ["포심 직구", "슬라이더", "커브"], horizontal=True)
 
     # 현재 선택된 구종의 능력치 매핑
@@ -50,7 +50,7 @@ def main():
     st.markdown(f"**현재 선택된 투구 조합:** `{pitcher_name}`의 `{selected_pitch}` (설정 구속: {current_speed} mph / 제구력: {current_control})")
 
     # --- [3. 실시간 HTML5 캔버스 게임 엔진 빌드] ---
-    # 파이썬 변수들을 자바스크립트 엔진 내부로 실시간 주입합니다.
+    # 파이썬 f-string 문법 에러를 완벽하게 회피하도록 자바스크립트 중괄호 블록들을 전부 {{}} 로 이스케이프 처리 완료했습니다.
     game_html = f"""
     <div style="display: flex; flex-direction: column; align-items: center; background-color: #1e1e1e; padding: 15px; border-radius: 12px; box-shadow: 0px 4px 15px rgba(0,0,0,0.5);">
         <div style="width: 780px; background-color: #0b2211; border: 3px solid #fff; border-radius: 8px; display: flex; justify-content: space-between; padding: 10px; margin-bottom: 15px; color: #ffeb3b; font-family: 'Courier New', monospace; font-size: 16px; font-weight: bold;">
@@ -71,7 +71,7 @@ def main():
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 파이썬 환경에서 전달된 실시간 커스텀 투수 스탯 데이터
+        // 파이썬 환경에서 전달된 실시간 커스텀 투수 스탯 데이터 (SyntaxError 해결 완료)
         const customPitchData = {{
             name: "{pitcher_name}",
             type: "{selected_pitch}",
@@ -101,7 +101,6 @@ def main():
         canvas.addEventListener('click', () => {{
             if (isPitching) return;
             if (mouseX >= 400 && mouseX <= 700 && mouseY >= 50 && mouseY <= 350) {{
-                // 제구력 수치 반영 (제구력이 낮을수록 목표 조준점에서 공이 더 크게 휘청임)
                 let errorRange = (100 - customPitchData.control) * 0.6;
                 targetX = mouseX + (Math.random() - 0.5) * errorRange;
                 targetY = mouseY + (Math.random() - 0.5) * errorRange;
@@ -128,17 +127,13 @@ def main():
 
         function judgePitch(tx, ty) {{
             const isStrike = (tx >= 480 && tx <= 620 && ty >= 120 && ty <= 280);
-            
-            // 설정한 구속에 무작위 변동폭 2mph 가미
             const finalSpeed = customPitchData.baseSpeed + Math.floor(Math.random() * 5) - 2;
             
-            // 타자 스윙 AI (구속이 빠를수록 타자가 속을 확률과 헛스윙 확률 상승)
-            let speedBonus = (finalSpeed - 85) * 0.01; // 100mph에 가까울수록 보너스 증가
+            let speedBonus = (finalSpeed - 85) * 0.01;
             const swingChance = isStrike ? (0.6 - speedBonus) : (0.2 + speedBonus);
             const isSwing = Math.random() < swingChance;
 
             if (isSwing) {{
-                // 스윙 시 구속이 빠르면 헛스윙 확률이 극대화됨
                 let missChance = 0.5 + speedBonus;
                 if (Math.random() > missChance) {{ 
                     const hitType = Math.random();
@@ -237,7 +232,6 @@ def main():
             ctx.lineWidth = 3;
             ctx.beginPath(); ctx.moveTo(175, 320);
             
-            // 커브 구종 특수 모션 연출 (배트 낮게 세팅)
             if(customPitchData.type === "커브") {{
                 ctx.lineTo(155, 305);
             }} else {{
@@ -270,7 +264,6 @@ def main():
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(mouseX - 15, mouseY); ctx.lineTo(mouseX + 15, mouseY);
-                ctx.moveTo(mouseX, mouseY - 15); ctx.lineTo(mouseX + 15, mouseY); // 가이드 크로스
                 ctx.moveTo(mouseX, mouseY - 15); ctx.lineTo(mouseX, mouseY + 15);
                 ctx.stroke();
                 ctx.beginPath(); ctx.arc(mouseX, mouseY, 6, 0, Math.PI*2); ctx.stroke();
@@ -282,18 +275,16 @@ def main():
                 ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI*2); ctx.fill();
             }});
 
-            // 실시간 비행 및 휘어지는 궤적 계산 (구종별 특성 반영)
+            // 실시간 비행 및 휘어지는 궤적 계산
             if (isPitching) {{
-                // 기본 직선 이동
                 ballX += (targetX - ballX) * 0.16;
                 ballY += (targetY - ballY) * 0.16;
 
-                // 변화구 궤적 무브먼트 연출 (슬라이더는 횡 변화, 커브는 종 변화)
                 let dist = Math.abs(ballX - targetX);
                 if (customPitchData.type === "슬라이더" && dist > 10) {{
-                    ballX += 1.2; // 오른쪽으로 휨
+                    ballX += 1.2;
                 }} else if (customPitchData.type === "커브" && dist > 10) {{
-                    ballY += 1.8; // 아래로 뚝 떨어짐
+                    ballY += 1.8;
                 }}
 
                 let ballRadius = 4 + (1 - dist / 400) * 4;
