@@ -1,9 +1,9 @@
+import streamlit as True
 import streamlit as st
 import json
 
 def main():
-    # 1. 고대비 다크 테마 & 전광판 야구장 스타일 적용
-    st.set_page_config(page_title="MLB STATCAST 30 TEAMS REAL GAME", layout="wide")
+    st.set_page_config(page_title="MLB STATCAST LIVE VIEW", layout="wide")
     
     st.markdown("""
         <style>
@@ -19,7 +19,7 @@ def main():
         </style>
     """, unsafe_allow_html=True)
 
-    # 2. [현실 고증] MLB 30개 구단 전체 데이터셋 복원
+    # 30개 구단 데이터셋 보존
     mlb_30_teams = {
         "NY Yankees (뉴욕 양키스)": {
             "pitcher": "게릿 콜", "speed": 96, "control": 92, "pitches": ["포심 직구", "너클 커브", "슬라이더"],
@@ -146,32 +146,29 @@ def main():
     if 'game_active' not in st.session_state:
         st.session_state.game_active = False
 
-    # 3. 게임 셋업 로비
     if not st.session_state.game_active:
         st.markdown("""
             <div style="background: #111827; padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #2563eb; max-width: 900px; margin: 30px auto;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900; letter-spacing:-1px;">⚾ MLB STATCAST 30 TEAMS REAL GAME</h1>
-                <p style="color: #94a3b8; font-weight: 600; margin-top: 5px;">30개 구단 전체 활성화 완료 • 이닝 기반 실시간 무한 공수교대 시스템</p>
+                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900; letter-spacing:-1px;">⚾ MLB STATCAST LIVE BROADCAST</h1>
+                <p style="color: #94a3b8; font-weight: 600; margin-top: 5px;">투수 마운드 및 양방향 타석 그래픽 동적 렌더링 시스템</p>
             </div>
         """, unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
         with c1:
-            team_away = st.selectbox("🎯 원정 팀 선택 (초 공격/플레이어)", list(mlb_30_teams.keys()), index=25) # 다저스 기본값
+            team_away = st.selectbox("🎯 원정 팀 선택 (초 공격/플레이어)", list(mlb_30_teams.keys()), index=25)
         with c2:
-            team_home = st.selectbox("🏠 홈 팀 선택 (말 공격/AI)", list(mlb_30_teams.keys()), index=0) # 양키스 기본값
+            team_home = st.selectbox("🏠 홈 팀 선택 (말 공격/AI)", list(mlb_30_teams.keys()), index=0)
             
-        if st.button("🏟️ 스타디움 입장 (공수 교대 매치 개시)"):
+        if st.button("🏟️ 중계 카메라 연결 (경기 개시)"):
             st.session_state.away_title = team_away.split(" (")[0]
             st.session_state.home_title = team_home.split(" (")[0]
             
-            # 플레이어 팀 데이터셋 바인딩
             st.session_state.user_pitcher = mlb_30_teams[team_away]['pitcher']
             st.session_state.user_pitches = mlb_30_teams[team_away]['pitches']
             st.session_state.user_speed = mlb_30_teams[team_away]['speed']
             st.session_state.user_lineup = mlb_30_teams[team_away]['lineup']
             
-            # AI 팀 데이터셋 바인딩
             st.session_state.ai_pitcher = mlb_30_teams[team_home]['pitcher']
             st.session_state.ai_pitches = mlb_30_teams[team_home]['pitches']
             st.session_state.ai_speed = mlb_30_teams[team_home]['speed']
@@ -181,20 +178,19 @@ def main():
             st.rerun()
         st.stop()
 
-    # 인게임 캔버스 전송용 데이터 마샬링
     user_lineup_json = json.dumps(st.session_state.user_lineup, ensure_ascii=False)
     ai_lineup_json = json.dumps(st.session_state.ai_lineup, ensure_ascii=False)
     user_pitches_json = json.dumps(st.session_state.user_pitches, ensure_ascii=False)
     ai_pitches_json = json.dumps(st.session_state.ai_pitches, ensure_ascii=False)
 
-    st.markdown(f"### 📡 LIVE STADIUM: {st.session_state.away_title} vs {st.session_state.home_title}")
+    st.markdown(f"### 📡 LIVE STADIUM BROADCAST CAMERA")
 
     col_ctrl1, col_ctrl2 = st.columns([1, 3])
     with col_ctrl1:
-        st.markdown("### 🎮 구종 및 작전")
-        user_select_pitch = st.selectbox("🔮 내 투수 구종 교체", st.session_state.user_pitches)
-        user_style = st.slider("⚖️ 피칭 웨이트 (제구력 vs 최대구속)", 0, 100, 50)
-        st.success("🚨 **플레이 가이드**\n* **공격(초):** 공이 날아올 때 캔버스를 타이밍 맞춰 클릭하세요!\n* **수비(말):** 스트라이크 존에 마우스를 대고 클릭하여 공을 던지세요!")
+        st.markdown("### 🎮 구종 지시 변경")
+        user_select_pitch = st.selectbox("🔮 투수 배정 구종", st.session_state.user_pitches)
+        user_style = st.slider("⚖️ 제구 vs 구속 밸런스", 0, 100, 50)
+        st.info("💡 **그래픽 업데이트 안내**\n중앙에 투수 실루엣이 상시 대기하며, 하단 스트라이크 존 우측에 타자가 배트를 쥐고 대기합니다! 타격 클릭 시 실시간 스윙 가동!")
     
     with col_ctrl2:
         game_canvas_html = f"""
@@ -234,8 +230,8 @@ def main():
 
             <canvas id="gameCanvas" width="880" height="420" style="background: #0f172a; border: 1px solid #1e293b; display: block; border-radius: 6px;"></canvas>
             
-            <div style="background: #020617; color: #f8fafc; padding: 18px; border-radius: 6px; font-size: 18px; font-weight: 700; margin-top: 8px; border-left: 6px solid #2563eb; text-align: left;">
-                <span id="game-ticker" style="color: #38bdf8;">🏟️ 전 경기장 셋업 완료. 플레이어 팀의 1회초 선두타자 타석 진입합니다!</span>
+            <div style="background: #020617; color: #f8fafc; padding: 18px; border-radius: 6px; font-size: 18px; font-weight: 700; margin-top: 8px; border-left: 6px solid #3b82f6; text-align: left;">
+                <span id="game-ticker" style="color: #38bdf8;">🏟️ 선수들이 포지션에 정렬했습니다. 화면을 누르면 투수 모션 및 배달이 가동됩니다!</span>
             </div>
         </div>
 
@@ -245,7 +241,6 @@ def main():
             const dCv = document.getElementById('diamondCanvas');
             const dCx = dCv.getContext('2d');
 
-            // 자바스크립트 스코프 내 데이터 구조화
             const USER_ROSTER = {user_lineup_json};
             const AI_ROSTER = {ai_lineup_json};
             const USER_PITCHES = {user_pitches_json};
@@ -256,7 +251,7 @@ def main():
 
             let match = {{
                 inning: 1,
-                isTop: true, // true: 초(유저 타격), false: 말(유저 피칭 수비)
+                isTop: true, 
                 scoreAway: 0, scoreHome: 0,
                 hitsAway: 0, hitsHome: 0,
                 b: 0, s: 0, o: 0,
@@ -264,11 +259,15 @@ def main():
                 bases: [false, false, false]
             }};
 
-            let ball = {{ active: false, x: 440, y: 120, tx: 440, ty: 240, time: 0, size: 2, currentSpeed: 0 }};
-            let pointer = {{ x: 440, y: 240 }};
+            let ball = {{ active: false, x: 440, y: 130, tx: 440, ty: 280, time: 0, size: 2, currentSpeed: 0 }};
+            let pointer = {{ x: 440, y: 280 }};
             let isActionDone = false;
             let currentPitchName = "";
             let trail = [];
+
+            // 그래픽 애니메이션 제어용 상태 링커
+            let playerActionTimer = 0; // 타자 스윙 애니메이션 지속 프레임
+            let pitcherActionTimer = 0; // 투수 윈드업 무브먼트 프레임
 
             cv.addEventListener('mousemove', (e) => {{
                 const r = cv.getBoundingClientRect();
@@ -280,86 +279,87 @@ def main():
                 if (ball.active) {{
                     if (match.isTop && !isActionDone) {{
                         isActionDone = true;
+                        playerActionTimer = 15; // 타자 스윙 트리거 발동
                         evaluateSwing();
                     }}
                     return;
                 }}
 
-                if (match.isTop) {{
-                    // AI 투수가 던짐 (플레이어 타격 기회)
-                    let pIndex = Math.floor(Math.random() * AI_PITCHES.length);
-                    currentPitchName = AI_PITCHES[pIndex];
-                    ball.currentSpeed = AI_BASE_SPEED + Math.floor(Math.random() * 5) - 2;
-                    ball.tx = 370 + Math.random() * 140;
-                    ball.ty = 170 + Math.random() * 140;
-                    initBallReady();
-                }} else {{
-                    // 플레이어 투수가 조준한 커서 위치로 피칭 배달
-                    currentPitchName = "{user_select_pitch}";
-                    ball.currentSpeed = USER_BASE_SPEED + Math.floor((100 - {user_style})*0.05);
-                    ball.tx = pointer.x;
-                    ball.ty = pointer.y;
-                    initBallReady();
-                }}
+                pitcherActionTimer = 20; // 투수 투구 윈드업 모션 가동
+
+                setTimeout(() => {{
+                    if (match.isTop) {{
+                        let pIndex = Math.floor(Math.random() * AI_PITCHES.length);
+                        currentPitchName = AI_PITCHES[pIndex];
+                        ball.currentSpeed = AI_BASE_SPEED + Math.floor(Math.random() * 5) - 2;
+                        ball.tx = 380 + Math.random() * 120;
+                        ball.ty = 220 + Math.random() * 120;
+                        initBallReady();
+                    }} else {{
+                        currentPitchName = "{user_select_pitch}";
+                        ball.currentSpeed = USER_BASE_SPEED + Math.floor((100 - {user_style})*0.05);
+                        ball.tx = pointer.x;
+                        ball.ty = pointer.y;
+                        initBallReady();
+                    }}
+                }}, 250); // 투수 모션 딜레이 후 공 발사
             }});
 
             function initBallReady() {{
-                ball.x = 440; ball.y = 120;
+                ball.x = 440; ball.y = 130;
                 ball.time = 0; ball.size = 2;
                 trail = []; isActionDone = false;
                 ball.active = true;
             }}
 
-            // 플레이어 스윙 타이밍 정밀 판정기
             function evaluateSwing() {{
                 const batter = USER_ROSTER[match.user_idx];
                 let t = ball.time;
                 
-                if (t >= 0.83 && t <= 0.95) {{
+                if (t >= 0.81 && t <= 0.96) {{
                     let dice = Math.random() + (batter.power - 70) * 0.01;
                     if (dice > 1.05) {{
-                        triggerHit(4, "💥 대형 홈런!! 타자 " + batter.name + "가 중앙 담장을 완전히 넘기는 초대형 홈런을 터트립니다!");
+                        triggerHit(4, "💥 대형 홈런!! " + batter.name + " 선수의 완벽한 배트 중심 정타가 대형 아치를 그립니다!");
                     }} else if (dice > 0.45) {{
-                        triggerHit(1, "⚾ 안타!! 빠른 타구가 야수 정면을 피해 깨끗한 안타로 연결됩니다.");
+                        triggerHit(1, "⚾ 안타!! 내야수 키를 가볍게 넘기는 안타 작렬!");
                     }} else {{
-                        triggerHit(2, "🔥 좌중간 뚫었습니다! 주자 질주, 2루타 완성!");
+                        triggerHit(2, "🔥 라인 드라이브성 안타! 우중간 가르는 2루타!");
                     }}
                 }} else {{
                     match.s++;
-                    document.getElementById('game-ticker').innerHTML = "<span style='color:#f59e0b;'>헛스윙!!</span> 배트가 허공을 크게 가릅니다.";
+                    document.getElementById('game-ticker').innerHTML = "<span style='color:#f59e0b;'>헛스윙!!</span> 타이밍 파괴구에 배트가 밀렸습니다.";
                     updateCounts();
                 }}
             }}
 
-            // AI 타격 연산 자동화 루틴
             function evaluateAIAtBat() {{
                 const batter = AI_ROSTER[match.ai_idx];
-                const inZone = (ball.tx >= 360 && ball.tx <= 520 && ball.ty >= 160 && ball.ty <= 320);
+                const inZone = (ball.tx >= 360 && ball.tx <= 520 && ball.ty >= 200 && ball.ty <= 360);
                 
                 let swingProb = inZone ? 0.68 : 0.22;
                 if (Math.random() < swingProb) {{
-                    if (Math.random() > 0.38) {{
+                    playerActionTimer = 15; // AI 타자도 스윙 발동 비주얼 표출
+                    if (Math.random() > 0.4) {{
                         let dice = Math.random();
-                        if (dice > 0.88) triggerHit(4, "🚨 AI 홈런 발생!! " + batter.name + "에게 뼈아픈 역전 장타를 허용합니다.");
-                        else triggerHit(1, "🏃 안타 허용: 주자 1,2루 위기로 이어집니다.");
+                        if (dice > 0.88) triggerHit(4, "🚨 AI 장외 홈런!! 실투를 정확히 받아쳐 점수를 빼앗깁니다.");
+                        else triggerHit(1, "🏃 AI 안타: 중전 안타로 누상에 주자가 나갑니다.");
                     }} else {{
                         match.s++;
-                        document.getElementById('game-ticker').innerText = "🎯 유인구 성공! 배트가 끌려 나오며 스트라이크를 축적합니다.";
+                        document.getElementById('game-ticker').innerText = "🎯 헛스윙 스트라이크! 피칭 완벽 삼진 유도 성공.";
                         updateCounts();
                     }}
                 }} else {{
                     if (inZone) {{
                         match.s++;
-                        document.getElementById('game-ticker').innerText = "👌 스트라이크 콜! 완벽한 경계선 제구였습니다.";
+                        document.getElementById('game-ticker').innerText = "👌 스트라이크 판정! 존을 꽉 채운 보더라인 투구.";
                     }} else {{
                         match.b++;
-                        document.getElementById('game-ticker').innerText = "✋ 볼 판정: 까다로운 궤적이었으나 타자가 참아냅니다.";
+                        document.getElementById('game-ticker').innerText = "✋ 볼 판정: 타자가 끝까지 속지 않았습니다.";
                     }}
                     updateCounts();
                 }}
             }}
 
-            // 야구 베이스 진루 엔진
             function triggerHit(basesCount, msg) {{
                 document.getElementById('game-ticker').innerHTML = "<span style='color:#10b981; font-weight:900;'> " + msg + "</span>";
                 if (match.isTop) match.hitsAway++; else match.hitsHome++;
@@ -382,10 +382,9 @@ def main():
                 updateCounts();
             }}
 
-            // 쓰리아웃 및 공수 스위칭 제어
             function updateCounts() {{
-                if (match.s >= 3) {{ match.o++; match.s = 0; match.b = 0; document.getElementById('game-ticker').innerText += " 🎯 K 삼진 아웃!!"; }}
-                if (match.b >= 4) {{ triggerHit(1, "🚶 사사구 밀어내기 볼넷 출루!"); }}
+                if (match.s >= 3) {{ match.o++; match.s = 0; match.b = 0; document.getElementById('game-ticker').innerText += " 🎯 삼진 아웃 처리!!"; }}
+                if (match.b >= 4) {{ triggerHit(1, "🚶 사사구 볼넷 출루 허용!"); }}
                 
                 if (match.o >= 3) {{
                     match.o = 0; match.s = 0; match.b = 0;
@@ -394,12 +393,12 @@ def main():
                     if (match.isTop) {{
                         match.isTop = false; 
                         match.user_idx = (match.user_idx + 1) % USER_ROSTER.length;
-                        document.getElementById('game-ticker').innerHTML = "🔄 <b>공수교대!</b> 플레이어가 수비(투수)로 전환합니다. 스트라이크 존을 조준하세요!";
+                        document.getElementById('game-ticker').innerHTML = "🔄 <b>이닝 교대(1회말)</b> 이제 내가 투수입니다! 화면 하단 스트라이크 존을 마우스로 조준하여 클릭 투구하세요!";
                     }} else {{
                         match.isTop = true;
                         match.ai_idx = (match.ai_idx + 1) % AI_ROSTER.length;
                         match.inning++;
-                        document.getElementById('game-ticker').innerHTML = "🔄 <b>공수교대! " + match.inning + "회초 공격 시작</b> 타격 준비 완료!";
+                        document.getElementById('game-ticker').innerHTML = "🔄 <b>이닝 교대(" + match.inning + "회초)</b> 내가 타자입니다! 공이 오면 정확한 타이밍에 캔버스를 클릭하세요!";
                     }}
                 }}
 
@@ -421,7 +420,6 @@ def main():
                 dCx.clearRect(0,0,70,70);
                 const pts = [{{x:50, y:35}}, {{x:35, y:20}}, {{x:20, y:35}}];
                 dCx.strokeStyle = "#334155"; dCx.lineWidth = 2;
-                dCx.style = "margin:auto;";
                 dCx.beginPath(); dCx.moveTo(35, 5); dCx.lineTo(65, 35); dCx.lineTo(35, 65); dCx.lineTo(5, 35); dCx.closePath(); dCx.stroke();
                 
                 for(let i=0; i<3; i++) {{
@@ -431,29 +429,73 @@ def main():
                 }}
             }}
 
+            // 🎨 인게임 메인 고품격 스타디움 & 선수 그래픽 렌더러
             function drawScene() {{
                 cx.clearRect(0, 0, 880, 420);
                 
+                // 야구 경기장 그라운드 부채꼴 원근 시각화
                 cx.fillStyle = "#1e293b"; cx.beginPath();
-                cx.moveTo(360, 420); cx.lineTo(520, 420); cx.lineTo(470, 120); cx.lineTo(410, 120);
+                cx.moveTo(320, 420); cx.lineTo(560, 420); cx.lineTo(465, 130); cx.lineTo(415, 130);
                 cx.closePath(); cx.fill();
 
-                cx.strokeStyle = "rgba(255, 255, 255, 0.25)"; cx.lineWidth = 2;
-                cx.strokeRect(360, 160, 160, 160);
+                // 투수 마운드 베이스 써클
+                cx.fillStyle = "#334155"; cx.beginPath(); cx.arc(440, 135, 20, 0, Math.PI*2); cx.fill();
 
+                // 스트라이크 타겟 피칭 넷 사각형 포지셔닝
+                cx.strokeStyle = "rgba(255, 255, 255, 0.22)"; cx.lineWidth = 2;
+                cx.strokeRect(360, 200, 160, 160);
+
+                // 🧙‍♂️ [비주얼] 1. 투수 그래픽 (원근감 구현)
+                cx.save();
+                cx.fillStyle = "#60a5fa"; 
+                let pYOffset = 0;
+                if(pitcherActionTimer > 0) {{
+                    pYOffset = Math.sin(pitcherActionTimer * 0.5) * 6; // 투구 흔들림 반동 무브먼트
+                    pitcherActionTimer--;
+                }}
+                // 투수 몸체 드로잉 (실루엣 아트 스타일)
+                cx.beginPath(); cx.arc(440, 115 + pYOffset, 8, 0, Math.PI*2); cx.fill(); // 머리
+                cx.fillRect(434, 123 + pYOffset, 12, 16); // 몸통
+                cx.strokeStyle = "#93c5fd"; cx.lineWidth = 3;
+                cx.beginPath(); cx.moveTo(434, 125 + pYOffset); cx.lineTo(426, 118 + pYOffset); cx.stroke(); // 글러브 든 팔
+                cx.restore();
+
+                // 🥷 [비주얼] 2. 타자 그래픽 (홈 플레이트 우타석 배치)
+                cx.save();
+                cx.fillStyle = "#f43f5e";
+                let batAngle = -Math.PI / 4; // 대기 자세 배트 각도
+                
+                if(playerActionTimer > 0) {{
+                    batAngle = (Math.PI / 2) * (playerActionTimer / 15); // 스윙 회전 궤적 공식 적용
+                    playerActionTimer--;
+                }}
+                
+                // 타자 본체 위치 (우측 타석 고정 브래킷)
+                let bX = 550, bY = 280;
+                cx.beginPath(); cx.arc(bX, bY, 14, 0, Math.PI*2); cx.fill(); // 머리
+                cx.fillRect(bX - 10, bY + 14, 20, 32); // 몸통
+                
+                // 야구 배트(Bat) 네온 효과 렌더링
+                cx.translate(bX - 5, bY + 14);
+                cx.rotate(batAngle);
+                cx.strokeStyle = "#fbbf24"; cx.lineWidth = 4;
+                cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(0, -45); cx.stroke(); // 네온 배트
+                cx.restore();
+
+                // ⚾ 야구공 물리 이동 시뮬레이터 브릿지
                 if (ball.active) {{
-                    let speedStep = 0.026 + (ball.currentSpeed / 100) * 0.015;
+                    let speedStep = 0.024 + (ball.currentSpeed / 100) * 0.015;
                     ball.time += speedStep;
 
                     let lx = 440 + (ball.tx - 440) * ball.time;
-                    let ly = 120 + (ball.ty - 120) * ball.time;
-                    ball.size = 2 + (Math.pow(ball.time, 3.5) * 30);
+                    let ly = 135 + (ball.ty - 135) * ball.time;
+                    ball.size = 2 + (Math.pow(ball.time, 3.2) * 28);
 
                     let curveOffsetX = 0;
                     if(currentPitchName.includes("슬라이더") || currentPitchName.includes("스위퍼")) {{
-                        curveOffsetX = Math.sin(ball.time * Math.PI) * 45;
+                        curveOffsetX = Math.sin(ball.time * Math.PI) * 50;
                     }} else if(currentPitchName.includes("커브")) {{
-                        curveOffsetX = Math.sin(ball.time * Math.PI) * 20;
+                        curveOffsetX = Math.sin(ball.time * Math.PI) * 25;
                         ly += Math.sin(ball.time * Math.PI) * 25;
                     }}
 
@@ -476,15 +518,16 @@ def main():
                             evaluateAIAtBat();
                         }} else {{
                             if (!isActionDone) {{
-                                const inZone = (ball.tx >= 360 && ball.tx <= 520 && ball.ty >= 160 && ball.ty <= 320);
-                                if (inZone) {{ match.s++; document.getElementById('game-ticker').innerText = "⚠️ 지켜봤으나 스트라이크 존 판정!"; }}
-                                else {{ match.b++; document.getElementById('game-ticker').innerText = "👀 잘 골라냈습니다, 볼넷 빌드업 볼 판정."; }}
+                                const inZone = (ball.tx >= 360 && ball.tx <= 520 && ball.ty >= 200 && ball.ty <= 360);
+                                if (inZone) {{ match.s++; document.getElementById('game-ticker').innerText = "⚠️ 스트라이크 콜! 한가운데 존을 그냥 지켜봤습니다."; }}
+                                else {{ match.b++; document.getElementById('game-ticker').innerText = "👀 선구안 발동, 볼 카운트 추가."; }}
                                 updateCounts();
                             }}
                         }}
                     }}
                 }}
 
+                // 수비 전용 타겟 링 메커니즘
                 if (!match.isTop && !ball.active) {{
                     cx.strokeStyle = "#f43f5e"; cx.lineWidth = 2;
                     cx.beginPath();
@@ -496,11 +539,11 @@ def main():
 
                 cx.fillStyle = "#94a3b8"; cx.font = "bold 13px sans-serif";
                 if (match.isTop) {{
-                    cx.fillText("현재 타석(플레이어): " + USER_ROSTER[match.user_idx].name + " [파워: " + USER_ROSTER[match.user_idx].power + "]", 20, 395);
-                    cx.fillText("상대 투수: {st.session_state.ai_pitcher} (" + ball.currentSpeed + " mph 예측)", 20, 411);
+                    cx.fillText("현재 타자(플레이어): " + USER_ROSTER[match.user_idx].name + " [파워: " + USER_ROSTER[match.user_idx].power + "]", 20, 395);
+                    cx.fillText("상대 투수 투구 대기 중 • 날아오는 공을 포커싱하여 스윙!", 20, 411);
                 }} else {{
-                    cx.fillText("현재 타석(AI): " + AI_ROSTER[match.ai_idx].name + " [파워: " + AI_ROSTER[match.ai_idx].power + "]", 20, 395);
-                    cx.fillText("마우스 에임으로 수비 피칭 제구 타겟팅 가동 중", 20, 411);
+                    cx.fillText("현재 타자(AI): " + AI_ROSTER[match.ai_idx].name + " [파워: " + AI_ROSTER[match.ai_idx].power + "]", 20, 395);
+                    cx.fillText("내 투수 조준 피칭 지시 대기 상태", 20, 411);
                 }}
 
                 requestAnimationFrame(drawScene);
@@ -513,7 +556,7 @@ def main():
         st.components.v1.html(game_canvas_html, height=620)
 
     st.markdown("---")
-    if st.button("🔄 게임 완전히 리셋하고 매치업 로비로 돌아가기"):
+    if st.button("🔄 게임 초기화 및 구단 로비 복귀"):
         st.session_state.game_active = False
         st.rerun()
 
