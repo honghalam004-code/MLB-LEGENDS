@@ -45,7 +45,7 @@ def main():
 
     with col_tactics_panel:
         st.markdown("### 📊 매니저 패널")
-        st.info("💡 **황금 밸런스 패치 적용!**\n\n타이밍에 맞춰 스윙하세요. 정타를 맞춰도 수비수에게 잡힐 수 있습니다. 단타/홈런/볼넷 등 야구 룰이 정상 적용됩니다.")
+        st.info("💡 **조작 안내**\n\n타석을 클릭해 스윙하세요. 정타를 맞춰도 수비수에게 잡힐 수 있습니다. 단타/홈런/볼넷 등 야구 룰이 정상 적용됩니다.")
         if st.button("🚪 로비로 돌아가기"):
             st.session_state.game_active = False
             st.rerun()
@@ -54,7 +54,8 @@ def main():
         team_p = st.session_state.player_team_name
         team_a = st.session_state.ai_team_name
 
-        game_html = f"""
+        # HTML 구조 (f-string 사용: 파이썬 변수 삽입)
+        html_part = f"""
         <div id="game-container" style="background: #0b1329; padding: 15px; border-radius: 14px; border: 2px solid #1c2541; max-width: 760px; margin: 0 auto;">
             
             <div style="background: #020c1b; border: 2px solid #3a86ff; border-radius: 8px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; color: white;">
@@ -89,7 +90,10 @@ def main():
                 <span id="commentary" style="color: #90e0ef;">🎙️ 해설위원: 경기 시작됩니다! 플레이볼! 타석을 클릭해 스윙하세요.</span>
             </div>
         </div>
+        """
 
+        # Javascript 구조 (일반 문자열 사용: 중괄호 에러 방지)
+        js_part = """
         <script>
             const canvas = document.getElementById('baseballField');
             const ctx = canvas.getContext('2d');
@@ -193,7 +197,6 @@ def main():
             }
 
             function evalBatterSwing() {
-                // 밸런스 패치: 스트라이크 존과 Z축(타이밍)을 적당히 조절 (너무 쉽지도, 불가능하지도 않게)
                 let insideZone = (ball.x >= 300 && ball.x <= 420 && ball.y >= 250 && ball.y <= 360);
                 if (ball.z >= 0.78 && ball.z <= 0.96) {
                     if (insideZone) {
@@ -208,7 +211,6 @@ def main():
 
             function evaluateHitTrajectory(isAiHitter) {
                 ball.active = false;
-                // 밸런스 패치: 안타 45%, 홈런 15%, 아웃 40% 확률로 쫄깃함 추가
                 let hitRoll = Math.random();
                 if (hitRoll > 0.85) {
                     advanceRunners("homerun");
@@ -342,7 +344,10 @@ def main():
             drawScene();
         </script>
         """
-        st.components.v1.html(game_html, height=620)
+
+        # HTML과 JS를 합치고, 컴포넌트 높이를 800으로 넉넉하게 지정!
+        full_html = html_part + js_part
+        st.components.v1.html(full_html, height=800)
 
 if __name__ == "__main__":
     main()
