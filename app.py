@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 def main():
-    st.set_page_config(page_title="MLB PRO ULTIMATE - 30 TEAMS", layout="wide")
+    st.set_page_config(page_title="MLB PRO ULTIMATE - FIX EDITION", layout="wide")
     
     st.markdown("""
         <style>
@@ -19,14 +19,13 @@ def main():
     if 'game_active' not in st.session_state:
         st.session_state.game_active = False
 
-    # 🌟 30개 전 구단 대규모 로스터
     mlb_data = {
         # AL East
         "New York Yankees": {"pitcher": {"name": "게릿 콜", "p1": "포심 직구", "p2": "너클 커브"}, "lineup": ["글레이버 토레스", "후안 소토", "애런 저지", "지안카를로 스탠튼", "재즈 치좀 Jr.", "앤서니 볼피", "알렉스 버두고", "오스틴 웰스", "앤서니 리조"]},
         "Baltimore Orioles": {"pitcher": {"name": "코빈 번스", "p1": "커터", "p2": "폭포수 커브"}, "lineup": ["거너 헨더슨", "애들리 러치맨", "앤서니 산탄데르", "라이언 마운트캐슬", "세드릭 멀린스", "조던 웨스트버그", "오스틴 헤이스", "콜튼 카우저", "라몬 우리아스"]},
         "Boston Red Sox": {"pitcher": {"name": "태너 하우크", "p1": "싱커", "p2": "스위퍼"}, "lineup": ["자렌 듀란", "윌리엄 아브레유", "라파엘 데버스", "타일러 오닐", "요시다 마사타카", "코너 웡", "트리스턴 카사스", "세단 라파엘라", "데이비드 해밀턴"]},
         "Tampa Bay Rays": {"pitcher": {"name": "셰인 맥클라나한", "p1": "광속구", "p2": "체인지업"}, "lineup": ["얀디 디아즈", "브랜든 로우", "란디 아로사레나", "아이작 파레디스", "조쉬 로우", "호세 시리", "르네 핀토", "테일러 월스", "리치 팔라시오스"]},
-        "Toronto Blue Jays": {"pitcher": {"name": "케빈 가우스먼", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["조지 스프링어", "블라디미르 게레로 Jr.", "보 비셋", "저스틴 터너", "돌튼 바쇼", "알레한드로 커크", "케빈 키어마이어", "어니 클레멘트", "아이재아 카이너-팔레파"]},
+        "Toronto Blue Jays": {"pitcher": {"name": "케빈 가우스먼", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["조지 스프링어", "블라디미르 게레로 Jr.", "보 비셋", "저스틴 터너", "돌튼 바شو", "알레한드로 커크", "케빈 키어마이어", "어니 클레멘트", "아이재아 카이너-팔레파"]},
         # AL Central
         "Cleveland Guardians": {"pitcher": {"name": "태너 바이비", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["스티븐 콴", "안드레스 히메네스", "호세 라미레즈", "조쉬 네일러", "데이비드 프라이", "윌 브레넌", "보 네일러", "브라이언 로키오", "타일러 프리먼"]},
         "Kansas City Royals": {"pitcher": {"name": "콜 레이건스", "p1": "광속구", "p2": "체인지업"}, "lineup": ["마이켈 가르시아", "바비 위트 Jr.", "비니 파스콴티노", "살바도르 페레즈", "헌터 렌프로", "넬슨 벨라스케스", "MJ 멜렌데즈", "카일 이스벨", "가렛 햄슨"]},
@@ -44,7 +43,7 @@ def main():
         "Philadelphia Phillies": {"pitcher": {"name": "잭 휠러", "p1": "포심 직구", "p2": "스위퍼"}, "lineup": ["카일 슈와버", "트레이 터너", "브라이스 하퍼", "J.T. 리얼무토", "알렉 봄", "닉 카스테야노스", "브라이슨 스탓", "에드문도 소사", "요한 로하스"]},
         "New York Mets": {"pitcher": {"name": "센가 코다이", "p1": "포심 직구", "p2": "유령 포크볼"}, "lineup": ["프란시스코 린도어", "피트 알론소", "브랜든 니모", "J.D. 마르티네즈", "제프 맥닐", "스탈링 마르테", "프란시스코 알바레즈", "브렛 베이티", "해리슨 베이더"]},
         "Washington Nationals": {"pitcher": {"name": "매켄지 고어", "p1": "포심 직구", "p2": "폭포수 커브"}, "lineup": ["CJ 에이브람스", "레인 토마스", "제시 윙커", "조이 갤로", "루이스 가르시아", "키버트 루이즈", "일데마로 바르가스", "제이콥 영", "빅터 로블레스"]},
-        "Miami Marlins": {"pitcher": {"name": "헤수스 루자르도", "p1": "광속구", "p2": "체인지업"}, "lineup": ["제이콥 아미야", "브라이언 데 라 크루즈", "조쉬 벨", "재즈 치좀 Jr.", "헤수스 산체스", "오토 로페즈", "닉 고든", "비달 브루얀", "알리 산체스"]},
+        "Miami Marlins": {"pitcher": {"name": "헤수스 루자르도", "p1": "광속구", "p2": "체인지업"}, "lineup": ["제이콥 아미야", "브라이언 데 라 크루즈", "조쉬 벨", "재즈 치whom Jr.", "헤수스 산체스", "오토 로페즈", "닉 고든", "비달 브루얀", "알리 산체스"]},
         # NL Central
         "Milwaukee Brewers": {"pitcher": {"name": "프레디 페랄타", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["잭 트랙", "윌리엄 콘트레라스", "크리스티안 옐리치", "윌리 아다메스", "리스 호스킨스", "브라이스 투랑", "게리 산체스", "잭슨 추리오", "살 프렐릭"]},
         "Chicago Cubs": {"pitcher": {"name": "저스틴 이마나가", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["이안 햅", "스즈키 세이야", "코디 벨린저", "크리스토퍼 모렐", "댄스비 스완슨", "마이클 부시", "니코 호너", "미겔 아마야", "피트 크로우-암스트롱"]},
@@ -64,8 +63,8 @@ def main():
     if not st.session_state.game_active:
         st.markdown("""
             <div style="background: #1c2541; padding: 35px; border-radius: 16px; text-align: center; border: 2px solid #3a86ff; max-width: 800px; margin: 40px auto;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900;">⚾ MLB PRO ULTIMATE - 30 TEAMS EDITION</h1>
-                <p style="color: #ffb703; margin-top: 10px; font-size: 18px; font-weight: bold;">[대규모 패치 완료] 메이저리그 30개 전 구단 합류! 원하는 팀으로 정상을 차지하세요.</p>
+                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900;">⚾ MLB PRO ULTIMATE - TEMPO FIXED</h1>
+                <p style="color: #ffb703; margin-top: 10px; font-size: 18px; font-weight: bold;">[초고속 버그 패치] 투구 속도 정상화 및 번트/추가진루 밸런스 완전 수정</p>
             </div>
         """, unsafe_allow_html=True)
         
@@ -75,7 +74,7 @@ def main():
         with c_right:
             ai_team = st.selectbox("🤖 라이벌 AI 구단", mlb_teams, index=mlb_teams.index("Los Angeles Dodgers"))
             
-        if st.button("🏟️ 찐 경기 시작"):
+        if st.button("🏟️ 경기 시작"):
             st.session_state.p_team = user_team
             st.session_state.a_team = ai_team
             st.session_state.p_data = mlb_data[user_team]
@@ -139,14 +138,14 @@ def main():
                 </div>
                 
                 <div id="batter-controls" style="display: block;">
-                    <button onclick="triggerBunt()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;">📐 번트</button>
-                    <button onclick="triggerSteal()" style="background: #ffb703; color: #020c1b; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 15px;">🏃 도루</button>
-                    <button onclick="tryAdvanceBase()" id="btn-advance" style="display: none; background: #e63946; color: white; border: 2px solid #ffffff; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; animation: blinker 1s linear infinite;">🚨 타격 후 추가 진루 (도박!)</button>
+                    <button onclick="triggerBunt()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;">📐 기습 번트 대기</button>
+                    <button onclick="triggerSteal()" style="background: #ffb703; color: #020c1b; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 15px;">🏃 즉시 도루</button>
+                    <button onclick="tryAdvanceBase()" id="btn-advance" style="display: none; background: #e63946; color: white; border: 2px solid #ffffff; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; animation: blinker 1s linear infinite;">🚨 주자 추가 진루 감행!</button>
                 </div>
             </div>
 
             <div style="background: #020c1b; color: #f8fafc; padding: 14px; border-radius: 8px; font-weight: bold; margin-top: 8px; border-left: 6px solid #3a86ff;">
-                <span id="commentary" style="color: #90e0ef;">🎙️ 캐스터: 자, {team_p}의 1번 타자가 타석에 들어섭니다! (마우스로 공의 궤적을 쫓아 정확히 클릭하세요!)</span>
+                <span id="commentary" style="color: #90e0ef;">🎙️ 캐스터: 메이저리그 베이스볼 개막합니다! 공을 끝까지 지켜보세요!</span>
             </div>
             <style> @keyframes blinker {{ 50% {{ opacity: 0.5; }} }} </style>
         </div>
@@ -169,19 +168,20 @@ def main():
 
             let pBatterIndex = 0; let aBatterIndex = 0;
 
+            // 🕰️ 템포 조정을 위해 구속 대폭 하향 패치 (기존의 1/3 속도로 제어 가능하게 변경)
             const pitchDict = {{
-                "포심 직구": {{ speed: 0.022, breakX: 0, breakY: 0 }},
-                "광속구": {{ speed: 0.028, breakX: 0, breakY: 0 }}, 
-                "고속 슬라이더": {{ speed: 0.018, breakX: 70, breakY: 15 }},
-                "스플링커": {{ speed: 0.020, breakX: -30, breakY: 60 }}, 
-                "너클 커브": {{ speed: 0.015, breakX: -20, breakY: 100 }}, 
-                "폭포수 커브": {{ speed: 0.014, breakX: -20, breakY: 90 }},
-                "싱커": {{ speed: 0.019, breakX: -50, breakY: 30 }},
-                "스위퍼": {{ speed: 0.016, breakX: 110, breakY: 0 }},
-                "체인지업": {{ speed: 0.018, breakX: -20, breakY: 40 }},
-                "스플리터": {{ speed: 0.021, breakX: 0, breakY: 60 }},
-                "유령 포크볼": {{ speed: 0.017, breakX: 10, breakY: 80 }},
-                "커터": {{ speed: 0.020, breakX: 30, breakY: 5 }}
+                "포심 직구": {{ speed: 0.007, breakX: 0, breakY: 0 }},
+                "광속구": {{ speed: 0.009, breakX: 0, breakY: 0 }}, 
+                "고속 슬라이더": {{ speed: 0.006, breakX: 50, breakY: 10 }},
+                "스플링커": {{ speed: 0.006, breakX: -20, breakY: 40 }}, 
+                "너클 커브": {{ speed: 0.004, breakX: -15, breakY: 60 }}, 
+                "폭포수 커브": {{ speed: 0.004, breakX: -15, breakY: 55 }},
+                "싱커": {{ speed: 0.006, breakX: -35, breakY: 20 }},
+                "스위퍼": {{ speed: 0.005, breakX: 70, breakY: 0 }},
+                "체인지업": {{ speed: 0.005, breakX: -15, breakY: 25 }},
+                "스플리터": {{ speed: 0.006, breakX: 0, breakY: 45 }},
+                "유령 포크볼": {{ speed: 0.005, breakX: 5, breakY: 50 }},
+                "커터": {{ speed: 0.006, breakX: 20, breakY: 5 }}
             }};
 
             let myPitch1 = document.getElementById('btn-fast').innerText.replace(" (선택됨)", "");
@@ -189,8 +189,11 @@ def main():
 
             let ball = {{ active: false, isHit: false, isBunt: false, x: 360, y: 220, z: 0, tx: 360, ty: 320, size: 2, name: myPitch1 }};
             let selectedPitch = myPitch1;
-            let aiPitchTimer = 60;
+            
+            // 🚨 투구 간 딜레이 대폭 증가 (연속 투구 방지)
+            let aiPitchTimer = 120; 
             let isSwung = false; let swingFrame = 0; let buntFrame = 0;
+            let isBuntStance = false;
 
             let fielders = [
                 {{ pos: "1B", x: 490, y: 240 }}, {{ pos: "2B", x: 410, y: 170 }}, {{ pos: "SS", x: 310, y: 170 }},
@@ -228,22 +231,75 @@ def main():
                 }}
             }}
 
-            // 🌟 하이리스크 하이리턴 주루 도박 버튼
             function tryAdvanceBase() {{
                 if (game.o >= 3) return;
                 document.getElementById('btn-advance').style.display = 'none';
                 
-                let safe = Math.random() > 0.45; 
+                let safe = Math.random() > 0.5; 
                 if (safe) {{
                     advanceRunners("single"); 
-                    document.getElementById('commentary').innerHTML = `🏃 <b>슬라이딩 세이프!!</b> 추가 진루에 극적으로 성공합니다!! 엄청난 주루 센스!`;
+                    document.getElementById('commentary').innerHTML = `🏃 <b>주자 추가 진루 대성공!!</b> 완벽한 슬라이딩으로 세이프 판정을 받아냅니다!`;
                 }} else {{
                     game.o++;
                     if (bases[2]) bases[2] = false;
                     else if (bases[1]) bases[1] = false;
                     else if (bases[0]) bases[0] = false;
                     
-                    document.getElementById('commentary').innerHTML = `☠️ <b>태그 아웃!!</b> 무리하게 뛰다가 횡사합니다! 분위기에 찬물을 끼얹습니다.`;
+                    document.getElementById('commentary').innerHTML = `☠️ <b>태그 아웃!!</b> 무리하게 베이스를 노리다가 저격당했습니다!`;
+                    updateInningStatus();
+                }}
+            }}
+
+            // 📐 번트 메커니즘 전면 리워크
+            function triggerBunt() {{
+                if (!ball.active || ball.isHit) {{
+                    isBuntStance = !isBuntStance;
+                    document.getElementById('commentary').innerHTML = isBuntStance ? "📐 <b>번트 자세 장착!</b> 공이 들어올 때 정확히 맞추세요." : "🎙️ 번트 자세를 취소하고 타격형태로 돌아갑니다.";
+                    return;
+                }}
+                if (isBuntStance || !isBuntStance) {{
+                    isBuntStance = true;
+                    buntFrame = 15;
+                    evalBunt();
+                }}
+            }}
+
+            function evalBunt() {{
+                if (ball.active && ball.z >= 0.75 && ball.z <= 0.95) {{
+                    ball.isHit = true; ball.isBunt = true;
+                    let safe = Math.random() > 0.4;
+                    if (safe) {{
+                        advanceRunners("single");
+                        document.getElementById('commentary').innerHTML = `📐 <b>스퀴즈 번트 성공!</b> 수비진이 당황한 사이 주자 전원 진루!`;
+                    }} else {{
+                        game.o++;
+                        document.getElementById('commentary').innerHTML = `🎙️ 번트가 투수 정면으로 가며 아웃 판정을 받습니다.`;
+                    }}
+                    nextBatter(); updateInningStatus();
+                }} else {{
+                    game.s++; ball.active = false;
+                    document.getElementById('commentary').innerHTML = `🎙️ 번트 헛방! 타이밍이 맞지 않았습니다.`;
+                    updateInningStatus();
+                }}
+                isBuntStance = false;
+            }}
+
+            // 🏃 도루 찬스 보정
+            function triggerSteal() {{
+                if (!bases[0] && !bases[1]) {{
+                    document.getElementById('commentary').innerHTML = "❌ <b>도루 실패:</b> 현재 베이스에 나간 주자가 없습니다!";
+                    return;
+                }}
+                let safe = Math.random() > 0.45;
+                if (safe) {{
+                    if (bases[1]) {{ bases[2] = true; bases[1] = false; }}
+                    else if (bases[0]) {{ bases[1] = true; bases[0] = false; }}
+                    document.getElementById('commentary').innerHTML = "🏃 <b>도루 성공!</b> 포수의 송구보다 주자의 발이 더 빨랐습니다!";
+                }} else {{
+                    game.o++;
+                    if (bases[1]) bases[1] = false;
+                    else if (bases[0]) bases[0] = false;
+                    document.getElementById('commentary').innerHTML = "☠️ <b>도루 저지 아웃!</b> 포수의 송구 칼배달!";
                     updateInningStatus();
                 }}
             }}
@@ -271,6 +327,10 @@ def main():
                         ball.active = true; ball.isHit = false; ball.isBunt = false; isSwung = false;
                     }}
                 }} else {{
+                    if (isBuntStance) {{
+                        evalBunt();
+                        return;
+                    }}
                     if (ball.active && !ball.isHit && !isSwung) {{ 
                         isSwung = true; swingFrame = 10; 
                         evalBatterSwing(mx, my);
@@ -280,45 +340,46 @@ def main():
 
             function evalBatterSwing(mx, my) {{
                 let hitDist = Math.hypot(mx - ball.x, my - ball.y);
-                let timingScore = Math.abs(ball.z - 0.90); 
+                let timingScore = Math.abs(ball.z - 0.85); 
 
-                if (ball.z >= 0.50 && ball.z <= 1.1) {{
-                    if (hitDist <= 30 && timingScore <= 0.10) {{
+                if (ball.z >= 0.65 && ball.z <= 1.05) {{
+                    if (hitDist <= 35 && timingScore <= 0.08) {{
                         evaluateHitTrajectory("homerun", false);
                     }} 
-                    else if (hitDist <= 60 && timingScore <= 0.20) {{
+                    else if (hitDist <= 65 && timingScore <= 0.18) {{
                         evaluateHitTrajectory("good", false);
                     }} 
-                    else if (hitDist <= 100) {{
+                    else if (hitDist <= 95) {{
                         evaluateHitTrajectory("poor", false);
                     }} 
                     else {{
                         game.s++; ball.active = false; 
-                        document.getElementById('commentary').innerHTML = `🎙️ 헛스윙! 에임이 공을 완전히 벗어났습니다. (오차: ${{Math.round(hitDist)}}px)`; 
+                        document.getElementById('commentary').innerHTML = `🎙️ 헛스윙! 공 근처에 맞추지 못했습니다.`; 
                         updateInningStatus();
                     }}
                 }} else {{ 
                     game.s++; ball.active = false; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 헛스윙! 타이밍이 전혀 안 맞았습니다!`; 
+                    document.getElementById('commentary').innerHTML = `🎙️ 타이밍 미스 가차없이 헛스윙!`; 
                     updateInningStatus(); 
                 }}
             }}
 
             function evalAiBatter() {{
-                if (ball.active && !ball.isHit && !isSwung && ball.z >= 0.70 && ball.z <= 0.92) {{
+                if (ball.active && !ball.isHit && !isSwung && ball.z >= 0.75 && ball.z <= 0.90) {{
                     let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
-                    let willSwing = insideZone ? (Math.random() > 0.3) : (Math.random() > 0.6);
+                    let willSwing = insideZone ? (Math.random() > 0.4) : (Math.random() > 0.75);
 
                     if (willSwing) {{
                         isSwung = true; swingFrame = 10;
-                        let whiffChance = insideZone ? 0.30 : 0.85; 
+                        let whiffChance = insideZone ? 0.35 : 0.80; 
                         
                         if (Math.random() < whiffChance) {{
-                            document.getElementById('commentary').innerHTML = `🎙️ AI ${{aLineup[aBatterIndex]}}, <b>헛스윙!!</b> 변화구에 속았습니다!`;
+                            document.getElementById('commentary').innerHTML = `🎙️ AI <b>헛스윙 삼진 유도!</b> 멋진 구질이었습니다.`;
+                            game.s++; ball.active = false; updateInningStatus();
                         }} else {{
                             let roll = Math.random();
-                            if (roll > 0.85) evaluateHitTrajectory("homerun", true);
-                            else if (roll > 0.40) evaluateHitTrajectory("good", true);
+                            if (roll > 0.88) evaluateHitTrajectory("homerun", true);
+                            else if (roll > 0.45) evaluateHitTrajectory("good", true);
                             else evaluateHitTrajectory("poor", true);
                         }}
                     }}
@@ -332,22 +393,22 @@ def main():
                 if (hitQuality === "homerun") {{
                     ball.tx = 360 + (Math.random() * 200 - 100); ball.ty = -100; 
                     advanceRunners("homerun");
-                    document.getElementById('commentary').innerHTML = `🔥 <b>빠던!!!</b> 에임과 타이밍이 완벽했습니다! ${{batterName}}의 초대형 홈런!!`;
+                    document.getElementById('commentary').innerHTML = `🔥 <b>그랜드슬램급 대형 홈런!!!</b> ${{batterName}} 선수의 방망이가 춤을 춥니다!`;
                     nextBatter(); updateInningStatus();
                 }} else if (hitQuality === "good") {{
                     ball.tx = 360 + (Math.random() * 300 - 150); ball.ty = 50 + Math.random() * 100; 
                     advanceRunners("single");
                     
                     if (!isAiHitter) {{
-                        document.getElementById('commentary').innerHTML = `🎙️ ${{batterName}}, 정확히 맞췄습니다! 안타!<br><span style="color:#ffb703; font-size:14px;">👉 [타격 후 추가 진루] 버튼을 누르면 2루, 3루까지 달립니다! (아웃 위험)</span>`;
+                        document.getElementById('commentary').innerHTML = `🎙️ 안타 확정! ${{batterName}} 출루합니다!<br><span style="color:#ffb703; font-size:14px;">👉 [추가 진루 감행] 버튼으로 한 베이스 더 노려보세요!</span>`;
                         document.getElementById('btn-advance').style.display = 'inline-block';
                     }} else {{
-                        document.getElementById('commentary').innerHTML = `🎙️ AI ${{batterName}}, 날카로운 안타를 쳐냅니다!`;
+                        document.getElementById('commentary').innerHTML = `🎙️ AI 안타 허용! 영리한 타격을 펼칩니다.`;
                     }}
                     nextBatter(); updateInningStatus();
                 }} else {{
                     ball.tx = 360 + (Math.random() * 100 - 50); ball.ty = 200; game.o++; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 아, 빗맞았습니다. ${{batterName}} 땅볼 아웃입니다.`;
+                    document.getElementById('commentary').innerHTML = `🎙️ 인필드 플라이성 땅볼 아웃입니다! 수비 안정적입니다.`;
                     nextBatter(); updateInningStatus();
                 }}
             }}
@@ -355,20 +416,19 @@ def main():
             function updateInningStatus() {{
                 if (game.s >= 3) {{ 
                     game.o++; game.s = 0; game.b = 0; 
-                    let batterName = currentMode === "batter" ? pLineup[pBatterIndex] : aLineup[aBatterIndex];
-                    document.getElementById('commentary').innerHTML = `🎙️ 루킹 삼진 아웃!! ${{batterName}} 물러납니다.`; 
+                    document.getElementById('commentary').innerHTML = `🎙️ 삼진 아웃!! 공수 교대 카운트가 올라갑니다.`; 
                     nextBatter();
                 }}
                 if (game.b >= 4) {{ 
                     game.s = 0; game.b = 0; 
-                    let batterName = currentMode === "batter" ? pLineup[pBatterIndex] : aLineup[aBatterIndex];
-                    document.getElementById('commentary').innerHTML = `🎙️ 볼넷! ${{batterName}} 1루로 걸어 나갑니다.`; 
+                    document.getElementById('commentary').innerHTML = `🎙️ 포어 볼(Walk)! 주자 만루를 향해 밀어냅니다.`; 
                     advanceRunners("walk"); nextBatter();
                 }}
                 
                 if (game.o >= 3) {{
                     game.o = 0; game.s = 0; game.b = 0; bases = [false, false, false]; 
                     document.getElementById('btn-advance').style.display = 'none'; 
+                    ball.active = false;
                     
                     if (currentMode === "batter") {{
                         currentMode = "pitcher";
@@ -381,8 +441,9 @@ def main():
                         document.getElementById('current-turn-badge').innerText = "2회초 공격"; document.getElementById('current-turn-badge').style.backgroundColor = "#3a86ff";
                         document.getElementById('pitcher-controls').style.display = 'none'; document.getElementById('batter-controls').style.display = 'block';
                         document.getElementById('current-batter-name').innerText = pLineup[pBatterIndex];
-                        document.getElementById('commentary').innerHTML = `🚨 <b>공수교대!</b> 공을 끝까지 보고 중심을 정확히 클릭하세요!`;
+                        document.getElementById('commentary').innerHTML = `🚨 <b>공수교대!</b> 원하는 포지션에 마우스를 대고 준비하세요.`;
                     }}
+                    aiPitchTimer = 150; 
                 }}
                 document.getElementById('count-display').innerText = "B: " + game.b + " | S: " + game.s + " | O: " + game.o;
             }}
@@ -410,20 +471,21 @@ def main():
 
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 2.5; ctx.strokeRect(310, 260, 100, 90);
                 
+                // 🕰️ AI 투수 투구 간 휴식 딜레이 제어
                 if (currentMode === "batter" && !ball.active) {{
                     aiPitchTimer--;
                     if (aiPitchTimer <= 0) {{
                         ball.name = Math.random() > 0.5 ? aiPitch1 : aiPitch2;
-                        ball.tx = 290 + Math.random() * 140; ball.ty = 240 + Math.random() * 120;
+                        ball.tx = 310 + Math.random() * 100; ball.ty = 260 + Math.random() * 90;
                         ball.x = 360; ball.y = 220; ball.z = 0; ball.size = 2;
                         ball.active = true; ball.isHit = false; ball.isBunt = false; isSwung = false;
-                        document.getElementById('commentary').innerHTML = `🤖 투수 <b>${{aiPitcherName}}</b>(이)가 <b>${{ball.name}}</b>(을)를 던집니다! 궤적을 쫓아 마우스로 클릭하세요!`;
+                        document.getElementById('commentary').innerHTML = `🤖 투수 <b>${{aiPitcherName}}</b>(이)가 <b>${{ball.name}}</b> 신중하게 투구했습니다!`;
                     }}
                 }}
 
                 if (ball.active) {{
                     let pData = pitchDict[ball.name] || pitchDict["포심 직구"];
-                    let currentSpeed = ball.isHit ? -0.04 : pData.speed;
+                    let currentSpeed = ball.isHit ? -0.02 : pData.speed;
                     ball.z += currentSpeed; 
                     
                     if (!ball.isHit) {{
@@ -439,7 +501,7 @@ def main():
                     if (ball.isHit) {{ ball.size = ball.isBunt ? 4 : Math.max(1, 2.5 + (ball.z * 10)); }} 
                     else {{ ball.size = 2.5 + (Math.pow(ball.z, 3.2) * 20); }}
 
-                    if (!ball.isHit && ball.z > 0.7) {{
+                    if (!ball.isHit && ball.z > 0.75) {{
                         ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#e63946"; ctx.lineWidth = 3;
                     }} else {{
                         ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.2;
@@ -451,29 +513,32 @@ def main():
 
                     if (!ball.isHit && ball.z >= 1.0) {{
                         ball.active = false;
-                        let insideZone = (ball.x >= 250 && ball.x <= 470 && ball.y >= 200 && ball.y <= 400);
+                        let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
                         if (insideZone) {{ 
                             game.s++; 
-                            if (!isSwung && currentMode === "pitcher") document.getElementById('commentary').innerHTML = "🎙️ 스트라이크 존에 꽂힙니다! 지켜보는 타자.";
+                            document.getElementById('commentary').innerHTML = "🎙️ 스트라이크!";
                         }} else {{ 
                             game.b++;
-                            if (!isSwung && currentMode === "pitcher") document.getElementById('commentary').innerHTML = "🎙️ 존을 살짝 벗어난 볼입니다.";
+                            document.getElementById('commentary').innerHTML = "🎙️ 볼!";
                         }}
                         updateInningStatus();
-                        aiPitchTimer = 60;
+                        aiPitchTimer = 120;
                     }} else if (ball.isHit && (ball.z <= -0.5 || ball.z >= 1.5)) {{ 
-                        ball.active = false; aiPitchTimer = 60;
+                        ball.active = false; aiPitchTimer = 120;
                     }}
                 }}
 
                 if (buntFrame > 0) {{
-                    ctx.strokeStyle = "#b79457"; ctx.lineWidth = 8;
-                    ctx.beginPath(); ctx.moveTo(350, 330); ctx.lineTo(410, 330); ctx.stroke(); buntFrame--;
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
+                    ctx.beginPath(); ctx.moveTo(330, 340); ctx.lineTo(390, 340); ctx.stroke(); buntFrame--;
+                }} else if (isBuntStance) {{
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 5;
+                    ctx.beginPath(); ctx.moveTo(330, 340); ctx.lineTo(390, 340); ctx.stroke();
                 }} else if (swingFrame > 0) {{
                     ctx.save(); let angleRatio = (swingFrame / 10) * Math.PI;
                     ctx.translate(400, 350); ctx.rotate(-angleRatio + Math.PI / 3);
                     ctx.strokeStyle = "#b79457"; ctx.lineWidth = 8;
-                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-80, -20); ctx.stroke(); ctx.restore(); swingFrame--;
+                    ctx.beginPath(); moveTo(0, 0); ctx.lineTo(-80, -20); ctx.stroke(); ctx.restore(); swingFrame--;
                 }} else {{
                     ctx.strokeStyle = "#b79457"; ctx.lineWidth = 6;
                     ctx.beginPath(); ctx.moveTo(395, 340); ctx.lineTo(430, 270); ctx.stroke();
