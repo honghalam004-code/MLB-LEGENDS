@@ -18,7 +18,6 @@ def main():
     if 'game_active' not in st.session_state:
         st.session_state.game_active = False
 
-    # MLB 30개 구단 완벽 구현
     mlb_teams = [
         "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", 
         "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Guardians", 
@@ -40,9 +39,9 @@ def main():
         
         c_left, c_right = st.columns(2)
         with c_left:
-            user_team = st.selectbox("🏃 내 플레이어 구단 선택", mlb_teams, index=13) 
+            user_team = st.selectbox("🏃 내 플레이어 구단 선택", mlb_teams, index=21) # Pittsburgh
         with c_right:
-            ai_team = st.selectbox("🤖 라이벌 AI 구단 선택", mlb_teams, index=18) 
+            ai_team = st.selectbox("🤖 라이벌 AI 구단 선택", mlb_teams, index=18) # Yankees
             
         if st.button("🏟️ 메이저리그 베이스볼 경기장 입장"):
             st.session_state.player_team_name = user_team
@@ -67,7 +66,6 @@ def main():
         team_p = st.session_state.player_team_name
         team_a = st.session_state.ai_team_name
 
-        # HTML 코드를 새로고침하기 위해 height와 구조를 대폭 변경 (캐시 버스팅)
         game_html = f"""
         <div id="game-container-v2" style="background: #0b1329; padding: 15px; border-radius: 14px; border: 2px solid #1c2541; max-width: 760px; margin: 0 auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
             
@@ -114,7 +112,7 @@ def main():
             </div>
 
             <div style="background: #020c1b; color: #f8fafc; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 700; margin-top: 8px; border-left: 6px solid #3a86ff; text-align: left;">
-                <span id="commentary" style="color: #90e0ef; line-height: 1.5;">🎙️ 해설위원: 플레이어 팀의 공격입니다. 야구장 그래픽이 최신형 3D 다이아몬드 뷰로 리뉴얼 되었습니다!</span>
+                <span id="commentary" style="color: #90e0ef; line-height: 1.5;">🎙️ 해설위원: 야구장 그래픽이 마침내 정상적인 비율로 재정비되었습니다! 플레이어 팀의 공격입니다.</span>
             </div>
         </div>
 
@@ -124,8 +122,9 @@ def main():
 
             let currentMode = "batter"; 
             let game = {{ pScore: 0, oppScore: 0, b: 0, s: 0, o: 0, hasRunner: false }};
-            // 공의 시작점을 마운드(360, 240)로 변경하여 3D 느낌 극대화
-            let ball = {{ active: false, x: 360, y: 240, z: 0, tx: 360, ty: 320, size: 2, name: "직구", speed: 0.025 }};
+            
+            // 공의 시작점 마운드(360, 220) 수정
+            let ball = {{ active: false, x: 360, y: 220, z: 0, tx: 360, ty: 320, size: 2, name: "직구", speed: 0.025 }};
             
             let selectedPitch = "직구";
             let aiPitchTimer = 60;
@@ -133,19 +132,18 @@ def main():
             let swingFrame = 0;
             let isBuntMode = false;
 
-            // 투수/타자 스펙
             let currentPitcher = {{ type: "ace", veloMod: 1.25, breakMod: 0.85, name: "강속구 선발 에이스" }};
             let currentBatter = {{ type: "speed", power: 0.75, speed: 1.45, name: "1번 타자" }};
 
-            // 필드에 상주하는 7명의 수비수 포지션 (영상에선 이게 캐싱 때문에 짤렸었음)
+            // 수정된 다이아몬드 비율에 맞춘 7명 수비수 좌표 재설정
             let fielders = [
-                {{ pos: "1B", x: 490, y: 270 }},
-                {{ pos: "2B", x: 420, y: 220 }},
-                {{ pos: "SS", x: 300, y: 220 }},
-                {{ pos: "3B", x: 230, y: 270 }},
-                {{ pos: "LF", x: 150, y: 140 }},
-                {{ pos: "CF", x: 360, y: 120 }},
-                {{ pos: "RF", x: 570, y: 140 }}
+                {{ pos: "1B", x: 490, y: 240 }},
+                {{ pos: "2B", x: 410, y: 170 }},
+                {{ pos: "SS", x: 310, y: 170 }},
+                {{ pos: "3B", x: 230, y: 240 }},
+                {{ pos: "LF", x: 170, y: 110 }},
+                {{ pos: "CF", x: 360, y: 90 }},
+                {{ pos: "RF", x: 550, y: 110 }}
             ];
 
             function changePitcher() {{
@@ -214,7 +212,7 @@ def main():
                 if (currentMode === "pitcher") {{
                     if (!ball.active) {{
                         ball.name = selectedPitch;
-                        ball.tx = mx; ball.ty = my; ball.x = 360; ball.y = 240; ball.z = 0; ball.size = 2;
+                        ball.tx = mx; ball.ty = my; ball.x = 360; ball.y = 220; ball.z = 0; ball.size = 2;
                         
                         if (ball.name === "직구") ball.speed = 0.032 * currentPitcher.veloMod;       
                         if (ball.name === "슬라이더") ball.speed = 0.022 * currentPitcher.veloMod;   
@@ -233,7 +231,7 @@ def main():
             function evalAiBatter() {{
                 if (ball.active && !isSwung && ball.z >= 0.85 && ball.z <= 0.93) {{
                     isSwung = true;
-                    let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 270 && ball.y <= 360);
+                    let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
                     if (insideZone) {{
                         if (Math.random() > 0.48) evaluateHitTrajectory(true);
                         else {{ game.s++; ball.active = false; checkInningStatus(); }}
@@ -244,7 +242,7 @@ def main():
             }}
 
             function evalBatterSwing() {{
-                let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 270 && ball.y <= 360);
+                let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
                 if (ball.z >= 0.84 && ball.z <= 0.95) {{
                     if (insideZone) {{
                         evaluateHitTrajectory(false);
@@ -322,43 +320,42 @@ def main():
                 document.getElementById('count-display').innerText = "B: " + game.b + " | S: " + game.s + " | O: " + game.o;
             }}
 
-            // 🎨 이전의 납작한 화면을 뚫고 나오는 리얼 3D 뷰 렌더링 엔진 
             function drawScene() {{
                 ctx.clearRect(0, 0, 720, 440);
 
                 // 1. 외야 천연 잔디
                 ctx.fillStyle = "#1a4d2e"; ctx.fillRect(0, 0, 720, 440);
                 
-                // 2. 내야 흙바닥 (원근감 사다리꼴)
+                // 2. 내야 흙바닥 (원근감 사다리꼴 수정)
                 ctx.fillStyle = "#a66a38";
                 ctx.beginPath();
                 ctx.moveTo(0, 440); ctx.lineTo(720, 440);
-                ctx.lineTo(550, 220); ctx.lineTo(170, 220);
+                ctx.lineTo(550, 190); ctx.lineTo(170, 190);
                 ctx.closePath(); ctx.fill();
 
-                // 3. 내야 잔디 다이아몬드
+                // 3. 내야 잔디 다이아몬드 (비율 정상화)
                 ctx.fillStyle = "#2a9d8f";
                 ctx.beginPath();
-                ctx.moveTo(360, 420); // 홈
-                ctx.lineTo(480, 280); // 1루
-                ctx.lineTo(360, 240); // 2루
-                ctx.lineTo(240, 280); // 3루
+                ctx.moveTo(360, 380); // 홈
+                ctx.lineTo(480, 260); // 1루
+                ctx.lineTo(360, 140); // 2루
+                ctx.lineTo(240, 260); // 3루
                 ctx.closePath(); ctx.fill();
 
-                // 4. 마운드 및 투수판
+                // 4. 마운드 및 투수판 (2루와 분리)
                 ctx.fillStyle = "#a66a38";
-                ctx.beginPath(); ctx.arc(360, 240, 35, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(350, 238, 20, 4);
+                ctx.beginPath(); ctx.arc(360, 220, 25, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(350, 218, 20, 4);
 
                 // 5. 홈플레이트
                 ctx.fillStyle = "#ffffff";
                 ctx.beginPath();
-                ctx.moveTo(360, 400); ctx.lineTo(375, 390); ctx.lineTo(375, 380);
-                ctx.lineTo(345, 380); ctx.lineTo(345, 390); ctx.closePath(); ctx.fill();
+                ctx.moveTo(360, 380); ctx.lineTo(370, 370); ctx.lineTo(370, 365);
+                ctx.lineTo(350, 365); ctx.lineTo(350, 370); ctx.closePath(); ctx.fill();
 
-                // 6. 투수 및 수비수 7명 렌더링 (이게 영상에서 안 보였던 핵심 고증 요소)
-                ctx.fillStyle = "#d90429"; ctx.fillRect(352, 220, 16, 20); // 마운드 투수
-                ctx.fillStyle = "#fbc4ab"; ctx.beginPath(); ctx.arc(360, 214, 6, 0, Math.PI*2); ctx.fill();
+                // 6. 투수 및 수비수 7명 렌더링
+                ctx.fillStyle = "#d90429"; ctx.fillRect(352, 200, 16, 20); // 마운드 투수
+                ctx.fillStyle = "#fbc4ab"; ctx.beginPath(); ctx.arc(360, 194, 6, 0, Math.PI*2); ctx.fill();
 
                 fielders.forEach(f => {{
                     ctx.fillStyle = "#023e8a"; ctx.fillRect(f.x - 8, f.y - 10, 16, 12);
@@ -367,15 +364,16 @@ def main():
                     ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = "11px Arial"; ctx.fillText(f.pos, f.x - 7, f.y + 14);
                 }});
 
-                // 7. 타석 가이드 및 스트라이크 존
+                // 7. 타석 및 스트라이크 존 (타자를 홈으로 복귀)
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 2.5;
-                ctx.strokeRect(310, 270, 100, 90);
+                ctx.strokeRect(310, 260, 100, 90);
 
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(410, 320, 24, 45); // 타자
-                ctx.fillStyle = "#fbc4ab"; ctx.beginPath(); ctx.arc(422, 310, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#03045e"; ctx.beginPath(); ctx.arc(422, 308, 10, Math.PI, 0); ctx.fill(); 
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(390, 330, 20, 40); // 타자 몸통
+                ctx.fillStyle = "#fbc4ab"; ctx.beginPath(); ctx.arc(400, 320, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#03045e"; ctx.beginPath(); ctx.arc(400, 318, 10, Math.PI, 0); ctx.fill(); 
 
                 // 미니맵 루상 표시기
+                ctx.fillStyle = "rgba(2, 12, 27, 0.7)"; ctx.fillRect(615, 25, 50, 50);
                 ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.strokeRect(620, 30, 40, 40);
                 ctx.fillStyle = game.hasRunner ? "#ffb703" : "#3d5a80"; ctx.fillRect(652, 46, 8, 8);
 
@@ -384,8 +382,8 @@ def main():
                     if (aiPitchTimer <= 0) {{
                         let pitchPool = ["직구", "슬라이더", "체인지업"];
                         ball.name = pitchPool[Math.floor(Math.random() * pitchPool.length)];
-                        ball.tx = 310 + Math.random() * 100; ball.ty = 270 + Math.random() * 90;
-                        ball.x = 360; ball.y = 240; ball.z = 0; ball.size = 2;
+                        ball.tx = 310 + Math.random() * 100; ball.ty = 260 + Math.random() * 90;
+                        ball.x = 360; ball.y = 220; ball.z = 0; ball.size = 2;
                         
                         if (ball.name === "직구") ball.speed = 0.032;
                         if (ball.name === "슬라이더") ball.speed = 0.022;
@@ -399,7 +397,7 @@ def main():
                     ball.z += ball.speed; 
                     
                     let baseX = 360 + (ball.tx - 360) * ball.z;
-                    let baseY = 240 + (ball.ty - 240) * ball.z;
+                    let baseY = 220 + (ball.ty - 220) * ball.z;
 
                     if (ball.name === "슬라이더") {{
                         let slideEffect = Math.pow(ball.z, 2.5) * (70 * (currentMode === "pitcher" ? currentPitcher.breakMod : 1.0)); 
@@ -423,7 +421,7 @@ def main():
 
                     if (ball.z >= 1.0) {{
                         ball.active = false;
-                        let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 270 && ball.y <= 360);
+                        let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
                         if (insideZone) game.s++; else game.b++;
                         checkInningStatus();
                     }}
@@ -433,17 +431,17 @@ def main():
                     ctx.save();
                     if (isBuntMode) {{
                         ctx.strokeStyle = "#b79457"; ctx.lineWidth = 7;
-                        ctx.beginPath(); ctx.moveTo(400, 330); ctx.lineTo(310, 330); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(390, 340); ctx.lineTo(310, 340); ctx.stroke();
                     }} else {{
                         let angleRatio = (swingFrame / 10) * Math.PI;
-                        ctx.translate(410, 340); ctx.rotate(-angleRatio + Math.PI / 3);
+                        ctx.translate(400, 350); ctx.rotate(-angleRatio + Math.PI / 3);
                         ctx.strokeStyle = "#b79457"; ctx.lineWidth = 8;
                         ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-80, -20); ctx.stroke();
                     }}
                     ctx.restore(); swingFrame--;
                 }} else {{
                     ctx.strokeStyle = "#b79457"; ctx.lineWidth = 6;
-                    ctx.beginPath(); ctx.moveTo(415, 330); ctx.lineTo(440, 270); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(395, 340); ctx.lineTo(430, 270); ctx.stroke();
                 }}
 
                 requestAnimationFrame(drawScene);
@@ -453,7 +451,6 @@ def main():
             drawScene();
         </script>
         """
-        # Height를 620으로 올려서 Streamlit 캐시를 강제로 파괴함
         st.components.v1.html(game_html, height=620)
 
 if __name__ == "__main__":
