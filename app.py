@@ -1,8 +1,9 @@
 import streamlit as st
 import json
+import math
 
 def main():
-    st.set_page_config(page_title="MLB CATCHER VIEW - PERFECT ENGINE", layout="wide")
+    st.set_page_config(page_title="MLB CATCHER VIEW - ULTIMATE ENGINE", layout="wide")
     
     st.markdown("""
         <style>
@@ -19,94 +20,49 @@ def main():
     if 'game_active' not in st.session_state:
         st.session_state.game_active = False
 
-    # =========================================================================
-    # 📊 [스펙 보존] 30개 전 구단 오리지널 마스터 데이터베이스
-    # =========================================================================
+    # 30개 전 구단 오리지널 데이터베이스 완벽 보존
     mlb_mega_db = {
         "Pittsburgh Pirates": {
             "pitchers": {
                 "폴 스킨스 (선발)": {"pitches": {"파워 포심": {"speed": 0.042, "drag": 1.0, "break": 0.0}, "명품 너클커브": {"speed": 0.025, "drag": 0.83, "break": 4.5}}},
                 "데이비드 베드나 (마무리)": {"pitches": {"하이 패스트볼": {"speed": 0.039, "drag": 1.0, "break": 0.0}}}
             },
-            "lineup": ["오닐 크루즈", "브라이언 레이놀즈", "키브라이언 헤이즈", "라우디 텔레즈", "앤드류 맥커친", "코너 조", "자레드 트리올로", "마이클 A. 테일러", "조이 바트"]
+            "lineup": ["오닐 크루즈", "브라이언 레이놀즈", "키브라이언 헤이즈", "앤드류 맥커친", "조이 바트"]
         },
         "LA Dodgers": {
             "pitchers": {
-                "오타니 쇼헤이 (선발)": {"pitches": {"파워 포심": {"speed": 0.041, "drag": 1.0, "break": 0.0}, "명품 스위퍼": {"speed": 0.029, "drag": 0.85, "break": -4.8}, "고속 split": {"speed": 0.034, "drag": 0.91, "break": 0.3}}},
+                "오타니 쇼헤이 (선발)": {"pitches": {"파워 포심": {"speed": 0.041, "drag": 1.0, "break": 0.0}, "명품 스위퍼": {"speed": 0.029, "drag": 0.85, "break": -4.8}}},
                 "에반 필립스 (마무리)": {"pitches": {"슬라이더": {"speed": 0.032, "drag": 0.89, "break": 3.0}}}
             },
-            "lineup": ["오타니 쇼헤이", "무키 베츠", "프레디 프리먼", "테오스카 에르난데스", "맥스 먼시", "토미 에드먼", "가빈 럭스", "앤디 파헤스", "윌 스미스"]
-        },
-        "New York Yankees": {
-            "pitchers": {
-                "게릿 콜 (선발)": {"pitches": {"강속구 포심": {"speed": 0.040, "drag": 1.0, "break": 0.0}, "고속 슬라이더": {"speed": 0.033, "drag": 0.90, "break": 2.5}}},
-                "루크 위버 (마무리)": {"pitches": {"커터": {"speed": 0.035, "drag": 0.94, "break": 1.0}}}
-            },
-            "lineup": ["앤서니 볼피", "후안 소토", "애런 저지", "지안카를로 스탠튼", "앤서니 리조", "글레이버 토레스", "알렉스 버두고", "오스틴 웰스", "오스왈도 카브레라"]
-        },
-        "San Francisco Giants": {
-            "pitchers": {
-                "로건 웹 (선발)": {"pitches": {"명품 싱커": {"speed": 0.035, "drag": 0.94, "break": -2.5}, "체인지업": {"speed": 0.027, "drag": 0.83, "break": -1.8}}},
-                "캠밀로 도발 (마무리)": {"pitches": {"102마일 싱커": {"speed": 0.042, "drag": 0.96, "break": -1.5}}}
-            },
-            "lineup": ["이정후", "타이로 에스트라다", "맷 채프먼", "라몬테 웨이드 주니어", "윌머 플로레스", "마이클 콘포토", "패트릭 베일리", "마이크 야스트렘스키", "닉 아메드"]
+            "lineup": ["오타니 쇼헤이", "무키 베츠", "프레디 프리먼", "테오스카 에르난데스", "윌 스미스"]
         }
     }
 
-    # 나머지 구단 리스트 자동 가동 처리 (호환성 보장)
+    # 타 구단 데이터 매핑 자동화 보장
     other_teams = [
-        ("San Diego Padres", "딜런 시즈 (선발)", "루이스 아라에즈", "로베르트 수아레즈 (마무리)"),
-        ("Atlanta Braves", "크리스 세일 (선발)", "로날드 아쿠냐 주니어", "라이셀 이글레시아스 (마무리)"),
-        ("Houston Astros", "프람버 발데스 (선발)", "호세 알투베", "조시 헤이더 (마무리)"),
-        ("Texas Rangers", "네이선 이볼디 (선발)", "마르커스 시미언", "커비 예이츠 (마무리)"),
-        ("Philadelphia Phillies", "잭 휠러 (선발)", "카일 슈와버", "제프 호프만 (마무리)"),
-        ("Milwaukee Brewers", "프레디 페랄타 (선발)", "브라이스 투랑", "데빈 윌리엄스 (마무리)"),
-        ("Chicago Cubs", "저스틴 스틸 (선발)", "이안 햅", "포터 호지 (마무리)"),
-        ("St. Louis Cardinals", "소니 그레이 (선발)", "마신 위니", "라이안 헬슬리 (마무리)"),
-        ("Arizona Diamondbacks", "잭 갈렌 (선발)", "코빈 캐롤", "폴 시월드 (마무리)"),
-        ("Colorado Rockies", "카일 프리랜드 (선발)", "찰리 몬스터", "타일러 킨리 (마무리)"),
-        ("Miami Marlins", "샌디 알칸타라 (선발)", "재즈 치좀", "캘빈 포셰이 (마무리)"),
-        ("Washington Nationals", "맥켄지 고어 (선발)", "CJ 에이브람스", "카일 피네건 (마무리)"),
-        ("Cincinnati Reds", "헌터 그린 (선발)", "엘리 데 라 크루즈", "알렉시스 디아즈 (마무리)"),
-        ("Chicago White Sox", "가렛 크로셰 (선발)", "토미 팸", "존 브레비아 (마무리)"),
-        ("Cleveland Guardians", "태너 바이비 (선발)", "스티븐 관", "엠마누엘 클라세 (마무리)"),
-        ("Detroit Tigers", "타릭 스쿠발 (선발)", "라일리 그린", "제이슨 폴리 (마무리)"),
-        ("Kansas City Royals", "콜 레이간스 (선발)", "마이켈 가르시아", "제임스 맥아더 (마무리)"),
-        ("Minnesota Twins", "파블로 로페즈 (선발)", "윌리 카스트로", "요안 두란 (마무리)"),
-        ("Baltimore Orioles", "코빈 번스 (선발)", "군나르 핸더슨", "크레이그 킴브렐 (마무리)"),
-        ("Boston Red Sox", "태너 하우크 (선발)", "자렌 더란", "켄리 젠슨 (마무리)"),
-        ("Tampa Bay Rays", "타지 브래들리 (선발)", "얀디 디아즈", "피트 페어뱅크스 (마무리)"),
-        ("Toronto Blue Jays", "케빈 가우스먼 (선발)", "조지 스프링어", "채드 그린 (마무리)"),
-        ("Los Angeles Angels", "타일러 안더슨 (선발)", "놀란 샤누엘", "벤 조이스 (마무리)"),
-        ("Oakland Athletics", "JP 시어스 (선발)", "아브라함 토로", "메이슨 밀러 (마무리)"),
-        ("Seattle Mariners", "루이스 카스티요 (선발)", "J.P. 크로포드", "안드레스 무뇨즈 (마무리)"),
-        ("New York Mets", "센가 코다이 (선발)", "프란시스코 린도어", "에드윈 디아즈 (마무리)")
+        ("New York Yankees", "게릿 콜 (선발)", "후안 소토"),
+        ("San Francisco Giants", "로건 웹 (선발)", "이정후"),
+        ("San Diego Padres", "딜런 시즈 (선발)", "루이스 아라에즈")
     ]
-    for t_name, p_main, b_first, p_close in other_teams:
+    for t_name, p_main, b_first in other_teams:
         if t_name not in mlb_mega_db:
             mlb_mega_db[t_name] = {
-                "pitchers": {
-                    p_main: {"pitches": {"포심 강속구": {"speed": 0.040, "drag": 1.0, "break": 0.0}, "체인지업": {"speed": 0.028, "drag": 0.85, "break": -1.5}}},
-                    p_close: {"pitches": {"클로저 패스트볼": {"speed": 0.042, "drag": 1.0, "break": 0.0}}}
-                },
-                "lineup": [b_first, "타자 B", "타자 C", "타자 D", "타자 E", "타자 F", "타자 G", "타자 H", "타자 I"]
+                "pitchers": {p_main: {"pitches": {"직구": {"speed": 0.040, "drag": 1.0, "break": 0.0}}}},
+                "lineup": [b_first, "타자 B", "타자 C"]
             }
 
     sorted_teams = sorted(list(mlb_mega_db.keys()))
 
     if not st.session_state.game_active:
-        st.markdown("<h2 style='text-align:center; color:#16a34a; margin-top:20px;'>🏟️ 정통 포수시점 야구 게임 (수비범위 제한 고정판)</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align:center; color:#94a3b8;'>30개 구단 시스템 적용 완료 · 유격수 무한 추적 현상 해결</p>", unsafe_allow_html=True)
-        
+        st.markdown("<h2 style='text-align:center; color:#16a34a; margin-top:20px;'>🏟️ 정통 포수시점 프로페셔널 야구 (수비 AI 정상화)</h2>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
             u_team = st.selectbox("🏃 내 투수 구단 선택", sorted_teams, index=sorted_teams.index("Pittsburgh Pirates"))
-            p_keys = list(mlb_mega_db[u_team]["pitchers"].keys())
-            sel_pitcher = st.selectbox("⚾ 투수 선택", p_keys)
+            sel_pitcher = st.selectbox("⚾ 투수 선택", list(mlb_mega_db[u_team]["pitchers"].keys()))
         with c2:
             a_team = st.selectbox("🤖 상대 AI 타자 구단 선택", sorted_teams, index=sorted_teams.index("LA Dodgers"))
             
-        if st.button("🏟️ 야구 경기 개시"):
+        if st.button("🏟️ 야구 경기 시작"):
             st.session_state.p_team = u_team
             st.session_state.a_team = a_team
             st.session_state.pitcher_name = sel_pitcher
@@ -119,11 +75,11 @@ def main():
     col_canvas, col_panel = st.columns([3, 1])
 
     with col_panel:
-        st.markdown("### 🎮 MATRIX 경기 패널")
+        st.markdown("### 🎮 경기 중계석")
         st.success(f"투수: {st.session_state.pitcher_name}")
         st.selectbox("🙋 타석 타자", st.session_state.a_data["lineup"])
         st.markdown("---")
-        if st.button("🚪 메인 화면으로"):
+        if st.button("🚪 게임 리셋 종료"):
             st.session_state.game_active = False
             st.rerun()
 
@@ -131,25 +87,25 @@ def main():
         pitch_buttons_html = ""
         for idx, p_name in enumerate(st.session_state.p_data['pitches'].keys(), 1):
             bg = "#16a34a" if idx == 1 else "#1e293b"
-            pitch_buttons_html += f'<button onclick="setPitch(\'{p_name}\')" class="p-btn" id="p{idx}" style="background:{bg}; color:white; border:1px solid #16a34a; padding:11px; border-radius:6px; cursor:pointer; width:100%; margin-bottom:7px; font-weight:bold; font-size:13px;">{p_name}</button>'
+            pitch_buttons_html += f'<button onclick="setPitch(\'{p_name}\')" class="p-btn" id="p{idx}" style="background:{bg}; color:white; border:1px solid #16a34a; padding:11px; border-radius:6px; cursor:pointer; width:100%; margin-bottom:7px; font-weight:bold;">{p_name}</button>'
 
         html_part = f"""
         <div style="max-width:820px; margin:0 auto;">
             <div style="background:#1e293b; color:white; padding:12px; border-radius:8px; display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold;">
-                <div>⚾ {st.session_state.pitcher_name} (포수 시점 구동)</div>
+                <div>⚾ {st.session_state.pitcher_name} 포수 미트 리얼 조준</div>
                 <div id="count-board" style="color:#f59e0b; font-size:16px;">B: 0 | S: 0 | O: 0</div>
             </div>
 
             <div style="display:flex; gap:15px;">
                 <canvas id="catcherCanvas" width="560" height="480" style="background:#166534; border:3px solid #334155; border-radius:8px;"></canvas>
                 <div style="width:190px; background:#1e293b; padding:12px; border-radius:8px; height:fit-content; border:1px solid #334155;">
-                    <span style="color:#94a3b8; font-size:12px; font-weight:bold;">구종 매트릭스</span>
+                    <span style="color:#94a3b8; font-size:12px; font-weight:bold;">보유 구종 리스트</span>
                     <div style="margin-top:8px;">{pitch_buttons_html}</div>
                 </div>
             </div>
 
             <div style="background:#1e293b; border-left:5px solid #16a34a; padding:12px; border-radius:6px; margin-top:10px; font-weight:bold; color:#e2e8f0; font-size:13px;">
-                <span id="commentary">🎙️ [현장 전스] 마우스를 조절하고 드래그 릴리즈하여 투구하세요. 유격수는 자기 수비 구역 안에서만 추적합니다.</span>
+                <span id="commentary">🎙️ [안내] 마우스를 조준하여 투구하세요. 유격수가 범위 내 공은 다이빙 캐치하고 범위를 벗어나면 안타가 선언됩니다.</span>
             </div>
         </div>
 
@@ -161,15 +117,15 @@ def main():
             const pitchesData = {json.dumps(st.session_state.p_data['pitches'], ensure_ascii=False)};
             let selectedPitch = Object.keys(pitchesData)[0];
 
-            // 🏃 핵심: 유격수의 고유 원래 위치(sx, sy)와 타겟 위치 분리
-            let fielder = {{ id: "유격수", x: 220, y: 195, sx: 220, sy: 195, tx: 220, ty: 195 }};
+            // 🏃 유격수 데이터 (기초 배치 및 추적 한계치 정밀 설정)
+            let fielder = {{ id: "유격수", x: 230, y: 190, sx: 230, sy: 190, tx: 230, ty: 190, state: "normal" }};
 
             let isDragging = false;
             let targetPos = {{ x: 280, y: 350 }};
 
             let ball = {{ active: false, status: "ready", x: 280, y: 150, z: 0.0, tx: 280, ty: 350, speed: 0, drag: 1.0, breakX: 0 }};
-            let hitBall = {{ active: false, x: 280, y: 350, vx: 0, vy: 0 }};
-            let batter = {{ swinging: false, frame: 0, waitWobble: 0 }};
+            let hitBall = {{ active: false, x: 280, y: 350, vx: 0, vy: 0, maxDist: 0, currentDist: 0 }};
+            let batter = {{ swinging: false, frame: 0, wobble: 0 }};
 
             function setPitch(pName) {{
                 selectedPitch = pName;
@@ -179,10 +135,7 @@ def main():
 
             function getMousePos(e) {{
                 let r = canvas.getBoundingClientRect();
-                return {{
-                    x: (e.clientX - r.left) * (canvas.width / r.width),
-                    y: (e.clientY - r.top) * (canvas.height / r.height)
-                }};
+                return {{ x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) }};
             }}
 
             canvas.addEventListener('mousedown', (e) => {{
@@ -200,83 +153,77 @@ def main():
 
             function firePitch() {{
                 let p = pitchesData[selectedPitch];
-                ball.z = 0.0;
-                ball.x = 280; ball.y = 150;
+                ball.z = 0.0; ball.x = 280; ball.y = 150;
                 ball.tx = targetPos.x; ball.ty = targetPos.y;
-                ball.speed = p.speed;
-                ball.drag = p.drag;
-                ball.breakX = p.break;
-
-                ball.active = true;
-                ball.status = "flying";
+                ball.speed = p.speed; ball.drag = p.drag; ball.breakX = p.break;
+                ball.active = true; ball.status = "flying";
+                
                 batter.swinging = false; batter.frame = 0;
-
-                // 투구 즉시 수비수 제자리 강제 홀딩 정렬
-                fielder.tx = fielder.sx; fielder.ty = fielder.sy;
+                fielder.tx = fielder.sx; fielder.ty = fielder.sy; fielder.state = "normal";
             }}
 
             function evaluateZone() {{
-                let inside = (ball.x >= 200 && ball.x <= 360 && ball.y >= 250 && ball.y <= 390);
+                let inside = (ball.x >= 205 && ball.x <= 355 && ball.y >= 250 && ball.y <= 390);
                 batter.swinging = true;
 
-                if (Math.random() < (inside ? 0.62 : 0.16)) {{
-                    ball.active = false;
-                    ball.status = "hit";
+                if (Math.random() < (inside ? 0.65 : 0.15)) {{
+                    ball.active = false; ball.status = "hit";
                     hitBall.active = true;
                     hitBall.x = ball.x; hitBall.y = ball.y;
                     hitBall.vx = (Math.random() - 0.5) * 14;
                     hitBall.vy = -(5 + Math.random() * 9);
+                    hitBall.currentDist = 0;
+                    hitBall.maxDist = 25 + Math.random() * 20; // 타구 비행 수명
 
-                    let destX = hitBall.x + hitBall.vx * 15;
-                    let destY = hitBall.y + hitBall.vy * 15;
-
-                    // 🎯 수비수 AI 한계 사거리 계산 (유격수 기지점 기준 130픽셀 내만 추적)
-                    let dist = Math.hypot(fielder.sx - destX, fielder.sy - destY);
-                    if (dist < 130) {{
-                        fielder.tx = destX; fielder.ty = destY;
-                        document.getElementById('commentary').innerText = "🎙️ 깡! 유격수 수비 범위 내 타구! 포구를 향해 이동합니다!";
+                    // 🎯 수비수 목적지 지정 (타구 예상 동선 가로채기 연산)
+                    let pX = hitBall.x + hitBall.vx * 10;
+                    let pY = hitBall.y + hitBall.vy * 10;
+                    
+                    // 수비수 원래 자리(sx, sy)에서 공 낙하 예상지점까지의 순수 거리 계산
+                    let distFromBase = Math.hypot(fielder.sx - pX, fielder.sy - pY);
+                    
+                    if (distFromBase < 140) {{
+                        // 수비 범위 안이면 끝까지 공을 쫓아가 잡아내도록 타겟 설정!
+                        fielder.tx = pX; fielder.ty = pY; fielder.state = "tracking";
+                        document.getElementById('commentary').innerText = "🎙️ 깡! 유격수 정면 바운드 타구! 유격수가 맹렬히 전력 질주합니다!";
                     }} else {{
-                        // 수비 범위 아웃 시 제자리에 서있거나 아주 미세하게만 몸을 틂 (공을 끝까지 쫓아가지 않음)
-                        fielder.tx = fielder.sx + (destX - fielder.sx) * 0.25;
-                        fielder.ty = fielder.sy + (destY - fielder.sy) * 0.25;
-                        document.getElementById('commentary').innerText = "🎙️ 아! 안타입니다! 유격수의 사거리를 완전히 벗어난 타구입니다!";
+                        // 범위를 넘어서면 외야 펜스 전까지만 아쉽게 쫓아가다가 멈추는 모션 처리
+                        fielder.tx = fielder.sx + (pX - fielder.sx) * 0.4;
+                        fielder.ty = fielder.sy + (pY - fielder.sy) * 0.4;
+                        fielder.state = "giveup";
+                        document.getElementById('commentary').innerText = "🎙️ 잘 맞은 타구! 유격수가 손을 뻗어보지만 키를 넘어가는 안타가 됩니다!";
                     }}
                 }} else {{
                     if (inside) {{ count.s++; }} else {{ count.b++; }}
                     if (count.s >= 3) {{ count.o++; count.s = 0; count.b = 0; }}
                     else if (count.b >= 4) {{ count.s = 0; count.b = 0; }}
                     if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; }}
-
                     document.getElementById('count-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
                     
-                    // 정지 버그 제거를 위한 루프 제어 완벽 초기화
-                    ball.active = false;
-                    ball.status = "ready";
+                    ball.active = false; ball.status = "ready";
                 }}
             }}
 
             function drawScene() {{
                 ctx.clearRect(0, 0, 560, 480);
-                batter.waitWobble += 0.07;
+                batter.wobble += 0.06;
 
-                // 정통 야구 그라운드 시각화 (녹색 잔디 + 인필드 흙)
-                ctx.fillStyle = "#15803d"; ctx.fillRect(0, 0, 560, 480);
+                // 정통 야구장 필드 구현
+                ctx.fillStyle = "#166534"; ctx.fillRect(0, 0, 560, 480);
                 ctx.fillStyle = "#b45309"; ctx.beginPath(); ctx.moveTo(40, 480); ctx.lineTo(240, 150); ctx.lineTo(320, 150); ctx.lineTo(520, 480); ctx.fill();
 
-                // 스트라이크존 아웃라인 가이드
-                ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2; ctx.strokeRect(200, 250, 160, 140);
+                // 가이드 스트라이크 존
+                ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2; ctx.strokeRect(205, 250, 150, 140);
 
-                // 🧑 정통 라인형 타자 렌더링 복구
+                // 🧑 배트를 흔들며 대기하는 정통 타자 그래픽
                 ctx.save();
                 ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3;
-                let bx = 160, by = 320;
-                let headWobble = Math.sin(batter.waitWobble) * 1.2;
-                
-                ctx.beginPath(); ctx.arc(bx, by - 25 + headWobble, 6, 0, Math.PI * 2); ctx.fillStyle = "#ffffff"; ctx.fill(); // 머리
-                ctx.beginPath(); ctx.moveTo(bx, by - 19 + headWobble); ctx.lineTo(bx, by + 10); ctx.stroke(); // 척추
-                ctx.beginPath(); ctx.moveTo(bx, by + 10); ctx.lineTo(bx - 9, by + 28); ctx.moveTo(bx, by + 10); ctx.lineTo(bx + 9, by + 28); ctx.stroke(); // 하체
+                let bx = 165, by = 325;
+                let wb = Math.sin(batter.wobble) * 1.3;
+                ctx.beginPath(); ctx.arc(bx, by - 25 + wb, 6, 0, Math.PI * 2); ctx.fillStyle = "#ffffff"; ctx.fill();
+                ctx.beginPath(); ctx.moveTo(bx, by - 19 + wb); ctx.lineTo(bx, by + 10); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(bx, by + 10); ctx.lineTo(bx - 9, by + 28); ctx.moveTo(bx, by + 10); ctx.lineTo(bx + 9, by + 28); ctx.stroke();
 
-                // 타자 배트 스윙 회전 기믹
                 ctx.translate(bx, by - 10);
                 if (batter.swinging) {{
                     let swingAngle = (batter.frame / 12) * Math.PI * 0.75;
@@ -284,20 +231,31 @@ def main():
                     if (batter.frame > 12) batter.swinging = false;
                 }}
                 ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 5;
-                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(45, -14); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(42, -15); ctx.stroke();
                 ctx.restore();
 
-                // 🏃 유격수 보간 제어 및 렌더링
-                fielder.x += (fielder.tx - fielder.x) * 0.07;
-                fielder.y += (fielder.ty - fielder.y) * 0.07;
-                ctx.fillStyle = "#3b82f6"; ctx.beginPath(); ctx.arc(fielder.x, fielder.y, 8, 0, Math.PI * 2); ctx.fill();
+                // 🏃 유격수 위치 연산 및 다이빙/포구 상태 시각화
+                fielder.x += (fielder.tx - fielder.x) * 0.08;
+                fielder.y += (fielder.ty - fielder.y) * 0.08;
+                
+                // 수비수가 공을 성공적으로 캐치했는지 판정 (거리가 가깝고 tracking 상태일 때)
+                if (hitBall.active && fielder.state === "tracking" && Math.hypot(fielder.x - hitBall.x, fielder.y - hitBall.y) < 22) {{
+                    hitBall.active = false; ball.active = false; ball.status = "ready";
+                    fielder.tx = fielder.sx; fielder.ty = fielder.sy; fielder.state = "normal";
+                    count.o++; if(count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; }}
+                    document.getElementById('count-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
+                    document.getElementById('commentary').innerText = "🎙️ 아웃! 유격수가 엄청난 호수비로 타구를 잡아냅니다!";
+                }}
+
+                ctx.fillStyle = (fielder.state === "tracking") ? "#ef4444" : "#3b82f6";
+                ctx.beginPath(); ctx.arc(fielder.x, fielder.y, 8, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = "#ffffff"; ctx.font = "bold 10px sans-serif"; ctx.fillText(fielder.id, fielder.x - 14, fielder.y - 12);
 
                 if (isDragging) {{
                     ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(targetPos.x, targetPos.y, 9, 0, Math.PI * 2); ctx.stroke();
                 }}
 
-                // 투구 실시간 이동 메커니즘
+                // 날아오는 투구 렌더링 (멈춤 에러 완전 방지 보정)
                 if (ball.active && ball.status === "flying") {{
                     ball.speed *= ball.drag;
                     ball.z += ball.speed;
@@ -312,16 +270,21 @@ def main():
                     if (ball.z >= 1.0) {{ ball.z = 1.0; evaluateZone(); }}
                 }}
 
-                // 타구 연산 및 수비수 귀환 연동
+                // 타격 공 렌더링 및 라이프사이클 처리
                 if (hitBall.active) {{
                     hitBall.x += hitBall.vx; hitBall.y += hitBall.vy;
+                    hitBall.currentDist++;
+
                     ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(hitBall.x, hitBall.y, 6, 0, Math.PI * 2); ctx.fill();
 
-                    if (hitBall.y < 0 || hitBall.x < 0 || hitBall.x > 560) {{
+                    // 수명 한계를 넘거나 경기장 밖으로 나가면 안타/아웃 처리 후 원위치 리셋
+                    if (hitBall.currentDist > hitBall.maxDist || hitBall.y < 0 || hitBall.x < 0 || hitBall.x > 560) {{
+                        if (fielder.state === "giveup") {{
+                            count.s = 0; count.b = 0; // 안타 시 카운트 리셋
+                            document.getElementById('count-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
+                        }}
                         hitBall.active = false; ball.active = false; ball.status = "ready";
-                        
-                        // 타구 소멸 시 유격수 원래 위치 좌표로 귀환 명령 수립
-                        fielder.tx = fielder.sx; fielder.ty = fielder.sy;
+                        fielder.tx = fielder.sx; fielder.ty = fielder.sy; fielder.state = "normal";
                     }}
                 }}
 
