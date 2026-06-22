@@ -142,16 +142,15 @@ def main():
 
             let pBatterIndex = 0; let aBatterIndex = 0;
 
-            // 🌀 마구 스펙 및 포수가 놓칠 확률(missProb) 밸런스 추가
             const pitchDict = {{
                 "포심 직구": {{ speed: 0.038, type: "fast", color: "#e63946", missProb: 0.01 }},
                 "고속 슬라이더": {{ speed: 0.031, type: "slider", color: "#3a86ff", missProb: 0.05 }},
                 "폭포수 커브": {{ speed: 0.021, type: "curve", color: "#ffb703", missProb: 0.10 }},
                 "체인지업": {{ speed: 0.024, type: "changeup", color: "#06d6a0", missProb: 0.06 }},
                 "파워 싱커": {{ speed: 0.034, type: "sinker", color: "#f72585", missProb: 0.07 }},
-                "스플리터": {{ speed: 0.032, type: "splitter", color: "#7209b7", missProb: 0.15 }}, // 뚝 떨어져서 포수가 놓치기 쉬움
+                "스플리터": {{ speed: 0.032, type: "splitter", color: "#7209b7", missProb: 0.15 }}, 
                 "커터": {{ speed: 0.036, type: "cutter", color: "#4cc9f0", missProb: 0.02 }},
-                "마구 너클볼": {{ speed: 0.016, type: "knuckle", color: "#ffffff", missProb: 0.25 }} // 너클볼은 25% 확률로 포구 실패!
+                "마구 너클볼": {{ speed: 0.016, type: "knuckle", color: "#ffffff", missProb: 0.25 }} 
             }};
 
             let ball = {{ active: false, isHit: false, isBunt: false, isPassed: false, x: 360, y: 210, z: 0, startX: 360, startY: 210, tx: 360, ty: 320, size: 2, name: "포심 직구" }};
@@ -201,7 +200,6 @@ def main():
                     let runs = 1; if (bases[0]) runs++; if (bases[1]) runs++; if (bases[2]) runs++;
                     addScore(runs); bases = [false, false, false]; 
                 }} else if (hitType === "passed_ball") {{
-                    // 포수가 공 빠뜨렸을 때 루상의 주자들 한 베이스씩 자동 안전 진루!
                     if (bases[2]) {{ addScore(1); bases[2] = false; }}
                     if (bases[1]) {{ bases[2] = true; bases[1] = false; }}
                     if (bases[0]) {{ bases[1] = true; bases[0] = false; }}
@@ -420,14 +418,12 @@ def main():
                 if (bases[1]) {{ ctx.fillStyle = "#ffb703"; ctx.beginPath(); ctx.arc(360, 140, 8, 0, Math.PI*2); ctx.fill(); }}
                 if (bases[2]) {{ ctx.fillStyle = "#ffb703"; ctx.beginPath(); ctx.arc(241, 261, 8, 0, Math.PI*2); ctx.fill(); }}
 
-                drawHuman(360, 195, true, animTicks, "P"); // 투수
-                drawHuman(285, 355, false, animTicks, "H"); // 타자
+                drawHuman(360, 195, true, animTicks, "P"); 
+                drawHuman(285, 355, false, animTicks, "H"); 
                 
-                // 🧤 안방마님 포수 등장 (홈플레이트 뒤에 대기)
                 let activeCatcherName = (currentMode === "pitcher") ? myCatcherName : aiCatcherName;
                 drawHuman(360, 395, true, animTicks, "C"); 
 
-                // 야수 수비수 추격 무빙
                 fielders.forEach(f => {{
                     if (ball.active && ball.isHit) {{
                         let dx = ball.x - f.x; let dy = ball.y - f.y;
@@ -451,15 +447,12 @@ def main():
                         ball.tx = 310 + Math.random() * 100; ball.ty = 260 + Math.random() * 90;
                         ball.x = 360; ball.y = 210; ball.z = 0; ball.startX = 360; ball.startY = 210;
                         ball.active = true; ball.isHit = false; ball.isBunt = false; ball.isPassed = false; isSwung = false;
-                        document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 투수 <b>${{aiPitcherName}}</b>이 구질로 <b>${{ball.name}}</b>을 장착했습니다!`;
+                        document.getElementById('commentary').innerHTML = "🎙️ 캐스터: 투수 <b>" + aiPitcherName + "</b>이 구질로 <b>" + ball.name + "</b>을 장착했습니다!";
                     }}
                 }}
 
-                // 변화구 물리 궤적 처리
                 if (ball.active) {{
                     let pData = pitchDict[ball.name] || pitchDict["포심 직구"];
-                    
-                    // 만약 포수 뒤로 공이 빠진 상황이라면 백스톱 패스트 트랙 작동
                     let currentSpeed = ball.isHit ? -0.042 : (ball.isPassed ? 0.035 : pData.speed);
                     ball.z += currentSpeed; 
                     
@@ -478,7 +471,6 @@ def main():
                         ball.x = base_x; ball.y = base_y;
                         ctx.fillStyle = pData.color;
                     }} else if (ball.isPassed) {{
-                        // ⚠️ 포수가 공을 놓쳐서 화면 아래 벽(백스톱)으로 직행하는 궤적
                         ball.y += 4;
                         ctx.fillStyle = "#ff5722";
                     }} else {{
@@ -492,18 +484,16 @@ def main():
 
                     if (currentMode === "pitcher" && !ball.isHit && !ball.isPassed) evalAiBatter();
 
-                    // 포구 위치 도달 시 연산
                     if (!ball.isHit && !ball.isPassed && ball.z >= 1.0) {{
-                        // 🔮 포수 포구 실패 주사위 굴리기!
                         if (Math.random() < pData.missProb) {{
                             ball.isPassed = true; 
                             let anyRunner = (bases[0] || bases[1] || bases[2]);
-                            advanceRunners("passed_ball"); // 주자 자동 진루
+                            advanceRunners("passed_ball"); 
                             
                             if (anyRunner) {{
-                                document.getElementById('commentary').innerHTML = `🎙️ 해설: <b>어어어?! 공이 빠졌습니다!! 포수 무브먼트를 비껴갑니다! 엉? 으의 아아어ㅣㅇ!! 그 사이에 루상의 주자들 한 베이스씩 자동 진루합니다!! 폭투입니다!</b>`;
-                            } else {{
-                                document.getElementById('commentary').innerHTML = `🎙️ 캐스터: <b>앗! 뒤로 빠집니다! 워낙 회전이 심한 마구다 보니 포수 ${{activeCatcherName}}도 블로킹하지 못했습니다!</b>`;
+                                document.getElementById('commentary').innerHTML = "🎙️ 해설: <b>어어어?! 공이 빠졌습니다!! 포수 무브먼트를 비껴갑니다! 엉? 으의 아아어ㅣㅇ!! 그 사이에 루상의 주자들 한 베이스씩 자동 진루합니다!! 폭투입니다!</b>";
+                            }} else {{
+                                document.getElementById('commentary').innerHTML = "🎙️ 캐스터: <b>앗! 뒤로 빠집니다! 워낙 회전이 심한 마구다 보니 포수 " + activeCatcherName + "도 블로킹하지 못했습니다!</b>";
                             }}
                         }} else {{
                             ball.active = false;
@@ -513,16 +503,14 @@ def main():
                             updateInningStatus(); aiPitchTimer = 55;
                         }}
                     }} else if (ball.isPassed && ball.y >= 440) {{
-                        // 뒤로 완전히 빠진 공 리셋
                         ball.active = false; ball.isPassed = false;
-                        game.b++; // 기본적으로 볼 카운트 추가
+                        game.b++; 
                         updateInningStatus(); aiPitchTimer = 55;
                     }} else if (ball.isHit && (ball.z <= -0.5 || ball.z >= 1.5)) {{ 
                         ball.active = false; aiPitchTimer = 55;
                     }}
                 }}
 
-                // 배트 애니메이션
                 if (isBuntStance) {{
                     ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(295, 350); ctx.lineTo(355, 350); ctx.stroke();
                 }} else if (swingFrame > 0) {{
