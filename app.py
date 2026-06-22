@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 def main():
-    st.set_page_config(page_title="MLB PRO ULTIMATE - FINAL FIX", layout="wide")
+    st.set_page_config(page_title="MLB PRO ULTIMATE - BATTERY MATRIX", layout="wide")
     
     st.markdown("""
         <style>
@@ -20,42 +20,11 @@ def main():
         st.session_state.game_active = False
 
     mlb_data = {
-        # AL East
-        "New York Yankees": {"pitcher": {"name": "게릿 콜", "p1": "포심 직구", "p2": "너클 커브"}, "lineup": ["글레이버 토레스", "후안 소토", "애런 저지", "지안카를로 스탠튼", "재즈 치좀 Jr.", "앤서니 볼피", "알렉스 버두고", "오스틴 웰스", "앤서니 리조"]},
-        "Baltimore Orioles": {"pitcher": {"name": "코빈 번스", "p1": "커터", "p2": "폭포수 커브"}, "lineup": ["거너 헨더슨", "애들리 러치맨", "앤서니 산탄데르", "라이언 마운트캐슬", "세드릭 멀린스", "조던 웨스트버그", "오스틴 헤이스", "콜튼 카우저", "라몬 우리아스"]},
-        "Boston Red Sox": {"pitcher": {"name": "태너 하우크", "p1": "싱커", "p2": "스위퍼"}, "lineup": ["자렌 듀란", "윌리엄 아브레유", "라파엘 데버스", "타일러 오닐", "요시다 마사타카", "코너 웡", "트리스턴 카사스", "세단 라파엘라", "데이비드 해밀턴"]},
-        "Tampa Bay Rays": {"pitcher": {"name": "셰인 맥클라나한", "p1": "광속구", "p2": "체인지업"}, "lineup": ["얀디 디아즈", "브랜든 로우", "란디 아로사레나", "아이작 파레디스", "조쉬 로우", "호세 시리", "르네 핀토", "테일러 월스", "리치 팔라시오스"]},
-        "Toronto Blue Jays": {"pitcher": {"name": "케빈 가우스먼", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["조지 스프링어", "블라디미르 게레로 Jr.", "보 비셋", "저스틴 터너", "돌튼 바쇼", "알레한드로 커크", "케빈 키어마이어", "어니 클레멘트", "아이재아 카이너-팔레파"]},
-        # AL Central
-        "Cleveland Guardians": {"pitcher": {"name": "태너 바이비", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["스티븐 콴", "안드레스 히메네스", "호세 라미레즈", "조쉬 네일러", "데이비드 프라이", "윌 브레넌", "보 네일러", "브라이언 로키오", "타일러 프리먼"]},
-        "Kansas City Royals": {"pitcher": {"name": "콜 레이건스", "p1": "광속구", "p2": "체인지업"}, "lineup": ["마이켈 가르시아", "바비 위트 Jr.", "비니 파스콴티노", "살바도르 페레즈", "헌터 렌프로", "넬슨 벨라스케스", "MJ 멜렌데즈", "카일 이스벨", "가렛 햄슨"]},
-        "Detroit Tigers": {"pitcher": {"name": "타릭 스쿠발", "p1": "광속구", "p2": "체인지업"}, "lineup": ["라일리 그린", "맷 비어링", "스펜서 토켈슨", "케리 카펜터", "지오 어셸라", "하비에르 바에즈", "콜트 키스", "제이크 로저스", "파커 메도우스"]},
-        "Minnesota Twins": {"pitcher": {"name": "파블로 로페즈", "p1": "포심 직구", "p2": "스위퍼"}, "lineup": ["에두아르도 줄리엔", "카를로스 코레아", "로이스 루이스", "맥스 케플러", "바이런 벅스턴", "카를로스 산타나", "라이언 제퍼스", "윌리 카스트로", "마누엘 마고"]},
-        "Chicago White Sox": {"pitcher": {"name": "개럿 크로셰", "p1": "광속구", "p2": "고속 슬라이더"}, "lineup": ["앤드류 베닌텐디", "요안 몬카다", "루이스 로버트 Jr.", "일로이 히메네스", "앤드류 본", "코리 줄스", "폴 데용", "마틴 말도나도", "니키 로페즈"]},
-        # AL West
-        "Houston Astros": {"pitcher": {"name": "프램버 발데스", "p1": "싱커", "p2": "폭포수 커브"}, "lineup": ["호세 알투베", "카일 터커", "요르단 알바레즈", "알렉스 브레그먼", "제레미 페냐", "야이너 디아즈", "마우리시오 두본", "제이크 마이어스", "호세 아브레유"]},
-        "Texas Rangers": {"pitcher": {"name": "네이선 이볼디", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["마커스 세미엔", "코리 시거", "에반 카터", "아돌리스 가르시아", "조쉬 영", "나다니엘 로우", "조나 하임", "에제키엘 두란", "레오디 타베라스"]},
-        "Seattle Mariners": {"pitcher": {"name": "루이스 카스티요", "p1": "포심 직구", "p2": "체인지업"}, "lineup": ["J.P. 크로포드", "훌리오 로드리게스", "칼 롤리", "미치 가버", "미치 해니거", "루크 레일리", "타이 프랑스", "딜런 무어", "조쉬 로하스"]},
-        "Los Angeles Angels": {"pitcher": {"name": "호세 소리아노", "p1": "싱커", "p2": "너클 커브"}, "lineup": ["놀란 샤누엘", "마이크 트라웃", "테일러 워드", "미겔 사노", "로건 오하피", "앤서니 렌던", "잭 네토", "조 아델", "루이스 렝히포"]},
-        "Oakland Athletics": {"pitcher": {"name": "메이슨 밀러", "p1": "광속구", "p2": "고속 슬라이더"}, "lineup": ["에스테우리 루이즈", "잭 겔로프", "브렌트 루커", "J.D. 데이비스", "세스 브라운", "타일러 소더스트롬", "셰이 랭글리어스", "아브라함 토로", "닉 앨런"]},
-        # NL East
-        "Atlanta Braves": {"pitcher": {"name": "맥스 프리드", "p1": "포심 직구", "p2": "폭포수 커브"}, "lineup": ["로날드 아쿠냐 Jr.", "아지 알비스", "오스틴 라일리", "맷 올슨", "마르셀 오수나", "마이클 해리스 2세", "션 머피", "자레드 켈닉", "올랜도 아르시아"]},
-        "Philadelphia Phillies": {"pitcher": {"name": "잭 휠러", "p1": "포심 직구", "p2": "스위퍼"}, "lineup": ["카일 슈와버", "트레이 터너", "브라이스 하퍼", "J.T. 리얼무토", "알렉 봄", "닉 카스테야노스", "브라이슨 스탓", "에드문도 소사", "요한 로하스"]},
-        "New York Mets": {"pitcher": {"name": "센가 코다이", "p1": "포심 직구", "p2": "유령 포크볼"}, "lineup": ["프란시스코 린도어", "피트 알론소", "브랜든 니모", "J.D. 마르티네즈", "제프 맥닐", "스탈링 마르테", "프란시스코 알바레즈", "브렛 베이티", "해리슨 베이더"]},
-        "Washington Nationals": {"pitcher": {"name": "매켄지 고어", "p1": "포심 직구", "p2": "폭포수 커브"}, "lineup": ["CJ 에이브람스", "레인 토마스", "제시 윙커", "조이 갤로", "루이스 가르시아", "키버트 루이즈", "일데마로 바르가스", "제이콥 영", "빅터 로블레스"]},
-        "Miami Marlins": {"pitcher": {"name": "헤수스 루자르도", "p1": "광속구", "p2": "체인지업"}, "lineup": ["제이콥 아미야", "브라이언 데 라 크루즈", "조쉬 벨", "재즈 치whom Jr.", "헤수스 산체스", "오토 로페즈", "닉 고든", "비달 브루얀", "알리 산체스"]},
-        # NL Central
-        "Milwaukee Brewers": {"pitcher": {"name": "프레디 페랄타", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["잭 트랙", "윌리엄 콘트레라스", "크리스티안 옐리치", "윌리 아다메스", "리스 호스킨스", "브라이스 투랑", "게리 산체스", "잭슨 추리오", "살 프렐릭"]},
-        "Chicago Cubs": {"pitcher": {"name": "저스틴 이마나가", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["이안 햅", "스즈키 세이야", "코디 벨린저", "크리스토퍼 모렐", "댄스비 스완슨", "마이클 부시", "니코 호너", "미겔 아마야", "피트 크로우-암스트롱"]},
-        "St. Louis Cardinals": {"pitcher": {"name": "소니 그레이", "p1": "싱커", "p2": "스위퍼"}, "lineup": ["브렌던 도노반", "폴 골드슈미트", "윌슨 콘트레라스", "놀란 아레나도", "알렉 버럴슨", "라스 누트바", "놀란 고먼", "아이반 에레라", "메이신 윈"]},
-        "Cincinnati Reds": {"pitcher": {"name": "헌터 그린", "p1": "광속구", "p2": "고속 슬라이더"}, "lineup": ["조나단 인디아", "엘리 데 라 크루즈", "스펜서 스티어", "제이머 칸델라리오", "타일러 스티븐슨", "루크 메일리", "스튜어트 페어차일드", "닉 마티니", "윌 벤슨"]},
-        "Pittsburgh Pirates": {"pitcher": {"name": "폴 스킨스", "p1": "광속구", "p2": "스플링커"}, "lineup": ["앤드류 매커친", "브라이언 레이놀즈", "오닐 크루즈", "조이 바트", "로우디 텔레즈", "키브라이언 헤이스", "카이너-팔레파", "데 라 크루즈", "자레드 트리올로"]},
-        # NL West
-        "Los Angeles Dodgers": {"pitcher": {"name": "야마모토 요시노부", "p1": "포심 직구", "p2": "스플리터"}, "lineup": ["오타니 쇼헤이", "무키 베츠", "프레디 프리먼", "T. 에르난데스", "맥스 먼시", "윌 스미스", "가빈 럭스", "토미 에드먼", "미겔 로하스"]},
-        "San Diego Padres": {"pitcher": {"name": "딜런 시즈", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["루이스 아라에즈", "페르난도 타티스 Jr.", "주릭슨 프로파", "매니 마차도", "잭슨 메릴", "김하성", "잰더 보가츠", "제이크 크로넨워스", "카일 히가시오카"]},
-        "San Francisco Giants": {"pitcher": {"name": "로건 웹", "p1": "싱커", "p2": "체인지업"}, "lineup": ["이정후", "맷 채프먼", "마이클 콘포토", "호르헤 솔레어", "타이로 에스트라다", "패트릭 베일리", "마이크 야스트렘스키", "라몬테 웨이드 Jr.", "닉 아메드"]},
-        "Arizona Diamondbacks": {"pitcher": {"name": "잭 갤런", "p1": "포심 직구", "p2": "너클 커브"}, "lineup": ["코빈 캐롤", "케텔 마르테", "루어데스 구리엘 Jr.", "크리스찬 워커", "작 피더슨", "에우헤니오 수아레즈", "가브리엘 모레노", "알렉 토마스", "제랄도 페르도모"]},
-        "Colorado Rockies": {"pitcher": {"name": "라이언 펠트너", "p1": "포심 직구", "p2": "고속 슬라이더"}, "lineup": ["찰리 블랙몬", "에제키엘 토바", "라이언 맥맨", "엘리아스 디아즈", "놀란 존스", "브렌던 로저스", "제이콥 스탈링스", "샘 힐리어드", "브렌턴 도일"]}
+        "San Diego Padres": {"pitcher": "딜런 시즈", "catcher": "카일 히가시오카", "lineup": ["루이스 아라에즈", "페르난도 타티스 Jr.", "주릭슨 프로파", "매니 마차도", "잭슨 메릴", "김하성", "잰더 보가츠", "제이크 크로넨워스"]},
+        "Los Angeles Dodgers": {"pitcher": "야마모토 요시노부", "catcher": "윌 스미스", "lineup": ["오타니 쇼헤이", "무키 베츠", "프레디 프리먼", "T. 에르난데스", "맥스 먼시", "가빈 럭스", "토미 에드먼", "미겔 로하스"]},
+        "New York Yankees": {"pitcher": "게릿 콜", "catcher": "오스틴 웰스", "lineup": ["글레이버 토레스", "후안 소토", "애런 저지", "지안카를로 스탠튼", "재즈 치좀 Jr.", "앤서니 볼피", "알렉스 버두고", "앤서니 리조"]},
+        "Atlanta Braves": {"pitcher": "맥스 프리드", "catcher": "션 머피", "lineup": ["로날드 아쿠냐 Jr.", "아지 알비스", "오스틴 라일리", "맷 올슨", "마르셀 오수나", "마이클 해리스 2세", "자레드 켈닉", "올랜도 아르시아"]},
+        "Philadelphia Phillies": {"pitcher": "잭 휠러", "catcher": "J.T. 리얼무토", "lineup": ["카일 슈와버", "트레이 터너", "브라이스 하퍼", "알렉 봄", "닉 카스테야노스", "브라이슨 스탓", "에드문도 소사", "요한 로하스"]}
     }
     
     mlb_teams = sorted(list(mlb_data.keys()))
@@ -63,16 +32,16 @@ def main():
     if not st.session_state.game_active:
         st.markdown("""
             <div style="background: #1c2541; padding: 35px; border-radius: 16px; text-align: center; border: 2px solid #3a86ff; max-width: 800px; margin: 40px auto;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900;">⚾ MLB PRO ULTIMATE - 타자 복귀 패치</h1>
-                <p style="color: #ffb703; margin-top: 10px; font-size: 18px; font-weight: bold;">[체감 개선 완료] 완벽한 구속 밸런스 튜닝 및 타자 캐릭터 그래픽 구현!</p>
+                <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: 900;">⚾ MLB PRO ULTIMATE - BATTERY MATRIX</h1>
+                <p style="color: #ffb703; margin-top: 10px; font-size: 18px; font-weight: bold;">🚨 포수 백스톱 구현! 마구 포구 실패 및 폭투/주자 자동 진루 시스템 가동!</p>
             </div>
         """, unsafe_allow_html=True)
         
         c_left, c_right = st.columns(2)
         with c_left:
-            user_team = st.selectbox("🏃 내 구단 선택", mlb_teams, index=mlb_teams.index("San Diego Padres"))
+            user_team = st.selectbox("🏃 내 구단 선택", mlb_teams, index=0)
         with c_right:
-            ai_team = st.selectbox("🤖 라이벌 AI 구단", mlb_teams, index=mlb_teams.index("Los Angeles Dodgers"))
+            ai_team = st.selectbox("🤖 라이벌 AI 구단", mlb_teams, index=1)
             
         if st.button("🏟️ 경기 시작"):
             st.session_state.p_team = user_team
@@ -92,9 +61,9 @@ def main():
     js_a_lineup = json.dumps(a_data['lineup'], ensure_ascii=False)
 
     with col_tactics_panel:
-        st.markdown("### 📊 라인업")
-        st.info(f"**⚾ 내 투수:** {p_data['pitcher']['name']}\n\n**1:** {p_data['lineup'][0]}\n**2:** {p_data['lineup'][1]}")
-        st.error(f"**🤖 AI 투수:** {a_data['pitcher']['name']}\n\n**1:** {a_data['lineup'][0]}\n**2:** {a_data['lineup'][1]}")
+        st.markdown("### 📊 배터리 & 타순")
+        st.info(f"**⚾ 내 팀:** {st.session_state.p_team}\n* 투수: {p_data['pitcher']}\n* 포수: {p_data['catcher']}\n\n**현재 타자:** {p_data['lineup'][0]}")
+        st.error(f"**🤖 AI 팀:** {st.session_state.a_team}\n* 투수: {a_data['pitcher']}\n* 포수: {a_data['catcher']}\n\n**상대 타자:** {a_data['lineup'][0]}")
         if st.button("🚪 로비로 돌아가기"):
             st.session_state.game_active = False
             st.rerun()
@@ -102,8 +71,6 @@ def main():
     with col_game_screen:
         team_p = st.session_state.p_team
         team_a = st.session_state.a_team
-        my_pitch1 = p_data['pitcher']['p1']
-        my_pitch2 = p_data['pitcher']['p2']
 
         html_part = f"""
         <div id="game-container" style="background: #0b1329; padding: 15px; border-radius: 14px; border: 2px solid #1c2541; max-width: 760px; margin: 0 auto;">
@@ -124,7 +91,7 @@ def main():
 
             <div style="text-align: center; margin-bottom: 10px;">
                 <span style="background: #ffb703; color: #020c1b; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 18px;">
-                    현재 타자: <span id="current-batter-name">{p_data['lineup'][0]}</span>
+                    현재 타석: <span id="current-batter-name">{p_data['lineup'][0]}</span>
                 </span>
             </div>
 
@@ -132,22 +99,29 @@ def main():
             
             <div style="margin-top: 10px; text-align: center; background: #1c2541; padding: 12px; border-radius: 8px;">
                 <div id="pitcher-controls" style="display: none; margin-bottom: 8px;">
-                    <span style="color: white; margin-right: 10px;">마운드: <b>{p_data['pitcher']['name']}</b></span>
-                    <button onclick="setPitch('{my_pitch1}')" id="btn-fast" style="background: #d90429; color: white; border: 2px solid #ffffff; padding: 6px 14px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;">{my_pitch1} (선택됨)</button>
-                    <button onclick="setPitch('{my_pitch2}')" id="btn-change" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 6px 14px; border-radius: 4px; font-weight: bold; cursor: pointer;">{my_pitch2}</button>
+                    <span style="color: white; display: inline-block; margin-bottom: 8px;">안방마님 포수: <b style="color:#4cc9f0;">{p_data['catcher']}</b> (너클볼/스플리터는 포수도 놓칠 수 있음!)</span><br>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+                        <button onclick="setPitch('포심 직구')" id="btn-p1" style="background: #d90429; color: white; border: 2px solid #ffffff; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">포심 직구</button>
+                        <button onclick="setPitch('고속 슬라이더')" id="btn-p2" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">슬라이더</button>
+                        <button onclick="setPitch('폭포수 커브')" id="btn-p3" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">곡예 커브</button>
+                        <button onclick="setPitch('체인지업')" id="btn-p4" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">체인지업</button>
+                        <button onclick="setPitch('파워 싱커')" id="btn-p5" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">파워 싱커</button>
+                        <button onclick="setPitch('스플리터')" id="btn-p6" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">스플리터</button>
+                        <button onclick="setPitch('커터')" id="btn-p7" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">고속 커터</button>
+                        <button onclick="setPitch('마구 너클볼')" id="btn-p8" style="background: #1c2541; color: #a1a1aa; border: 1px solid #4b5563; padding: 8px 5px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:13px;">🔮 너클볼</button>
+                    </div>
                 </div>
                 
                 <div id="batter-controls" style="display: block;">
-                    <button onclick="triggerBunt()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;">📐 기습 번트 대기</button>
+                    <button onclick="triggerBunt()" style="background: #4caf50; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 5px;">📐 기습 번트 자세</button>
                     <button onclick="triggerSteal()" style="background: #ffb703; color: #020c1b; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-right: 15px;">🏃 즉시 도루</button>
-                    <button onclick="tryAdvanceBase()" id="btn-advance" style="display: none; background: #e63946; color: white; border: 2px solid #ffffff; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; animation: blinker 1s linear infinite;">🚨 주자 추가 진루 감행!</button>
+                    <button onclick="tryAdvanceBase()" id="btn-advance" style="display: none; background: #e63946; color: white; border: 2px solid #ffffff; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; animation: blinker 1s linear infinite;">🚨 주자 추가 진루!</button>
                 </div>
             </div>
 
-            <div style="background: #020c1b; color: #f8fafc; padding: 14px; border-radius: 8px; font-weight: bold; margin-top: 8px; border-left: 6px solid #3a86ff;">
-                <span id="commentary" style="color: #90e0ef;">🎙️ 캐스터: 타석에 타자가 준비를 끝마쳤습니다! 공이 날아오는 타이밍에 맞춰 정확히 조준 사격하세요!</span>
+            <div style="background: #020c1b; color: #f8fafc; padding: 14px; border-radius: 8px; font-weight: bold; margin-top: 8px; border-left: 6px solid #3a86ff; min-height: 55px;">
+                <span id="commentary" style="color: #90e0ef;">🎙️ 캐스터: 안방마님 포수까지 마운드 뒤에 완벽 배치 완료! 마구를 흘리는지 안 흘리는지 지켜보겠습니다!</span>
             </div>
-            <style> @keyframes blinker {{ 50% {{ opacity: 0.5; }} }} </style>
         </div>
         """
 
@@ -162,41 +136,40 @@ def main():
 
             const pLineup = {js_p_lineup};
             const aLineup = {js_a_lineup};
-            const aiPitcherName = "{a_data['pitcher']['name']}";
-            const aiPitch1 = "{a_data['pitcher']['p1']}";
-            const aiPitch2 = "{a_data['pitcher']['p2']}";
+            const aiPitcherName = "{a_data['pitcher']}";
+            const aiCatcherName = "{a_data['catcher']}";
+            const myCatcherName = "{p_data['catcher']}";
 
             let pBatterIndex = 0; let aBatterIndex = 0;
 
-            // ⚾ 체감 극대화! 너무 느리지도, 빠르지도 않은 인간형 밸런스 구속 패치
+            // 🌀 마구 스펙 및 포수가 놓칠 확률(missProb) 밸런스 추가
             const pitchDict = {{
-                "포심 직구": {{ speed: 0.015, breakX: 0, breakY: 0 }},
-                "광속구": {{ speed: 0.019, breakX: 0, breakY: 0 }}, 
-                "고속 슬라이더": {{ speed: 0.013, breakX: 40, breakY: 10 }},
-                "스플링커": {{ speed: 0.014, breakX: -15, breakY: 30 }}, 
-                "너클 커브": {{ speed: 0.010, breakX: -10, breakY: 50 }}, 
-                "폭포수 커브": {{ speed: 0.010, breakX: -10, breakY: 45 }},
-                "싱커": {{ speed: 0.013, breakX: -30, breakY: 15 }},
-                "스위퍼": {{ speed: 0.011, breakX: 65, breakY: 0 }},
-                "체인지업": {{ speed: 0.012, breakX: -15, breakY: 20 }},
-                "스플리터": {{ speed: 0.014, breakX: 0, breakY: 35 }},
-                "유령 포크볼": {{ speed: 0.011, breakX: 5, breakY: 40 }},
-                "커터": {{ speed: 0.014, breakX: 15, breakY: 5 }}
+                "포심 직구": {{ speed: 0.038, type: "fast", color: "#e63946", missProb: 0.01 }},
+                "고속 슬라이더": {{ speed: 0.031, type: "slider", color: "#3a86ff", missProb: 0.05 }},
+                "폭포수 커브": {{ speed: 0.021, type: "curve", color: "#ffb703", missProb: 0.10 }},
+                "체인지업": {{ speed: 0.024, type: "changeup", color: "#06d6a0", missProb: 0.06 }},
+                "파워 싱커": {{ speed: 0.034, type: "sinker", color: "#f72585", missProb: 0.07 }},
+                "스플리터": {{ speed: 0.032, type: "splitter", color: "#7209b7", missProb: 0.15 }}, // 뚝 떨어져서 포수가 놓치기 쉬움
+                "커터": {{ speed: 0.036, type: "cutter", color: "#4cc9f0", missProb: 0.02 }},
+                "마구 너클볼": {{ speed: 0.016, type: "knuckle", color: "#ffffff", missProb: 0.25 }} // 너클볼은 25% 확률로 포구 실패!
             }};
 
-            let myPitch1 = document.getElementById('btn-fast').innerText.replace(" (선택됨)", "");
-            let myPitch2 = document.getElementById('btn-change').innerText;
-
-            let ball = {{ active: false, isHit: false, isBunt: false, x: 360, y: 220, z: 0, tx: 360, ty: 320, size: 2, name: myPitch1 }};
-            let selectedPitch = myPitch1;
+            let ball = {{ active: false, isHit: false, isBunt: false, isPassed: false, x: 360, y: 210, z: 0, startX: 360, startY: 210, tx: 360, ty: 320, size: 2, name: "포심 직구" }};
+            let selectedPitch = "포심 직구";
             
-            let aiPitchTimer = 90; 
-            let isSwung = false; let swingFrame = 0; let buntFrame = 0;
+            let aiPitchTimer = 55; 
+            let isSwung = false; let swingFrame = 0;
             let isBuntStance = false;
+            let animTicks = 0;
 
             let fielders = [
-                {{ pos: "1B", x: 490, y: 240 }}, {{ pos: "2B", x: 410, y: 170 }}, {{ pos: "SS", x: 310, y: 170 }},
-                {{ pos: "3B", x: 230, y: 240 }}, {{ pos: "LF", x: 170, y: 110 }}, {{ pos: "CF", x: 360, y: 90 }}, {{ pos: "RF", x: 550, y: 110 }}
+                {{ pos: "1B", x: 490, y: 240, ox: 490, oy: 240 }},
+                {{ pos: "2B", x: 410, y: 170, ox: 410, oy: 170 }},
+                {{ pos: "SS", x: 310, y: 170, ox: 310, oy: 170 }},
+                {{ pos: "3B", x: 230, y: 240, ox: 230, oy: 240 }},
+                {{ pos: "LF", x: 170, y: 110, ox: 170, oy: 110 }},
+                {{ pos: "CF", x: 360, y: 90,  ox: 360, oy: 90 }},
+                {{ pos: "RF", x: 550, y: 110, ox: 550, oy: 110 }}
             ];
 
             function addScore(points) {{
@@ -206,10 +179,10 @@ def main():
 
             function nextBatter() {{
                 if (currentMode === "batter") {{
-                    pBatterIndex = (pBatterIndex + 1) % 9;
+                    pBatterIndex = (pBatterIndex + 1) % 8;
                     document.getElementById('current-batter-name').innerText = pLineup[pBatterIndex];
                 }} else {{
-                    aBatterIndex = (aBatterIndex + 1) % 9;
+                    aBatterIndex = (aBatterIndex + 1) % 8;
                     document.getElementById('current-batter-name').innerText = aLineup[aBatterIndex];
                 }}
             }}
@@ -227,56 +200,48 @@ def main():
                 }} else if (hitType === "homerun") {{
                     let runs = 1; if (bases[0]) runs++; if (bases[1]) runs++; if (bases[2]) runs++;
                     addScore(runs); bases = [false, false, false]; 
+                }} else if (hitType === "passed_ball") {{
+                    // 포수가 공 빠뜨렸을 때 루상의 주자들 한 베이스씩 자동 안전 진루!
+                    if (bases[2]) {{ addScore(1); bases[2] = false; }}
+                    if (bases[1]) {{ bases[2] = true; bases[1] = false; }}
+                    if (bases[0]) {{ bases[1] = true; bases[0] = false; }}
                 }}
             }}
 
             function tryAdvanceBase() {{
                 if (game.o >= 3) return;
                 document.getElementById('btn-advance').style.display = 'none';
-                
-                let safe = Math.random() > 0.5; 
+                let safe = Math.random() > 0.48; 
                 if (safe) {{
                     advanceRunners("single"); 
-                    document.getElementById('commentary').innerHTML = `🏃 <b>주자 추가 진루 대성공!!</b> 허를 찌르는 슬라이딩으로 세이프!`;
+                    document.getElementById('commentary').innerHTML = `🎙️ 해설: 세이프! 주자가 베이스를 완전히 찢었습니다!`;
                 }} else {{
                     game.o++;
-                    if (bases[2]) bases[2] = false;
-                    else if (bases[1]) bases[1] = false;
-                    else if (bases[0]) bases[0] = false;
-                    
-                    document.getElementById('commentary').innerHTML = `☠️ <b>태그 아웃!!</b> 무리하게 베이스를 노리다가 횡사했습니다!`;
+                    if (bases[2]) bases[2] = false; else if (bases[1]) bases[1] = false; else if (bases[0]) bases[0] = false;
+                    document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 아웃! 무리한 진루가 화를 불렀습니다.`;
                     updateInningStatus();
                 }}
             }}
 
             function triggerBunt() {{
-                if (!ball.active || ball.isHit) {{
-                    isBuntStance = !isBuntStance;
-                    document.getElementById('commentary').innerHTML = isBuntStance ? "📐 <b>번트 자세 장착!</b> 타이밍에 맞춰 마우스로 공을 클릭하세요." : "🎙️ 번트 캔슬, 정상 타격 스탠스로 전환합니다.";
-                    return;
-                }}
-                if (isBuntStance || !isBuntStance) {{
-                    isBuntStance = true;
-                    buntFrame = 15;
-                    evalBunt();
-                }}
+                if (!ball.active || ball.isHit || ball.isPassed) return;
+                isBuntStance = true; evalBunt();
             }}
 
             function evalBunt() {{
-                if (ball.active && ball.z >= 0.70 && ball.z <= 0.95) {{
+                if (ball.active && ball.z >= 0.78 && ball.z <= 0.95) {{
                     ball.isHit = true; ball.isBunt = true;
-                    let safe = Math.random() > 0.45;
-                    if (safe) {{
+                    if (Math.random() > 0.45) {{
                         advanceRunners("single");
-                        document.getElementById('commentary').innerHTML = `📐 <b>작전 성공! 기습 번트 안타!</b> 수비진을 완벽하게 뒤흔듭니다!`;
+                        document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 번트 안타 성공! 절묘하게 굴렀습니다!`;
                     }} else {{
                         game.o++;
-                        document.getElementById('commentary').innerHTML = `🎙️ 번트 타구가 투수 정면으로 굴러가 아웃됩니다.`;
+                        document.getElementById('commentary').innerHTML = `🎙️ 해설: 야수가 빠르게 집어 1루 아웃!`;
                     }}
                     nextBatter(); updateInningStatus();
                 }} else {{
                     game.s++; ball.active = false;
-                    document.getElementById('commentary').innerHTML = `🎙️ 번트 헛방! 스트라이크 카운트가 올라갑니다.`;
+                    document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 번트 헛방, 스트라이크!`;
                     updateInningStatus();
                 }}
                 isBuntStance = false;
@@ -284,53 +249,47 @@ def main():
 
             function triggerSteal() {{
                 if (!bases[0] && !bases[1]) {{
-                    document.getElementById('commentary').innerHTML = "❌ <b>도루 불가:</b> 주자가 루상에 없습니다.";
+                    document.getElementById('commentary').innerHTML = "🎙️ 중계석: 주자가 없습니다.";
                     return;
                 }}
-                let safe = Math.random() > 0.5;
-                if (safe) {{
+                if (Math.random() > 0.5) {{
                     if (bases[1]) {{ bases[2] = true; bases[1] = false; }}
                     else if (bases[0]) {{ bases[1] = true; bases[0] = false; }}
-                    document.getElementById('commentary').innerHTML = "🏃 <b>도루 대성공!</b> 상대 베이스를 완전히 훔쳐냅니다!";
+                    document.getElementById('commentary').innerHTML = "🎙️ 캐스터: 2루 도루 성공!";
                 }} else {{
                     game.o++;
-                    if (bases[1]) bases[1] = false;
-                    else if (bases[0]) bases[0] = false;
-                    document.getElementById('commentary').innerHTML = "☠️ <b>도루 실패!</b> 포수의 명품 송구에 저지당합니다.";
+                    if (bases[1]) bases[1] = false; else if (bases[0]) bases[0] = false;
+                    document.getElementById('commentary').innerHTML = "🎙️ 해설: 포수 송구 아웃!";
                     updateInningStatus();
                 }}
             }}
 
             function setPitch(type) {{
                 selectedPitch = type;
-                let bf = document.getElementById('btn-fast'); let bc = document.getElementById('btn-change');
-                if(type === myPitch1) {{
-                    bf.style.background = '#d90429'; bf.style.color = 'white'; bf.style.border = '2px solid white'; bf.innerText = myPitch1 + " (선택됨)";
-                    bc.style.background = '#1c2541'; bc.style.color = '#a1a1aa'; bc.style.border = '1px solid #4b5563'; bc.innerText = myPitch2;
-                }} else {{
-                    bc.style.background = '#f77f00'; bc.style.color = 'white'; bc.style.border = '2px solid white'; bc.innerText = myPitch2 + " (선택됨)";
-                    bf.style.background = '#1c2541'; bf.style.color = '#a1a1aa'; bf.style.border = '1px solid #4b5563'; bf.innerText = myPitch1;
+                for(let i=1; i<=8; i++) {{
+                    let btn = document.getElementById("btn-p" + i);
+                    if (btn && btn.innerText.includes(type.replace("마구 ","").replace("파워 ","").replace("고속 ","").replace("곡예 ",""))) {{
+                        btn.style.background = "#d90429"; btn.style.color = "white"; btn.style.border = "2px solid white";
+                    }} else if (btn) {{
+                        btn.style.background = "#1c2541"; btn.style.color = "#a1a1aa"; btn.style.border = "1px solid #4b5563";
+                    }}
                 }}
             }}
 
             canvas.addEventListener('mousedown', (e) => {{
                 let rect = canvas.getBoundingClientRect(); let mx = e.clientX - rect.left; let my = e.clientY - rect.top;
-                
                 document.getElementById('btn-advance').style.display = 'none';
 
                 if (currentMode === "pitcher") {{
                     if (!ball.active) {{
-                        ball.name = selectedPitch; ball.tx = mx; ball.ty = my; ball.x = 360; ball.y = 220; ball.z = 0; ball.size = 2;
-                        ball.active = true; ball.isHit = false; ball.isBunt = false; isSwung = false;
+                        ball.name = selectedPitch; ball.tx = mx; ball.ty = my; ball.x = 360; ball.y = 210; ball.z = 0;
+                        ball.startX = 360; ball.startY = 210;
+                        ball.active = true; ball.isHit = false; ball.isBunt = false; ball.isPassed = false; isSwung = false;
                     }}
                 }} else {{
-                    if (isBuntStance) {{
-                        evalBunt();
-                        return;
-                    }}
-                    if (ball.active && !ball.isHit && !isSwung) {{ 
-                        isSwung = true; swingFrame = 12; 
-                        evalBatterSwing(mx, my);
+                    if (isBuntStance) {{ evalBunt(); return; }}
+                    if (ball.active && !ball.isHit && !ball.isPassed && !isSwung) {{ 
+                        isSwung = true; swingFrame = 12; evalBatterSwing(mx, my);
                     }}
                 }}
             }});
@@ -339,43 +298,38 @@ def main():
                 let hitDist = Math.hypot(mx - ball.x, my - ball.y);
                 let timingScore = Math.abs(ball.z - 0.85); 
 
-                if (ball.z >= 0.65 && ball.z <= 1.05) {{
-                    if (hitDist <= 38 && timingScore <= 0.09) {{
-                        evaluateHitTrajectory("homerun", false);
-                    }} 
-                    else if (hitDist <= 68 && timingScore <= 0.19) {{
-                        evaluateHitTrajectory("good", false);
-                    }} 
-                    else if (hitDist <= 98) {{
-                        evaluateHitTrajectory("poor", false);
-                    }} 
+                if (ball.z >= 0.72 && ball.z <= 0.96) {{
+                    if (hitDist <= 30 && timingScore <= 0.04) evaluateHitTrajectory("homerun", false);
+                    else if (hitDist <= 55 && timingScore <= 0.09) evaluateHitTrajectory("good", false);
+                    else if (hitDist <= 85) evaluateHitTrajectory("poor", false);
                     else {{
                         game.s++; ball.active = false; 
-                        document.getElementById('commentary').innerHTML = `🎙️ 헛스윙! 공을 스치지 못했습니다.`; 
+                        document.getElementById('commentary').innerHTML = `🎙️ 캐스터: <b>헛스윙! 공이 마법처럼 꺾였습니다!</b>`; 
                         updateInningStatus();
                     }}
                 }} else {{ 
                     game.s++; ball.active = false; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 타이밍이 너무 빠르거나 늦어 헛스윙!`; 
+                    document.getElementById('commentary').innerHTML = `🎙️ 해설: 타이밍이 안 맞았습니다, 헛스윙!`; 
                     updateInningStatus(); 
                 }}
             }}
 
             function evalAiBatter() {{
-                if (ball.active && !ball.isHit && !isSwung && ball.z >= 0.75 && ball.z <= 0.90) {{
+                if (ball.active && !ball.isHit && !ball.isPassed && !isSwung && ball.z >= 0.76 && ball.z <= 0.90) {{
                     let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
-                    let willSwing = insideZone ? (Math.random() > 0.45) : (Math.random() > 0.80);
+                    let pitchData = pitchDict[ball.name];
+                    let aiMissChance = (pitchData.type === "knuckle" || pitchData.type === "splitter") ? 0.58 : 0.35;
+                    
+                    let willSwing = insideZone ? (Math.random() > 0.42) : (Math.random() > 0.89);
 
                     if (willSwing) {{
                         isSwung = true; swingFrame = 12;
-                        let whiffChance = insideZone ? 0.38 : 0.85; 
-                        
-                        if (Math.random() < whiffChance) {{
-                            document.getElementById('commentary').innerHTML = `🎙️ AI <b>헛스윙 삼진 유도!</b> 완벽히 속여냈습니다.`;
+                        if (Math.random() < aiMissChance) {{
+                            document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 삼진! 타자의 배트가 허공을 가릅니다!`;
                             game.s++; ball.active = false; updateInningStatus();
                         }} else {{
                             let roll = Math.random();
-                            if (roll > 0.88) evaluateHitTrajectory("homerun", true);
+                            if (roll > 0.89) evaluateHitTrajectory("homerun", true);
                             else if (roll > 0.45) evaluateHitTrajectory("good", true);
                             else evaluateHitTrajectory("poor", true);
                         }}
@@ -385,184 +339,198 @@ def main():
 
             function evaluateHitTrajectory(hitQuality, isAiHitter) {{
                 ball.isHit = true; ball.isBunt = false;
-                let batterName = isAiHitter ? aLineup[aBatterIndex] : pLineup[pBatterIndex];
 
                 if (hitQuality === "homerun") {{
-                    ball.tx = 360 + (Math.random() * 200 - 100); ball.ty = -100; 
+                    ball.tx = 360 + (Math.random() * 260 - 130); ball.ty = -160; 
                     advanceRunners("homerun");
-                    document.getElementById('commentary').innerHTML = `🔥 <b>초대형 아치!!! 홈런!!</b> ${{batterName}} 담장을 찢어버립니다!`;
+                    document.getElementById('commentary').innerHTML = `🎙️ 캐스터: <b>쳤습니다!! 담장 밖으로!! 홈런입니다!!</b>`;
                     nextBatter(); updateInningStatus();
                 }} else if (hitQuality === "good") {{
-                    ball.tx = 360 + (Math.random() * 300 - 150); ball.ty = 50 + Math.random() * 100; 
+                    ball.tx = 360 + (Math.random() * 340 - 170); ball.ty = 40 + Math.random() * 110; 
                     advanceRunners("single");
-                    
                     if (!isAiHitter) {{
-                        document.getElementById('commentary').innerHTML = `🎙️ 안타 쾅! ${{batterName}} 루상에 나갑니다!<br><span style="color:#ffb703; font-size:14px;">👉 [주자 추가 진루 감행] 버튼을 누르면 다음 베이스로 질주합니다!</span>`;
+                        document.getElementById('commentary').innerHTML = `🎙️ 해설: 안타! 주자 나갑니다.`;
                         document.getElementById('btn-advance').style.display = 'inline-block';
                     }} else {{
-                        document.getElementById('commentary').innerHTML = `🎙️ AI 클러치 안타 작렬! 위기를 맞이합니다.`;
+                        document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 깨끗한 안타를 허용합니다.`;
                     }}
                     nextBatter(); updateInningStatus();
                 }} else {{
-                    ball.tx = 360 + (Math.random() * 100 - 50); ball.ty = 200; game.o++; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 허공에 뜬 공, 평범한 플라이 아웃으로 물러납니다.`;
+                    ball.tx = 360 + (Math.random() * 140 - 70); ball.ty = 175; game.o++; 
+                    document.getElementById('commentary').innerHTML = `🎙️ 해설: 뜬공 아웃입니다.`;
                     nextBatter(); updateInningStatus();
                 }}
             }}
 
             function updateInningStatus() {{
-                if (game.s >= 3) {{ 
-                    game.o++; game.s = 0; game.b = 0; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 삼진 아웃!! 배트가 허공을 갈랐습니다.`; 
-                    nextBatter();
-                }}
-                if (game.b >= 4) {{ 
-                    game.s = 0; game.b = 0; 
-                    document.getElementById('commentary').innerHTML = `🎙️ 볼넷 출루 성공! 주자가 밀려 나갑니다.`; 
-                    advanceRunners("walk"); nextBatter();
-                }}
+                if (game.s >= 3) {{ game.o++; game.s = 0; game.b = 0; document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 삼진 아웃!`; nextBatter(); }}
+                if (game.b >= 4) {{ game.s = 0; game.b = 0; document.getElementById('commentary').innerHTML = `🎙️ 중계석: 볼넷 출루!`; advanceRunners("walk"); nextBatter(); }}
                 
                 if (game.o >= 3) {{
                     game.o = 0; game.s = 0; game.b = 0; bases = [false, false, false]; 
-                    document.getElementById('btn-advance').style.display = 'none'; 
-                    ball.active = false;
+                    document.getElementById('btn-advance').style.display = 'none'; ball.active = false;
                     
                     if (currentMode === "batter") {{
                         currentMode = "pitcher";
                         document.getElementById('current-turn-badge').innerText = "1회말 수비"; document.getElementById('current-turn-badge').style.backgroundColor = "#f72585";
                         document.getElementById('pitcher-controls').style.display = 'block'; document.getElementById('batter-controls').style.display = 'none';
                         document.getElementById('current-batter-name').innerText = aLineup[aBatterIndex];
-                        document.getElementById('commentary').innerHTML = "🚨 <b>공수교대!</b> 아래 변화구를 섞어 타자의 허를 찌르세요!";
                     }} else {{
                         currentMode = "batter";
                         document.getElementById('current-turn-badge').innerText = "2회초 공격"; document.getElementById('current-turn-badge').style.backgroundColor = "#3a86ff";
                         document.getElementById('pitcher-controls').style.display = 'none'; document.getElementById('batter-controls').style.display = 'block';
                         document.getElementById('current-batter-name').innerText = pLineup[pBatterIndex];
-                        document.getElementById('commentary').innerHTML = `🚨 <b>공수교대!</b> 타격 타이밍에 맞춰 사격 개시!`;
                     }}
-                    aiPitchTimer = 90; 
+                    aiPitchTimer = 55; 
                 }}
                 document.getElementById('count-display').innerText = "B: " + game.b + " | S: " + game.s + " | O: " + game.o;
             }}
 
+            function drawHuman(x, y, isPitcher, frameTick, label="") {{
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = isPitcher ? "#e63946" : "#4cc9f0";
+                ctx.fillStyle = isPitcher ? "#e63946" : "#4cc9f0";
+
+                let idleOffset = Math.sin(frameTick * 0.08) * 1.8;
+                ctx.beginPath(); ctx.arc(x, y - 22 + (isPitcher ? 0 : idleOffset), 6, 0, Math.PI*2); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(x, y - 16 + (isPitcher ? 0 : idleOffset)); ctx.lineTo(x, y); ctx.stroke();
+
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 6, y + 14); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 6, y + 14); ctx.stroke();
+                
+                if(label) {{
+                    ctx.fillStyle = "#ffffff"; ctx.font = "10px Arial"; ctx.fillText(label, x - 12, y - 30);
+                }}
+            }}
+
             function drawScene() {{
+                animTicks++;
                 ctx.clearRect(0, 0, 720, 440);
                 ctx.fillStyle = "#1a4d2e"; ctx.fillRect(0, 0, 720, 440);
                 
-                // 야구장 흙 및 내야
                 ctx.fillStyle = "#a66a38"; ctx.beginPath(); ctx.moveTo(0, 440); ctx.lineTo(720, 440); ctx.lineTo(550, 190); ctx.lineTo(170, 190); ctx.closePath(); ctx.fill();
                 ctx.fillStyle = "#2a9d8f"; ctx.beginPath(); ctx.moveTo(360, 380); ctx.lineTo(480, 260); ctx.lineTo(360, 140); ctx.lineTo(240, 260); ctx.closePath(); ctx.fill();
-                ctx.fillStyle = "#a66a38"; ctx.beginPath(); ctx.arc(360, 220, 25, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ffffff"; ctx.fillRect(350, 218, 20, 4);
+                ctx.fillStyle = "#a66a38"; ctx.beginPath(); ctx.arc(360, 210, 25, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffffff"; ctx.fillRect(350, 208, 20, 4);
                 
-                // 홈플레이트 및 루상 베이스
                 ctx.beginPath(); ctx.moveTo(360, 380); ctx.lineTo(370, 370); ctx.lineTo(350, 370); ctx.closePath(); ctx.fill(); 
                 ctx.fillRect(475, 255, 12, 12); ctx.fillRect(354, 134, 12, 12); ctx.fillRect(235, 255, 12, 12); 
 
-                // 주자 표시 채우기
-                ctx.fillStyle = "#ffb703"; ctx.strokeStyle = "#000000"; ctx.lineWidth = 2;
-                if (bases[0]) {{ ctx.beginPath(); ctx.arc(481, 261, 8, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }}
-                if (bases[1]) {{ ctx.beginPath(); ctx.arc(360, 140, 8, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }}
-                if (bases[2]) {{ ctx.beginPath(); ctx.arc(241, 261, 8, 0, Math.PI*2); ctx.fill(); ctx.stroke(); }}
+                if (bases[0]) {{ ctx.fillStyle = "#ffb703"; ctx.beginPath(); ctx.arc(481, 261, 8, 0, Math.PI*2); ctx.fill(); }}
+                if (bases[1]) {{ ctx.fillStyle = "#ffb703"; ctx.beginPath(); ctx.arc(360, 140, 8, 0, Math.PI*2); ctx.fill(); }}
+                if (bases[2]) {{ ctx.fillStyle = "#ffb703"; ctx.beginPath(); ctx.arc(241, 261, 8, 0, Math.PI*2); ctx.fill(); }}
 
-                // 투수 모델링(빨간 사각형)
-                ctx.fillStyle = "#d90429"; ctx.fillRect(352, 200, 16, 20); 
+                drawHuman(360, 195, true, animTicks, "P"); // 투수
+                drawHuman(285, 355, false, animTicks, "H"); // 타자
                 
-                // 수비수 무리
+                // 🧤 안방마님 포수 등장 (홈플레이트 뒤에 대기)
+                let activeCatcherName = (currentMode === "pitcher") ? myCatcherName : aiCatcherName;
+                drawHuman(360, 395, true, animTicks, "C"); 
+
+                // 야수 수비수 추격 무빙
                 fielders.forEach(f => {{
+                    if (ball.active && ball.isHit) {{
+                        let dx = ball.x - f.x; let dy = ball.y - f.y;
+                        let dist = Math.hypot(dx, dy);
+                        if(dist > 5) {{ f.x += (dx / dist) * 2.8; f.y += (dy / dist) * 2.8; }} 
+                    }} else {{ 
+                        let dx = f.ox - f.x; let dy = f.oy - f.y;
+                        f.x += dx * 0.06; f.y += dy * 0.06;
+                    }}
                     ctx.fillStyle = "#023e8a"; ctx.fillRect(f.x - 8, f.y - 10, 16, 12);
                     ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.font = "11px Arial"; ctx.fillText(f.pos, f.x - 7, f.y + 14);
                 }});
 
-                // 스트라이크 스트라이크 존 그리드 안내
                 ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 2.5; ctx.strokeRect(310, 260, 100, 90);
                 
-                // 🦸 타자 그래픽 전면 수리 (방망이 든 타자 형태 렌더링)
-                ctx.fillStyle = "#4cc9f0"; 
-                ctx.fillRect(285, 335, 18, 30); // 타자 몸통
-                ctx.fillStyle = "#ffb703";
-                ctx.beginPath(); ctx.arc(294, 325, 8, 0, Math.PI*2); ctx.fill(); // 타자 머리
-                
-                // AI 투수 연산 제어틱
                 if (currentMode === "batter" && !ball.active) {{
                     aiPitchTimer--;
                     if (aiPitchTimer <= 0) {{
-                        ball.name = Math.random() > 0.5 ? aiPitch1 : aiPitch2;
+                        let keys = Object.keys(pitchDict);
+                        ball.name = keys[Math.floor(Math.random() * keys.length)];
                         ball.tx = 310 + Math.random() * 100; ball.ty = 260 + Math.random() * 90;
-                        ball.x = 360; ball.y = 220; ball.z = 0; ball.size = 2;
-                        ball.active = true; ball.isHit = false; ball.isBunt = false; isSwung = false;
-                        document.getElementById('commentary').innerHTML = `🤖 투수 <b>${{aiPitcherName}}</b>(이)가 <b>${{ball.name}}</b>(으)로 승부해옵니다!`;
+                        ball.x = 360; ball.y = 210; ball.z = 0; ball.startX = 360; ball.startY = 210;
+                        ball.active = true; ball.isHit = false; ball.isBunt = false; ball.isPassed = false; isSwung = false;
+                        document.getElementById('commentary').innerHTML = `🎙️ 캐스터: 투수 <b>${{aiPitcherName}}</b>이 구질로 <b>${{ball.name}}</b>을 장착했습니다!`;
                     }}
                 }}
 
-                // 공 비행 궤적 및 크기 조절
+                // 변화구 물리 궤적 처리
                 if (ball.active) {{
                     let pData = pitchDict[ball.name] || pitchDict["포심 직구"];
-                    let currentSpeed = ball.isHit ? -0.03 : pData.speed;
+                    
+                    // 만약 포수 뒤로 공이 빠진 상황이라면 백스톱 패스트 트랙 작동
+                    let currentSpeed = ball.isHit ? -0.042 : (ball.isPassed ? 0.035 : pData.speed);
                     ball.z += currentSpeed; 
                     
-                    if (!ball.isHit) {{
-                        let break_factor = Math.pow(ball.z, 2.3); 
-                        let base_x = 360 + (ball.tx - 360) * ball.z;
-                        let base_y = 220 + (ball.ty - 220) * ball.z;
-                        ball.x = base_x + (pData.breakX * break_factor);
-                        ball.y = base_y + (pData.breakY * break_factor);
+                    if (!ball.isHit && !ball.isPassed) {{
+                        let base_x = ball.startX + (ball.tx - ball.startX) * ball.z;
+                        let base_y = ball.startY + (ball.ty - ball.startY) * ball.z;
+                        
+                        if (pData.type === "slider") base_x += Math.pow(ball.z, 2.3) * 65;
+                        else if (pData.type === "curve") {{ base_y -= Math.sin(ball.z * Math.PI) * 55; base_y += Math.pow(ball.z, 2) * 25; }}
+                        else if (pData.type === "changeup") base_y += Math.pow(ball.z, 2.8) * 40;
+                        else if (pData.type === "sinker") {{ base_x -= Math.pow(ball.z, 2) * 25; base_y += Math.pow(ball.z, 2) * 30; }}
+                        else if (pData.type === "splitter" && ball.z > 0.6) base_y += Math.pow(ball.z - 0.6, 2) * 160;
+                        else if (pData.type === "cutter") base_x += Math.pow(ball.z, 2) * 15;
+                        else if (pData.type === "knuckle") {{ base_x += Math.sin(ball.z * 12) * 18; base_y += Math.cos(ball.z * 10) * 12; }}
+                        
+                        ball.x = base_x; ball.y = base_y;
+                        ctx.fillStyle = pData.color;
+                    }} else if (ball.isPassed) {{
+                        // ⚠️ 포수가 공을 놓쳐서 화면 아래 벽(백스톱)으로 직행하는 궤적
+                        ball.y += 4;
+                        ctx.fillStyle = "#ff5722";
                     }} else {{
-                        ball.x = 360 + (ball.tx - 360) * ball.z; ball.y = 220 + (ball.ty - 220) * ball.z;
+                        ball.x = 360 + (ball.tx - 360) * ball.z; ball.y = 210 + (ball.ty - 210) * ball.z;
+                        ctx.fillStyle = "#ffffff";
                     }}
                     
-                    if (ball.isHit) {{ ball.size = ball.isBunt ? 4 : Math.max(1, 2.5 + (ball.z * 10)); }} 
-                    else {{ ball.size = 2.5 + (Math.pow(ball.z, 3.2) * 20); }}
-
-                    if (!ball.isHit && ball.z > 0.70) {{
-                        ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#e63946"; ctx.lineWidth = 3;
-                    }} else {{
-                        ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.2;
-                    }}
-                    
+                    ball.size = ball.isHit ? (ball.isBunt ? 4 : Math.max(1, 2.5 + (ball.z * 12))) : (2.5 + (Math.pow(ball.z, 3.2) * 22));
+                    ctx.strokeStyle = "#000000"; ctx.lineWidth = 1.2;
                     ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI*2); ctx.fill(); ctx.stroke();
 
-                    if (currentMode === "pitcher" && !ball.isHit) evalAiBatter();
+                    if (currentMode === "pitcher" && !ball.isHit && !ball.isPassed) evalAiBatter();
 
-                    if (!ball.isHit && ball.z >= 1.0) {{
-                        ball.active = false;
-                        let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
-                        if (insideZone) {{ 
-                            game.s++; 
-                            document.getElementById('commentary').innerHTML = "🎙️ 완벽한 코스 스트라이크 삼진 아웃 위기!";
-                        }} else {{ 
-                            game.b++;
-                            document.getElementById('commentary').innerHTML = "🎙️ 잘 골라냈습니다, 볼!";
+                    // 포구 위치 도달 시 연산
+                    if (!ball.isHit && !ball.isPassed && ball.z >= 1.0) {{
+                        // 🔮 포수 포구 실패 주사위 굴리기!
+                        if (Math.random() < pData.missProb) {{
+                            ball.isPassed = true; 
+                            let anyRunner = (bases[0] || bases[1] || bases[2]);
+                            advanceRunners("passed_ball"); // 주자 자동 진루
+                            
+                            if (anyRunner) {{
+                                document.getElementById('commentary').innerHTML = `🎙️ 해설: <b>어어어?! 공이 빠졌습니다!! 포수 무브먼트를 비껴갑니다! 엉? 으의 아아어ㅣㅇ!! 그 사이에 루상의 주자들 한 베이스씩 자동 진루합니다!! 폭투입니다!</b>`;
+                            } else {{
+                                document.getElementById('commentary').innerHTML = `🎙️ 캐스터: <b>앗! 뒤로 빠집니다! 워낙 회전이 심한 마구다 보니 포수 ${{activeCatcherName}}도 블로킹하지 못했습니다!</b>`;
+                            }}
+                        }} else {{
+                            ball.active = false;
+                            let insideZone = (ball.x >= 310 && ball.x <= 410 && ball.y >= 260 && ball.y <= 350);
+                            if (insideZone) {{ game.s++; document.getElementById('commentary').innerHTML = "🎙️ 해설: 스트라이크 꽂힙니다!"; }} 
+                            else {{ game.b++; document.getElementById('commentary').innerHTML = "🎙️ 해설: 볼입니다."; }}
+                            updateInningStatus(); aiPitchTimer = 55;
                         }}
-                        updateInningStatus();
-                        aiPitchTimer = 90;
+                    }} else if (ball.isPassed && ball.y >= 440) {{
+                        // 뒤로 완전히 빠진 공 리셋
+                        ball.active = false; ball.isPassed = false;
+                        game.b++; // 기본적으로 볼 카운트 추가
+                        updateInningStatus(); aiPitchTimer = 55;
                     }} else if (ball.isHit && (ball.z <= -0.5 || ball.z >= 1.5)) {{ 
-                        ball.active = false; aiPitchTimer = 90;
+                        ball.active = false; aiPitchTimer = 55;
                     }}
                 }}
 
-                // 📐 번트 스탠스 및 방망이 애니메이션 보정
-                if (buntFrame > 0) {{
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 6;
-                    ctx.beginPath(); ctx.moveTo(300, 345); ctx.lineTo(360, 345); ctx.stroke(); buntFrame--;
-                }} else if (isBuntStance) {{
-                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 5;
-                    ctx.beginPath(); ctx.moveTo(300, 345); ctx.lineTo(360, 345); ctx.stroke();
+                // 배트 애니메이션
+                if (isBuntStance) {{
+                    ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(295, 350); ctx.lineTo(355, 350); ctx.stroke();
                 }} else if (swingFrame > 0) {{
-                    ctx.save(); 
-                    let angleRatio = ((12 - swingFrame) / 12) * Math.PI; 
-                    ctx.translate(295, 345); ctx.rotate(angleRatio - Math.PI / 6);
-                    ctx.strokeStyle = "#b79457"; ctx.lineWidth = 7;
-                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(75, 0); ctx.stroke(); 
-                    ctx.restore(); 
-                    swingFrame--;
+                    ctx.save(); let angleRatio = ((12 - swingFrame) / 12) * Math.PI; ctx.translate(290, 350); ctx.rotate(angleRatio - Math.PI / 5);
+                    ctx.strokeStyle = "#b79457"; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(75, 0); ctx.stroke(); ctx.restore(); swingFrame--;
                 }} else {{
-                    // 기본 타격 대기 자세 방망이 위치 (어깨 위에 대기)
-                    ctx.save();
-                    ctx.translate(295, 335); ctx.rotate(-Math.PI / 3);
-                    ctx.strokeStyle = "#b79457"; ctx.lineWidth = 6;
-                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(65, 0); ctx.stroke();
-                    ctx.restore();
+                    ctx.save(); let batIdle = Math.sin(animTicks * 0.1) * 0.05; ctx.translate(290, 340); ctx.rotate(-Math.PI / 2.8 + batIdle);
+                    ctx.strokeStyle = "#b79457"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(65, 0); ctx.stroke(); ctx.restore();
                 }}
 
                 requestAnimationFrame(drawScene);
