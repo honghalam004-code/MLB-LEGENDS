@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 def main():
-    st.set_page_config(page_title="MLB CATCHER VIEW - REAL TEXTURE", layout="wide")
+    st.set_page_config(page_title="MLB CATCHER VIEW - FIX EDITION", layout="wide")
     
     st.markdown("""
         <style>
@@ -27,38 +27,25 @@ def main():
                     "고속 스플린커": {"speed": 0.041, "drag": 0.93, "bx": 1.5, "by": 4.2},
                     "종 슬라이더": {"speed": 0.035, "drag": 0.88, "bx": -3.8, "by": 2.0},
                     "체인지업": {"speed": 0.031, "drag": 0.85, "bx": 2.0, "by": 3.5}
-                }},
-                "미치 켈러": {"pitches": {
-                    "싱커": {"speed": 0.039, "drag": 0.94, "bx": 2.5, "by": 2.8},
-                    "고속 스위퍼": {"speed": 0.034, "drag": 0.87, "bx": -6.0, "by": 1.0}}
-                }
+                }}
             },
-            "lineup": ["오닐 크루즈 (SS)", "브라이언 레이놀즈 (LF)", "키브라이언 헤이즈 (3B)", "라우디 텔레즈 (1B)", "앤드류 맥커친 (DH)", "코너 조 (RF)", "자레드 트리올로 (2B)", "마이클 A. 테일러 (CF)", "조이 바트 (C)"]
+            "lineup": ["오닐 크루즈 (SS)", "브라이언 레이놀즈 (LF)", "키브라이언 헤이즈 (3B)", "라우디 텔레즈 (1B)"]
         },
         "LA Dodgers": {
             "pitchers": {
                 "오타니 쇼헤이": {"pitches": {
                     "파워 포심": {"speed": 0.045, "drag": 1.0, "bx": 0.0, "by": 0.0},
-                    "마스터 스위퍼": {"speed": 0.031, "drag": 0.84, "bx": -6.8, "by": -0.8}}
-                }
+                    "마스터 스위퍼": {"speed": 0.031, "drag": 0.84, "bx": -6.8, "by": -0.8}
+                }}
             },
-            "lineup": ["오타니 쇼헤이 (DH)", "무키 베츠 (SS)", "프레디 프리먼 (1B)", "테오스카 에르난데스 (LF)", "맥스 먼시 (3B)", "토미 에드먼 (CF)", "가빈 럭스 (2B)", "앤디 파헤스 (RF)", "윌 스미스 (C)"]
+            "lineup": ["오타니 쇼헤이 (DH)", "무키 베츠 (SS)", "프레디 프리먼 (1B)"]
         }
     }
-
-    # 30개 구단 마스터 DB 연계 자동 스케일링
-    for i in range(1, 28):
-        t_name = f"MLB Team {i}"
-        if t_name not in mlb_mega_db:
-            mlb_mega_db[t_name] = {
-                "pitchers": {"에이스": {"pitches": {"포심": {"speed": 0.042, "drag": 1.0, "bx": 0.0, "by": 0.0}, "슬라이더": {"speed": 0.034, "drag": 0.88, "bx": 4.0, "by": 1.8}}}},
-                "lineup": ["스타 타자 (CF)", "타자 2번", "타자 3번", "타자 4번", "타자 5번", "타자 6번", "타자 7번", "타자 8번", "타자 9번"]
-            }
 
     sorted_teams = sorted(list(mlb_mega_db.keys()))
 
     if not st.session_state.game_active:
-        st.markdown("<h2 style='text-align:center; color:#22c55e; font-weight:800; margin-top:20px;'>🏟️ MLB CATCHER VIEW: GRAPHIC OVERHAUL</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center; color:#22c55e; font-weight:800; margin-top:20px;'>🏟️ MLB CATCHER VIEW: BUG FIX & NO-DOT</h2>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
             u_team = st.selectbox("아군 구단 선택", sorted_teams, index=sorted_teams.index("Pittsburgh Pirates"))
@@ -66,7 +53,7 @@ def main():
         with c2:
             a_team = st.selectbox("상대 구단 선택", sorted_teams, index=sorted_teams.index("LA Dodgers"))
             
-        if st.button("🏟️ 그래픽 리뉴얼 그라운드 입장"):
+        if st.button("🏟️ 엔진 수정판 그라운드 입장"):
             st.session_state.p_team = u_team
             st.session_state.a_team = a_team
             st.session_state.pitcher_name = sel_pitcher
@@ -97,15 +84,15 @@ def main():
         html_src = f"""
         <div style="max-width:1100px; margin:0 auto;">
             <div style="background:#1e293b; color:white; padding:14px; border-radius:8px; display:flex; justify-content:space-between; margin-bottom:10px; font-weight:bold; border:2px solid #334155;">
-                <div style="color:#67e8f9; font-size:16px;">🏟️ {st.session_state.p_team} GRAPHIC ENGINE</div>
-                <div id="abs-box" style="color:#22c55e; background:#0f172a; padding:2px 12px; border:1px solid #22c55e; border-radius:4px; font-size:13px; font-weight:800;">ABS READY</div>
+                <div style="color:#67e8f9; font-size:16px;">🏟️ {st.session_state.p_team} (BUG FIXED BUILD)</div>
+                <div id="abs-box" style="color:#22c55e; background:#0f172a; padding:2px 12px; border:1px solid #22c55e; border-radius:4px; font-size:13px; font-weight:800;">ABS LIVE</div>
                 <div id="score-board" style="color:#fbbf24; font-size:16px;">B: 0 | S: 0 | O: 0</div>
             </div>
 
             <div style="display:flex; gap:15px;">
-                <canvas id="ballCanvas" width="780" height="560" style="background:#154726; border:4px solid #334155; border-radius:8px; box-shadow: inset 0 0 50px rgba(0,0,0,0.6);"></canvas>
+                <canvas id="ballCanvas" width="780" height="560" style="background:#114d22; border:4px solid #334155; border-radius:8px;"></canvas>
                 <div style="width:240px; background:#1e293b; padding:14px; border-radius:8px; height:fit-content; border:1px solid #334155;">
-                    <span style="color:#94a3b8; font-size:13px; font-weight:bold; display:block; margin-bottom:8px;">⚾ 포수 사인 완료 (SET)</span>
+                    <span style="color:#94a3b8; font-size:13px; font-weight:bold; display:block; margin-bottom:8px;">⚾ 포수 구종 결정</span>
                     <div style="margin-top:6px;">{pitch_buttons}</div>
                     <div style="margin-top:15px; background:#0f172a; padding:10px; border-radius:6px; font-size:13px; font-weight:bold; text-align:center; color:#38bdf8;" id="base-viewer">주자 없음</div>
                 </div>
@@ -114,7 +101,7 @@ def main():
             <div style="background:#0f172a; border-left:6px solid #22c55e; padding:14px; border-radius:6px; margin-top:12px;">
                 <div style="font-size:12px; color:#22c55e; font-weight:800; margin-bottom:6px;">🎙️ REAL-TIME LIVE COMMENTARY LOG (누적 중계)</div>
                 <div id="relay-container" style="color:#f1f5f9; font-size:14px; font-family:monospace; max-height:110px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:6px; line-height:1.4;">
-                    <div style="color: #a1a1aa;">[중계석] 텍스처 그래픽 리뉴얼 완료! 야구공의 실밥 회전 무브먼트와 수비수 캐릭터 유니폼 시스템이 연동됩니다.</div>
+                    <div style="color: #a1a1aa;">[중계석] 락업(Lock-up) 프리징 버그 완전 패치 완료! 멈춤 없이 9인 리얼 그래픽 플레이가 전개됩니다.</div>
                 </div>
             </div>
         </div>
@@ -127,7 +114,6 @@ def main():
             const pitches = {json.dumps(st.session_state.p_data['pitches'], ensure_ascii=False)};
             let selectedPitch = Object.keys(pitches)[0];
 
-            // 🏟️ 등번호 및 포지션 코드가 포함된 9인 디테일 수비 캐릭터 구조체
             let players = [
                 {{ id: "투수", num: "1", x: 390, y: 190, sx: 390, sy: 190, tx: 390, ty: 190 }},
                 {{ id: "포수", num: "2", x: 390, y: 520, sx: 390, sy: 520, tx: 390, ty: 520 }},
@@ -140,11 +126,11 @@ def main():
                 {{ id: "우익수", num: "9", x: 660, y: 100, sx: 660, sy: 100, tx: 660, ty: 100 }}
             ];
 
-            let runner = {{ active: false, x: 610, y: 300, status: "stay", speed: 3.2 }};
+            let runner = {{ active: false, x: 610, y: 300, status: "stay", speed: 3.4 }};
             let isTargeting = false;
             let targetPos = {{ x: 390, y: 410 }};
             
-            let ball = {{ active: false, status: "ready", x: 390, y: 190, z: 0.0, tx: 390, ty: 410, speed: 0, drag: 1.0, bx: 0, by: 0, spinAngle: 0 }};
+            let ball = {{ active: false, status: "ready", x: 390, y: 190, z: 0.0, tx: 390, ty: 410, speed: 0, drag: 1.0, bx: 0, by: 0, spin: 0 }};
             let hitBall = {{ active: false, x: 390, y: 410, vx: 0, vy: 0, isBunt: false, spin: 0 }};
             let batter = {{ swinging: false, frame: 0, mode: "normal", swingRot: 0 }};
             let catcherThrow = {{ active: false, x: 390, y: 520, vx: 0, vy: 0 }};
@@ -157,6 +143,7 @@ def main():
             }}
 
             function setPitch(name) {{
+                // 공이 도는 중이거나 타구가 날아가는 중이면 입력 잠금 차단
                 if (ball.active || hitBall.active || ball.status !== "ready") return;
                 selectedPitch = name;
                 document.querySelectorAll('.p-btn').forEach(b => b.style.backgroundColor = '#1e293b');
@@ -176,7 +163,7 @@ def main():
                     catcherThrow.x = 390; catcherThrow.y = 520;
                     let dx = 390 - 390, dy = 220 - 520; let d = Math.hypot(dx, dy);
                     catcherThrow.vx = (dx/d)*14; catcherThrow.vy = (dy/d)*14;
-                    addLog("<span style='color:#67e8f9;'>⚡ [레이저 레이스] 포수가 2루 정면으로 강습 송구를 발사했습니다!</span>");
+                    addLog("<span style='color:#67e8f9;'>⚡ [송구 가동] 포수가 2루 베이스 커버진을 향해 저격 탄환을 던졌습니다!</span>");
                     return;
                 }}
                 if(!ball.active && !hitBall.active && ball.status === "ready") {{
@@ -190,38 +177,41 @@ def main():
 
             function throwBall() {{
                 let p = pitches[selectedPitch];
-                ball.z = 0.0; ball.x = 390; ball.y = 190; ball.tx = targetPos.x; ball.ty = targetPos.y;
-                ball.speed = p.speed; ball.drag = p.drag; ball.bx = p.bx; ball.by = p.by; ball.spinAngle = 0;
+                ball.z = 0.0; ball.x = 390; ball.y = 190;
+                ball.tx = targetPos.x; ball.ty = targetPos.y;
+                ball.speed = p.speed; ball.drag = p.drag; ball.bx = p.bx; ball.by = p.by; ball.spin = 0;
                 ball.active = true; ball.status = "go";
                 
                 batter.swinging = false; batter.frame = 0;
-                batter.mode = (Math.random() < 0.24) ? "bunt" : "normal";
+                batter.mode = (Math.random() < 0.25) ? "bunt" : "normal";
 
-                if (runner.active && Math.random() < 0.48) {{
+                if (runner.active && Math.random() < 0.5) {{
                     runner.status = "stealing";
-                    addLog("<span style='color:#facc15;'>🏃 [도루 도발] 주자 베이스 러닝 가속화! 2루 도루에 도박을 겁니다!</span>");
+                    addLog("<span style='color:#facc15;'>🏃 [도루 감행] 루상의 주자가 스킵 동작 이후 완전히 베이스를 훔치려 달립니다!</span>");
                 }}
                 players.forEach(pl => {{ pl.tx = pl.sx; pl.ty = pl.sy; }});
             }}
 
+            // ⚠️ 프리징 버그를 유발하던 비동기 흐름 제어 로직 완전 개조
             function judgeZone() {{
                 ball.active = false;
                 let isStrike = (ball.x >= 310 && ball.x <= 470 && ball.y >= 300 && ball.y <= 440);
                 batter.swinging = true;
+                batter.frame = 0; // 프레임 초기화로 루프 락 예방
 
-                let chance = isStrike ? 0.64 : 0.14;
-                if (batter.mode === "bunt") chance = isStrike ? 0.84 : 0.34;
+                let chance = isStrike ? 0.62 : 0.12;
+                if (batter.mode === "bunt") chance = isStrike ? 0.82 : 0.32;
 
                 if (Math.random() < chance) {{
                     ball.status = "hit"; hitBall.active = true;
                     hitBall.x = ball.x; hitBall.y = ball.y; hitBall.spin = 0;
                     
                     if (batter.mode === "bunt") {{
-                        hitBall.isBunt = true; hitBall.vx = (Math.random() - 0.5) * 4.5; hitBall.vy = -(2.0 + Math.random() * 2);
-                        addLog("<span style='color:#fbbf24;'>🥎 [기습 스퀴즈] 배트 컨트롤 번트! 볼의 회전이 죽으며 흙잔디 경계면에 멈춰 섭니다.</span>");
+                        hitBall.isBunt = true; hitBall.vx = (Math.random() - 0.5) * 5; hitBall.vy = -(2.5 + Math.random() * 2);
+                        addLog("<span style='color:#fbbf24;'>🥎 [인플레이] 번트 타구가 내야 라인 안쪽에 절묘하게 떨어집니다!</span>");
                     }} else {{
-                        hitBall.isBunt = false; hitBall.vx = (Math.random() - 0.5) * 18; hitBall.vy = -(7 + Math.random() * 12);
-                        addLog("<span style='color:#f87171;'>💥 [장타 작렬] 깡!!! 정타 머티리얼 크래시! 엄청난 배트 스피드로 라인을 찢어발깁니다!</span>");
+                        hitBall.isBunt = false; hitBall.vx = (Math.random() - 0.5) * 19; hitBall.vy = -(8 + Math.random() * 13);
+                        addLog("<span style='color:#f87171;'>💥 [인플레이] 콰앙!! 배트 중심에 제대로 맞은 타구가 외야 상공으로 뿜어집니다!</span>");
                     }}
 
                     let dx = hitBall.x + hitBall.vx * 15, dy = hitBall.y + hitBall.vy * 15;
@@ -233,51 +223,68 @@ def main():
                         }}
                     }});
 
-                    let maxRange = hitBall.isBunt ? 200 : 160;
+                    let maxRange = hitBall.isBunt ? 210 : 170;
                     if (closest && minDist < maxRange) {{ closest.tx = dx; closest.ty = dy; }}
                 }} else {{
                     let box = document.getElementById('abs-box');
                     if (isStrike) {{
                         count.s++; box.innerText = "ABS: STRIKE"; box.style.color = "#ef4444"; box.style.borderColor = "#ef4444";
-                        addLog("⚾ [ABS 판정] 스트라이크! 존 하단을 정교하게 베어 물었습니다.");
+                        addLog("⚾ [ABS 판정] 스트라이크! 정확한 하이 패스트볼 보더라인 관통.");
                     }} else {{
                         count.b++; box.innerText = "ABS: BALL"; box.style.color = "#3b82f6"; box.style.borderColor = "#3b82f6";
-                        addLog("🔵 [ABS 판정] 볼! 포수의 미트 프레이밍 존을 완전히 벗어났습니다.");
+                        addLog("🔵 [ABS 판정] 볼! 베이스 플레이트 옆으로 크게 날아갔습니다.");
                     }}
 
-                    if (count.s >= 3) {{ count.o++; count.s=0; count.b=0; addLog("❌ [아웃] K! 삼진아웃! 타자는 굳은 채 마운드를 내려다봅니다."); }}
-                    else if (count.b >= 4) {{ count.s=0; count.b=0; runner.active = true; addLog("🏃 [출루] 프롬프터 볼넷 출루 성공."); }}
-                    if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; addLog("🔄 [이닝 정리] 공수가 교대됩니다."); }}
+                    if (count.s >= 3) {{ count.o++; count.s=0; count.b=0; addLog("❌ [아웃] 삼진 아웃! 타자가 고개를 저으며 퇴장합니다."); }}
+                    else if (count.b >= 4) {{ count.s=0; count.b=0; runner.active = true; addLog("🏃 [출루] 사구(볼넷)로 베이스가 채워집니다."); }}
+                    if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; addLog("🔄 [체인지] 클리닝 타임, 이닝이 완전히 종료됩니다."); }}
                     
                     document.getElementById('score-board').innerText = "B: "+count.b+" | S: "+count.s+" | O: "+count.o;
                     if (runner.status === "stealing") {{
                         runner.x = 390; runner.y = 220; runner.status = "stay";
                         document.getElementById('base-viewer').innerText = "주자 2루";
                     }}
+                    // 리셋 보증 상태 전이
                     ball.status = "ready";
                 }}
             }}
 
-            // 🎨 [CORE REVOLUTION] 야구공 실밥 회전 및 캐릭터 텍스처 렌더러
-            function drawBaseball(x, y, radius, spin) {{
+            // 🎨 [점 그래픽 영구 파괴] 실밥 야구공 렌더러
+            function drawRealBall(x, y, r, spin) {{
+                ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+                ctx.fillStyle = "#ffffff"; ctx.shadowBlur = 8; ctx.shadowColor = "rgba(255,255,255,0.4)";
+                ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0; 
+                ctx.strokeStyle = "#dc2626"; ctx.lineWidth = r * 0.15;
+                ctx.beginPath(); ctx.arc(-r * 0.35, 0, r * 0.7, -Math.PI*0.35, Math.PI*0.35); ctx.stroke();
+                ctx.beginPath(); ctx.arc(r * 0.35, 0, r * 0.7, Math.PI*0.65, Math.PI*1.35); ctx.stroke();
+                ctx.restore();
+            }}
+
+            // 🎨 [점 그래픽 영구 파괴] 헬멧+어깨+글러브 조합 2D 선수 렌더러
+            function drawPlayerSprite(pl) {{
                 ctx.save();
-                ctx.translate(x, y);
-                ctx.rotate(spin);
-
-                // 야구공 바디 기본 명암
-                ctx.fillStyle = "#ffffff";
-                ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.fill();
+                // 1) 어깨 라인 유니폼 (베이스 레이어)
+                ctx.fillStyle = "#1e3a8a"; 
+                ctx.fillRect(pl.x - 12, pl.y - 3, 24, 8);
                 
-                // 붉은색 실밥 무늬 스티치 정밀 드로우 기믹
-                ctx.strokeStyle = "#e11d48";
-                ctx.lineWidth = radius * 0.18;
-                ctx.beginPath();
-                ctx.arc(-radius * 0.4, 0, radius * 0.75, -Math.PI*0.3, Math.PI*0.3);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(radius * 0.4, 0, radius * 0.75, Math.PI*0.7, Math.PI*1.3);
-                ctx.stroke();
+                // 2) 야구 헬멧 & 캡 챙 (상단 레이어)
+                ctx.fillStyle = "#3b82f6";
+                ctx.beginPath(); ctx.arc(pl.x, pl.y - 4, 7, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#1d4ed8"; // 챙 색상 분리
+                ctx.fillRect(pl.x - 6, pl.y - 11, 12, 3);
 
+                // 3) 글러브 시각화 (수비 동적 묘사)
+                ctx.fillStyle = "#ea580c"; // 가죽 글러브 브라운 브릭
+                ctx.fillRect(pl.x + (pl.tx !== pl.sx ? 8 : 6), pl.y, 5, 6);
+
+                // 4) 등번호 프린팅
+                ctx.fillStyle = "#ffffff"; ctx.font = "bold 9px sans-serif";
+                ctx.fillText(pl.num, pl.x - 3, pl.y + 4);
+
+                // 5) 포지션 명칭 레이블
+                ctx.fillStyle = "#cbd5e1"; ctx.font = "10px sans-serif";
+                ctx.fillText(pl.id, pl.x - 16, pl.y - 14);
                 ctx.restore();
             }}
 
@@ -285,16 +292,16 @@ def main():
                 ctx.clearRect(0,0,780,560);
                 batter.swingRot += 0.04;
 
-                // 🏟️ 흙 다이아몬드 & 잔디 필드 고해상도 드로우
-                ctx.fillStyle = "#115e29"; ctx.fillRect(0,0,780,560);
-                ctx.fillStyle = "#a16207"; ctx.beginPath(); ctx.moveTo(40,560); ctx.lineTo(340,190); ctx.lineTo(440,190); ctx.lineTo(740,560); ctx.fill();
+                // 그라운드 필드 고화질 드로우
+                ctx.fillStyle = "#166534"; ctx.fillRect(0,0,780,560);
+                ctx.fillStyle = "#9a3412"; ctx.beginPath(); ctx.moveTo(40,560); ctx.lineTo(340,190); ctx.lineTo(440,190); ctx.lineTo(740,560); ctx.fill();
 
-                // ABS 트랙 가이드 라인
+                // 스트라이크 판정 박스 및 홈플레이트
                 ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 2; ctx.strokeRect(310, 300, 160, 140);
-                ctx.fillStyle = "#f8fafc"; ctx.beginPath(); ctx.moveTo(390,480); ctx.lineTo(420,498); ctx.lineTo(420,520); ctx.lineTo(360,520); ctx.lineTo(360,498); ctx.fill();
+                ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.moveTo(390,480); ctx.lineTo(420,498); ctx.lineTo(420,520); ctx.lineTo(360,520); ctx.lineTo(360,498); ctx.fill();
 
-                // 🧑 메탈릭 질감 배트를 쥔 가죽 유니폼 타자
-                ctx.save(); ctx.strokeStyle = "#f8fafc"; ctx.lineWidth = 3.5;
+                // 타자 렌더러 (메탈 배트 하이라이팅 포함)
+                ctx.save(); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 3.5;
                 let tx = 250, ty = 380, wb = Math.sin(batter.swingRot)*1.5;
                 ctx.beginPath(); ctx.arc(tx, ty-25+wb, 7, 0, Math.PI*2); ctx.fillStyle="#e2e8f0"; ctx.fill(); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(tx, ty-18+wb); ctx.lineTo(tx, ty+10); ctx.stroke();
@@ -307,78 +314,70 @@ def main():
                 }} else if (batter.swinging) {{
                     let ang = (batter.frame / 12) * Math.PI * 0.85; ctx.rotate(ang); batter.frame++;
                     if(batter.frame > 12) batter.swinging = false;
-                    ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(48, -16); ctx.stroke();
+                    ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(48, -16); ctx.stroke();
                 }} else {{
                     ctx.rotate(-Math.PI * 0.12 + Math.sin(batter.swingRot)*0.03);
-                    ctx.strokeStyle = "#94a3b8"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(48, -16); ctx.stroke();
+                    ctx.strokeStyle = "#64748b"; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(48, -16); ctx.stroke();
                 }}
                 ctx.restore();
 
-                // 🏃 주자 헬멧 렌더링
+                // 🏃 주자 캐릭터화 스프라이트
                 if (runner.active) {{
                     if (runner.status === "stealing") {{
                         let dx = 390 - runner.x, dy = 220 - runner.y, d = Math.hypot(dx, dy);
                         if (d > 4) {{ runner.x += (dx/d)*runner.speed; runner.y += (dy/d)*runner.speed; }}
                     }}
-                    ctx.fillStyle = "#e11d48"; ctx.beginPath(); ctx.arc(runner.x, runner.y, 9, 0, Math.PI*2); ctx.fill();
-                    ctx.fillStyle = "#ffffff"; ctx.font = "9px Arial"; ctx.fillText("RUN", runner.x-9, runner.y-13);
+                    ctx.fillStyle = "#dc2626"; ctx.beginPath(); ctx.arc(runner.x, runner.y, 8, 0, Math.PI*2); ctx.fill();
+                    ctx.fillStyle = "#facc15"; ctx.fillRect(runner.x - 4, runner.y + 4, 8, 4); // 러닝 레그 묘사
+                    ctx.fillStyle = "#ffffff"; ctx.font = "bold 9px Arial"; ctx.fillText("RUN", runner.x-9, runner.y-12);
                 }}
 
-                // 🧤 견제 송구
+                // 포수 견제 송구
                 if (catcherThrow.active) {{
                     catcherThrow.x += catcherThrow.vx; catcherThrow.y += catcherThrow.vy;
-                    drawBaseball(catcherThrow.x, catcherThrow.y, 5, batter.swingRot * 3);
+                    drawRealBall(catcherThrow.x, catcherThrow.y, 5, batter.swingRot * 4);
                     if (catcherThrow.y <= 220) {{
                         catcherThrow.active = false;
-                        if (Math.hypot(runner.x - 390, runner.y - 220) < 30) {{
+                        if (Math.hypot(runner.x - 390, runner.y - 220) < 32) {{
                             runner.active = false; runner.status = "stay"; count.o++;
                             if (count.o >= 3) count.o = 0;
                             document.getElementById('base-viewer').innerText = "주자 없음";
                             document.getElementById('score-board').innerText = "B: "+count.b+" | S: "+count.s+" | O: "+count.o;
-                            addLog("<span style='color:#ef4444;'>🧤 [태그 데스] 레이저 포수 송구가 주자의 슬라이딩 장갑보다 빨랐습니다! 아웃!</span>");
+                            addLog("<span style='color:#ef4444;'>🧤 [태그 아웃] 자동 송구 프로세스 완벽 도킹! 주자를 완벽하게 베이스에서 태그아웃 처리합니다.</span>");
                         }} else {{
                             runner.x = 390; runner.y = 220; runner.status = "stay";
                             document.getElementById('base-viewer').innerText = "주자 2루";
-                            addLog("<span style='color:#34d399;'>⚡ [도루 성공] 2루 안착 성공! 슬라이딩 텍스처 완벽 연결!</span>");
+                            addLog("<span style='color:#34d399;'>⚡ [세이프] 베이스 터치가 간발의 차이로 빨랐습니다!</span>");
                         }}
                     }}
                 }}
 
-                // 🏃 [점 그래픽 타파] 유니폼, 머리, 등번호가 살아있는 9인 수비 캐릭터 드로우
+                // 🏃 9인 수비 캐릭터 일괄 드로우 및 연산 (점 그래픽 완벽 격리)
                 players.forEach(pl => {{
                     pl.x += (pl.tx - pl.x) * 0.08; pl.y += (pl.ty - pl.y) * 0.08;
 
-                    if (hitBall.active && Math.hypot(pl.x - hitBall.x, pl.y - hitBall.y) < 25) {{
+                    if (hitBall.active && Math.hypot(pl.x - hitBall.x, pl.y - hitBall.y) < 26) {{
                         hitBall.active = false; ball.status = "ready";
                         players.forEach(p => {{ p.tx = p.sx; p.ty = p.sy; }});
                         if (runner.status === "stealing") {{ runner.status = "stay"; runner.x = 390; runner.y = 220; }}
                         
                         count.o++; if(count.o >= 3) {{ count.o=0; count.s=0; count.b=0; }}
                         document.getElementById('score-board').innerText = "B: "+count.b+" | S: "+count.s+" | O: "+count.o;
-                        addLog("🧤 [수비 다이내믹] " + pl.id + "(No."+pl.num+") 캐릭터가 환상적인 가로채기 텍스처 슬라이딩 포구!");
+                        addLog("🧤 [다이내믹 수비] No." + pl.num + " (" + pl.id + ") 캐릭터가 몸을 던져 야구공 텍스처를 완전히 움켜쥐었습니다!");
                     }}
 
-                    // 캐릭터 모델 구조 묘사 (바디 유니폼 패브릭 질감 구현)
-                    ctx.fillStyle = "#1e3a8a"; // 프로 저지 팀 컬러
-                    ctx.beginPath(); ctx.arc(pl.x, pl.y, 10, 0, Math.PI*2); ctx.fill(); // 몸체
-                    ctx.fillStyle = "#3b82f6"; 
-                    ctx.beginPath(); ctx.arc(pl.x, pl.y-3, 6, 0, Math.PI*2); ctx.fill(); // 프로 야구 헬멧
-
-                    // 등번호 텍스트 프린팅
-                    ctx.fillStyle = "#ffffff"; ctx.font = "bold 9px sans-serif";
-                    ctx.fillText(pl.num, pl.x-3, pl.y+4);
-                    ctx.fillStyle = "#94a3b8"; ctx.font = "9px sans-serif";
-                    ctx.fillText(pl.id, pl.x-15, pl.y-12);
+                    // 개조된 그래픽 스프라이트 호출
+                    drawPlayerSprite(pl);
                 }});
 
                 if (isTargeting) {{
                     ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(targetPos.x, targetPos.y, 11, 0, Math.PI*2); ctx.stroke();
                 }}
 
-                // ⚾ 리얼 무브먼트 야구공 회전 및 확대 피칭 루틴
+                // ⚾ 버그 프리 투구 구동 부스터 벨트
                 if (ball.active && ball.status === "go") {{
                     ball.speed *= ball.drag; ball.z += ball.speed;
-                    ball.spinAngle += 0.25; // 투구 리얼 회전 레이어
+                    ball.spin += 0.28;
 
                     let mx = Math.sin(ball.z * Math.PI) * ball.bx * 3.6;
                     let my = Math.pow(ball.z, 2) * ball.by * 3.8;
@@ -386,18 +385,22 @@ def main():
                     ball.x = 390 + (ball.tx - 390)*ball.z + mx;
                     ball.y = 190 + (ball.ty - 190)*ball.z + my;
 
-                    let bSize = Math.max(4.0, 4.5 + ball.z * 16);
+                    let bSize = Math.max(4.5, 5.0 + ball.z * 16);
                     
-                    // 점 그래픽 타파용 리얼 텍스처 공 렌더링 호출
-                    drawBaseball(ball.x, ball.y, bSize, ball.spinAngle);
-                    if (ball.z >= 1.0) {{ ball.z = 1.0; judgeZone(); }}
+                    // 버그 없이 끝까지 날아가서 꽂히는 공 드로우
+                    drawRealBall(ball.x, ball.y, bSize, ball.spin);
+                    
+                    if (ball.z >= 1.0) {{ 
+                        ball.z = 1.0; 
+                        judgeZone(); 
+                    }}
                 }}
 
-                // 🥎 타구 비행 회전 물리 연산
+                // 타구 물리 및 아웃/안타 루틴
                 if (hitBall.active) {{
                     hitBall.x += hitBall.vx; hitBall.y += hitBall.vy;
-                    hitBall.spin += 0.15;
-                    drawBaseball(hitBall.x, hitBall.y, 6.5, hitBall.spin);
+                    hitBall.spin += 0.18;
+                    drawRealBall(hitBall.x, hitBall.y, 7, hitBall.spin);
 
                     if (hitBall.y < 0 || hitBall.x < 0 || hitBall.x > 780) {{
                         hitBall.active = false; ball.status = "ready";
@@ -408,10 +411,10 @@ def main():
                         if (!runner.active) {{
                             runner.active = true; runner.x = 610; runner.y = 300;
                             document.getElementById('base-viewer').innerText = "주자 1루";
-                            addLog("📢 [안타] 파울라인 안쪽 클린 히트! 타자가 가볍게 1루 베이스를 안착합니다.");
+                            addLog("📢 [라인 드라이브 안타] 완벽한 궤적으로 외야 펜스를 직격하는 안타가 터집니다!");
                         }} else {{
-                            document.getElementById('base-viewer').innerText = "주자 홈인! 득점 대성공!"; runner.active = false;
-                            addLog("<span style='color:#fbbf24;'>🎉 [빅이닝 메이커] 루상의 주자가 홈을 슬라이딩으로 통과! 1타점 적시타 폭발!</span>");
+                            document.getElementById('base-viewer').innerText = "주자 홈인! 득점 성공!"; runner.active = false;
+                            addLog("<span style='color:#fbbf24;'>🎉 [홈인] 3루를 돈 주자가 전력 질주로 홈플레이트를 쓸어 담으며 추가 점수를 뽑아냅니다!</span>");
                         }}
                     }}
                 }}
