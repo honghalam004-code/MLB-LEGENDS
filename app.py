@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 def main():
-    st.set_page_config(page_title="MLB 30 TEAMS PERFECT STRATEGY ENGINE", layout="wide")
+    st.set_page_config(page_title="MLB 30 TEAMS PERFECT STRATEGY ENGINE v4", layout="wide")
     
     st.markdown("""
         <style>
@@ -18,7 +18,7 @@ def main():
     if 'game_active' not in st.session_state:
         st.session_state.game_active = False
 
-    # ⚾ MLB 30개 전 구단 실존 원투펀치 및 현실 무브먼트 데이터셋
+    # ⚾ MLB 30개 전 구단 실존 원투펀치 데이터셋
     mlb_30_teams = {
         "LA Dodgers": {
             "pitchers": {
@@ -100,7 +100,6 @@ def main():
         }
     }
 
-    # 🛠️ [에러 해결 완벽 수정] 쉼표 문법 에러 완전 차단 및 나머지 17개 팀 실명 라인업 빌드
     remaining_teams = {
         "CHC Cubs": ("저스틴 스틸", "슬라이더", "제임슨 타이온", "커터"),
         "STL Cardinals": ("소니 그레이", "스위퍼", "마일스 마이콜라스", "싱커"),
@@ -132,7 +131,7 @@ def main():
     sorted_teams = sorted(list(mlb_30_teams.keys()))
 
     if not st.session_state.game_active:
-        st.markdown("<h2 style='text-align:center; color:#22c55e; font-weight:800; margin-top:20px;'>🏟️ MLB 30 TEAMS STRATEGY ENGINE v2</h2>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center; color:#22c55e; font-weight:800; margin-top:20px;'>🏟️ MLB 30 TEAMS PERFECT STRATEGY ENGINE v4</h2>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
         with c1:
             u_team = st.selectbox("투수 구단 선택", sorted_teams, index=sorted_teams.index("LA Dodgers"))
@@ -161,10 +160,11 @@ def main():
             st.rerun()
 
     with col_canvas:
+        pitch_names = list(st.session_state.p_data.keys())
         pitch_buttons = ""
-        for idx, p_name in enumerate(st.session_state.p_data.keys(), 1):
-            bg = "#22c55e" if idx == 1 else "#1e293b"
-            pitch_buttons += f'<button onclick="setPitch(\'{p_name}\')" class="p-btn" style="background:{bg}; color:white; border:1px solid #22c55e; padding:12px; border-radius:6px; cursor:pointer; width:100%; margin-bottom:8px; font-weight:bold;">{p_name}</button>'
+        for idx, p_name in enumerate(pitch_names):
+            active_style = "background:#22c55e; border:2px solid #ffffff;" if idx == 0 else "background:#1e293b; border:1px solid #22c55e;"
+            pitch_buttons += f'<button id="pbtn-{idx}" onclick="selectPitchType(\'{p_name}\', {idx})" style="{active_style} color:white; padding:12px; border-radius:6px; cursor:pointer; width:100%; margin-bottom:8px; font-weight:bold;">{p_name}</button>'
 
         html_src = f"""
         <div style="max-width:1100px; margin:0 auto;">
@@ -174,11 +174,13 @@ def main():
             </div>
 
             <div style="display:flex; gap:15px;">
-                <canvas id="ballCanvas" width="760" height="540" style="background:#14532d; border:4px solid #334155; border-radius:8px;"></canvas>
+                <canvas id="ballCanvas" width="760" height="540" style="background:#14532d; border:4px solid #334155; border-radius:8px; cursor:crosshair;"></canvas>
                 
                 <div style="width:240px; background:#1e293b; padding:14px; border-radius:8px; border:1px solid #334155; height:fit-content; display:flex; flex-direction:column; gap:10px;">
-                    <span style="color:#94a3b8; font-size:12px; font-weight:bold;">⚾ 에이스 고유 구종</span>
+                    <span style="color:#22c55e; font-size:12px; font-weight:bold;">1️⃣ 1단계: 구종 고르기</span>
                     <div>{pitch_buttons}</div>
+                    
+                    <span style="color:#94a3b8; font-size:11px; color:#e2e8f0; font-weight:bold; background:#0f172a; padding:6px; border-radius:4px; text-align:center;">💡 그라운드 클릭 시 피칭 스타트!</span>
                     
                     <span style="color:#94a3b8; font-size:12px; font-weight:bold; margin-top:5px;">📋 작전 지시 벤치</span>
                     <button id="bunt-toggle" onclick="toggleBunt()" style="background:#475569; color:white; border:1px solid #64748b; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold; text-align:center;">🎯 번트 모션: OFF</button>
@@ -189,9 +191,9 @@ def main():
             </div>
 
             <div style="background:#0f172a; border-left:6px solid #22c55e; padding:12px; border-radius:6px; margin-top:12px;">
-                <div style="font-size:12px; color:#22c55e; font-weight:800; margin-bottom:4px;">🎙️ REAL MLB 중계석 (통합 픽스 완료)</div>
+                <div style="font-size:12px; color:#22c55e; font-weight:800; margin-bottom:4px;">🎙️ REAL MLB 중계석 (타구 궤적 및 야수 유기적 동시 이동 고증 버전)</div>
                 <div id="relay-container" style="color:#f1f5f9; font-size:14px; font-family:monospace; max-height:100px; overflow-y:auto; display:flex; flex-direction:column-reverse; gap:4px;">
-                    <div style="color: #a1a1aa;">[엔진] 전 구단 고증 라인업 팩과 작전 시스템 빌드가 충돌 없이 리빌드되었습니다.</div>
+                    <div style="color: #a1a1aa;">[엔진] 타구 속도/높이(그림자 연산)와 전체 수비대의 백업 수비 기동 로직이 가동 중입니다.</div>
                 </div>
             </div>
         </div>
@@ -202,18 +204,21 @@ def main():
 
             let count = {{ b: 0, s: 0, o: 0 }};
             const pitches = {json.dumps(st.session_state.p_data, ensure_ascii=False)};
+            const totalPitchCount = {len(pitch_names)};
+            
+            let selectedPitchName = "{pitch_names[0]}";
 
-            // 원형 점 폐기 ➡️ 유니폼 레이어 기반 2D 피규어 모델
+            // 각 야수 피규어들의 초기 고유 세팅
             let players = [
-                {{ id: "투수", num: "1", x: 380, y: 180, sx: 380, sy: 180, tx: 380, ty: 180 }},
-                {{ id: "포수", num: "2", x: 380, y: 495, sx: 380, sy: 495, tx: 380, ty: 495 }},
-                {{ id: "1루수", num: "3", x: 600, y: 300, sx: 600, sy: 300, tx: 600, ty: 300 }},
-                {{ id: "2루수", num: "4", x: 490, y: 220, sx: 490, sy: 220, tx: 490, ty: 220 }},
-                {{ id: "3루수", num: "5", x: 160, y: 300, sx: 160, sy: 300, tx: 160, ty: 300 }},
-                {{ id: "유격수", num: "6", x: 270, y: 220, sx: 270, sy: 220, tx: 270, ty: 220 }},
-                {{ id: "좌익수", num: "7", x: 110, y: 110, sx: 110, sy: 110, tx: 110, ty: 110 }},
-                {{ id: "중견수", num: "8", x: 380, y: 80, sx: 380, sy: 80, tx: 380, ty: 80 }},
-                {{ id: "우익수", num: "9", x: 650, y: 110, sx: 650, sy: 110, tx: 650, ty: 110 }}
+                {{ id: "투수", num: "1", x: 380, y: 180, sx: 380, sy: 180, tx: 380, ty: 180, speedFactor: 0.08 }},
+                {{ id: "포수", num: "2", x: 380, y: 495, sx: 380, sy: 495, tx: 380, ty: 495, speedFactor: 0.05 }},
+                {{ id: "1루수", num: "3", x: 600, y: 300, sx: 600, sy: 300, tx: 600, ty: 300, speedFactor: 0.10 }},
+                {{ id: "2루수", num: "4", x: 490, y: 220, sx: 490, sy: 220, tx: 490, ty: 220, speedFactor: 0.12 }},
+                {{ id: "3루수", num: "5", x: 160, y: 300, sx: 160, sy: 300, tx: 160, ty: 300, speedFactor: 0.10 }},
+                {{ id: "유격수", num: "6", x: 270, y: 220, sx: 270, sy: 220, tx: 270, ty: 220, speedFactor: 0.13 }},
+                {{ id: "좌익수", num: "7", x: 140, y: 110, sx: 140, sy: 110, tx: 140, ty: 110, speedFactor: 0.14 }},
+                {{ id: "중견수", num: "8", x: 380, y: 80, sx: 380, sy: 80, tx: 380, ty: 80, speedFactor: 0.15 }},
+                {{ id: "우익수", num: "9", x: 620, y: 110, sx: 620, sy: 110, tx: 620, ty: 110, speedFactor: 0.14 }}
             ];
 
             let runner = {{ active: false, x: 600, y: 300, status: "stay" }}; 
@@ -226,8 +231,14 @@ def main():
             let ballTx = 380, ballTy = 400;
             let ballSpeed = 0.04, ballBx = 0, ballBy = 0;
 
+            // 💥 타구 궤적(포물선 높이 및 그림자) 고증 변수
             let hitActive = false;
-            let hitX = 380, hitY = 400, hitVx = 0, hitVy = 0;
+            let hitX = 380, hitY = 400;
+            let hitDestX = 380, hitDestY = 150;
+            let hitProgress = 0.0;
+            let hitSpeed = 0.02;
+            let maxHitHeight = 60; // 뜬공의 최대 높이 정점 스케일
+
             let batterSwinging = false, batterFrame = 0;
 
             function addLog(msg) {{
@@ -235,6 +246,23 @@ def main():
                 const div = document.createElement('div');
                 div.innerHTML = msg;
                 container.insertBefore(div, container.firstChild);
+            }}
+
+            function selectPitchType(name, targetIdx) {{
+                if (ballActive || hitActive) return;
+                selectedPitchName = name;
+                for (let i = 0; i < totalPitchCount; i++) {{
+                    const btn = document.getElementById('pbtn-' + i);
+                    if (btn) {{
+                        if (i === targetIdx) {{
+                            btn.style.background = "#22c55e";
+                            btn.style.border = "2px solid #ffffff";
+                        }} else {{
+                            btn.style.background = "#1e293b";
+                            btn.style.border = "1px solid #22c55e";
+                        }}
+                    }}
+                }}
             }}
 
             function toggleBunt() {{
@@ -253,7 +281,7 @@ def main():
             function triggerSteal() {{
                 if (!runner.active || ballActive || hitActive) return;
                 stealTriggered = true;
-                addLog("<span style='color:#fbbf24;'>🏃 [작전 실행] 1루 주자가 2루를 향해 전력으로 베이스 러닝을 개시합니다!</span>");
+                addLog("<span style='color:#fbbf24;'>🏃 [작전 실행] 1루 주자가 2루를 향해 리드오프 스타트를 끊었습니다!</span>");
             }}
 
             function updateBaseUI() {{
@@ -278,17 +306,15 @@ def main():
                 }}
             }}
 
+            // 2단계: 그라운드 조준 피칭 개시
             canvas.addEventListener('mousedown', (e) => {{
                 if (ballActive || hitActive) return;
+                
                 let r = canvas.getBoundingClientRect();
                 targetPos.x = (e.clientX - r.left) * (760 / r.width);
                 targetPos.y = (e.clientY - r.top) * (540 / r.height);
-            }});
-
-            function setPitch(name) {{
-                if (ballActive || hitActive) return;
                 
-                let p = pitches[name];
+                let p = pitches[selectedPitchName];
                 ballX = 380; ballY = 180; ballZ = 0.0;
                 ballTx = targetPos.x; ballTy = targetPos.y;
                 ballSpeed = p.speed; ballBx = p.bx; ballBy = p.by;
@@ -300,9 +326,9 @@ def main():
 
                 if (stealTriggered) runner.status = "running";
 
-                addLog("⚾ 투구 고증 분석: [" + name + "] 회전수 및 브레이킹 포인트 추적 시작");
+                addLog("⚾ 피칭 가동: [" + selectedPitchName + "] 조준점 투구!");
                 players.forEach(pl => {{ pl.tx = pl.sx; pl.ty = pl.sy; }});
-            }}
+            }});
 
             function judgeZone() {{
                 ballActive = false;
@@ -316,38 +342,56 @@ def main():
 
                     if (Math.random() < (isStrike ? 0.85 : 0.40)) {{
                         hitActive = true;
+                        hitProgress = 0.0;
                         hitX = ballX; hitY = ballY;
-                        hitVx = (Math.random() - 0.5) * 6;
-                        hitVy = -(3 + Math.random() * 4);
-                        addLog("<span style='color:#38bdf8;'>🎯 [기습 번트] 타자가 허리를 숙여 투수 앞 방향으로 절묘하게 타구를 밀어 보냈습니다!</span>");
+                        hitDestX = ballX + (Math.random() - 0.5) * 80;
+                        hitDestY = ballY - (40 + Math.random() * 50); // 투수-내야진 사이 짧게 구르는 번트
+                        hitSpeed = 0.03;
+                        maxHitHeight = 5; // 번트는 고도가 거의 없음
+
+                        addLog("<span style='color:#38bdf8;'>🎯 [기습 번트 내야 로직] 배트에 툭 맞아 투수 앞으로 힘없이 굴러갑니다!</span>");
                         
+                        // 💥 전체 수비수 유기적 타구 예측 대형 이동 개시
                         players.forEach(pl => {{
                             if (pl.id === "투수" || pl.id === "1루수" || pl.id === "3루수") {{
-                                pl.tx = hitX + hitVx * 10; pl.ty = hitY + hitVy * 10;
+                                pl.tx = hitDestX; pl.ty = hitDestY; // 직접 포구 기동
+                            } else {{
+                                pl.tx = pl.sx + (hitDestX - pl.sx) * 0.2; pl.ty = pl.sy + (hitDestY - pl.sy) * 0.2; // 백업 커버
                             }}
                         }});
                         return;
                     }} else {{
-                        addLog("🎯 번트 모션 실패! 파울!");
+                        addLog("🎯 번트 파울!");
                         count.s++;
                     }}
                 }} else {{
-                    if (Math.random() < (isStrike ? 0.55 : 0.10)) {{
+                    if (Math.random() < (isStrike ? 0.60 : 0.15)) {{
                         hitActive = true;
+                        hitProgress = 0.0;
                         hitX = ballX; hitY = ballY;
-                        hitVx = (Math.random() - 0.5) * 24;
-                        hitVy = -(8 + Math.random() * 11);
-                        addLog("<span style='color:#f87171;'>💥 배트 중심에 정확히 정타! 라인 드라이브성 타구가 외야로 뻗어갑니다!</span>");
+                        
+                        // 대각선 좌/우/중앙 외야 전역 낙하지점 고증 수학적 분산
+                        hitDestX = 100 + Math.random() * 560;
+                        hitDestY = 50 + Math.random() * 180;
+                        hitSpeed = 0.015 + Math.random() * 0.015;
+                        maxHitHeight = 35 + Math.random() * 55; // 팝플라이 및 장타 고도 연산셋
 
-                        let dx = hitX + hitVx * 13, dy = hitY + hitVy * 13;
-                        let closest = null, minDist = 9999;
+                        addLog("<span style='color:#f87171;'>💥 타격 폭발!! 타구가 큰 포물선을 그리며 외야 관중석 방향으로 날아갑니다!</span>");
+
+                        // 💥 전체 수비수 유기적 동시 대형 백업 이동
                         players.forEach(pl => {{
-                            if (pl.id !== "투수" && pl.id !== "포수") {{
-                                let d = Math.hypot(pl.sx - dx, pl.sy - dy);
-                                if (d < minDist) {{ minDist = d; closest = pl; }}
+                            if (pl.id !== "포수") {{
+                                // 타구 낙하지점을 향해 모든 수비수가 각자의 고유 속도로 기동 및 백업 포메이션 빌드
+                                let distToDest = Math.hypot(hitDestX - pl.sx, hitDestY - pl.sy);
+                                if (distToDest < 260) {{
+                                    pl.tx = hitDestX; pl.ty = hitDestY; // 주 타겟 수비수 대시
+                                }} else {{
+                                    // 나머지 수비수들은 송구 길목 및 베이스 커버를 위한 유기적 방향 이동
+                                    pl.tx = pl.sx + (hitDestX - pl.sx) * 0.35;
+                                    pl.ty = pl.sy + (hitDestY - pl.sy) * 0.35;
+                                }}
                             }}
                         }});
-                        if (closest && minDist < 200) {{ closest.tx = dx; closest.ty = dy; }}
                         return;
                     }} else {{
                         if (isStrike) {{ count.s++; addLog("스트라이크 존 통과!"); }}
@@ -355,22 +399,23 @@ def main():
                     }}
                 }}
 
+                // 도루 러닝 판정
                 if (runner.status === "running") {{
                     stealTriggered = false;
                     if (runner.y <= 245) {{
                         runner.status = "second";
                         runner.x = 490; runner.y = 220;
-                        addLog("<span style='color:#22c55e; font-weight:bold;'>🏃 [도루 성공] 야수 태그보다 빠르게 주자가 2루 슬라이딩 세이프 성공!</span>");
+                        addLog("<span style='color:#22c55e; font-weight:bold;'>🏃 [도루 세이프] 주자 완벽한 도루 성공!</span>");
                     }} else {{
                         runner.active = false; runner.status = "stay";
                         runner.x = 600; runner.y = 300;
                         count.o++;
-                        addLog("<span style='color:#ef4444; font-weight:bold;'>❌ [도루 실패] 포수의 정밀 저격 송구로 인해 2루에서 태그아웃 처리됩니다!</span>");
+                        addLog("<span style='color:#ef4444; font-weight:bold;'>❌ [도루 저지] 포수의 2루 송구 아웃!</span>");
                     }}
                 }}
 
                 if (count.s >= 3) {{ count.o++; count.s = 0; count.b = 0; addLog("❌ 삼진 아웃!"); }}
-                else if (count.b >= 4) {{ count.s = 0; count.b = 0; runner.active = true; runner.status = "stay"; addLog("🏃 사사구 출루!"); }}
+                else if (count.b >= 4) {{ count.s = 0; count.b = 0; runner.active = true; runner.status = "stay"; addLog("🏃 볼넷 출루!"); }}
                 if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; runner.active = false; runner.status = "stay"; addLog("🔄 쓰리아웃 공수 교대!"); }}
                 
                 document.getElementById('score-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
@@ -412,14 +457,14 @@ def main():
                     let ang = (batterFrame / 8) * Math.PI * 0.85; ctx.rotate(ang); batterFrame++;
                     if (batterFrame > 8) batterSwinging = false;
                 }} else if (isBuntMode) {{
-                    ctx.rotate(Math.PI * 0.35); // 번트 수평 배트 모션 고증
+                    ctx.rotate(Math.PI * 0.35); 
                 }} else {{
                     ctx.rotate(-Math.PI * 0.15);
                 }}
                 ctx.strokeStyle = "#d97706"; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(42, -12); ctx.stroke();
                 ctx.restore();
 
-                // 도루 궤적 연산
+                // 주자 도루 궤적 연산
                 if (runner.active) {{
                     if (runner.status === "running") {{
                         let dx = 490 - runner.x, dy = 220 - runner.y;
@@ -433,24 +478,11 @@ def main():
                     ctx.fillStyle = "#ffffff"; ctx.font = "bold 8px Arial"; ctx.fillText("RUN", runner.x-7, runner.y-10);
                 }}
 
+                // 수비수 이동 처리 루프
                 players.forEach(pl => {{
-                    pl.x += (pl.tx - pl.x) * 0.12; pl.y += (pl.ty - pl.y) * 0.12;
-
-                    if (hitActive && Math.hypot(pl.x - hitX, pl.y - hitY) < 23) {{
-                        hitActive = false;
-                        players.forEach(p => {{ p.tx = p.sx; p.ty = p.sy; }});
-                        
-                        if (runner.active && runner.status === "stay") {{
-                            runner.status = "second"; runner.x = 490; runner.y = 220;
-                            addLog("🎯 작전 적중! 자신은 아웃당하면서 선행 주자를 진루시키는 진루타 번트 성공!");
-                        }} else {{
-                            addLog("🧤 야수 정면 포구로 타자 아웃 처리됩니다.");
-                        }}
-                        
-                        count.o++; if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; runner.active = false; runner.status = "stay"; }}
-                        document.getElementById('score-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
-                        updateBaseUI();
-                    }}
+                    // 각 야수의 speedFactor 가중치치를 곱해 기동 속도 고증 차별화
+                    pl.x += (pl.tx - pl.x) * pl.speedFactor; 
+                    pl.y += (pl.ty - pl.y) * pl.speedFactor;
                     drawRealisticPlayer(pl);
                 }});
 
@@ -458,7 +490,7 @@ def main():
                     ctx.strokeStyle = "#22c55e"; ctx.lineWidth = 2; ctx.strokeRect(targetPos.x - 6, targetPos.y - 6, 12, 12);
                 }}
 
-                // 고증 물리 변화구 연산 (프리징 리스크 완전 제로)
+                // 1. 투구 물리 변화구 연산
                 if (ballActive) {{
                     ballZ += ballSpeed;
                     if (ballZ > 1.0) ballZ = 1.0;
@@ -472,8 +504,6 @@ def main():
                     ctx.save(); ctx.translate(ballX, ballY);
                     let bSize = Math.max(4.0, 4.0 + ballZ * 14);
                     ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(0, 0, bSize, 0, Math.PI*2); ctx.fill();
-                    ctx.strokeStyle = "#dc2626"; ctx.lineWidth = bSize * 0.14;
-                    ctx.beginPath(); ctx.arc(-bSize*0.2, 0, bSize*0.7, -Math.PI*0.3, Math.PI*0.3); ctx.stroke();
                     ctx.restore();
 
                     if (ballZ >= 1.0) {{
@@ -481,23 +511,73 @@ def main():
                     }}
                 }}
 
+                // 2. 💥 친 공의 공중 포물선 궤적 및 그림자 + 야수 다이나믹 포구 연산
                 if (hitActive) {{
-                    hitX += hitVx; hitY += hitVy;
-                    ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(hitX, hitY, 5, 0, Math.PI*2); ctx.fill();
+                    hitProgress += hitSpeed;
+                    if (hitProgress > 1.0) hitProgress = 1.0;
 
-                    if (hitY < 0 || hitX < 0 || hitX > 760 || hitY > 540) {{
+                    // 낙하지점(hitDest)을 향해 뻗어가는 실시간 투영 좌표
+                    hitX = ballTx + (hitDestX - ballTx) * hitProgress;
+                    hitY = ballTy + (hitDestY - ballTy) * hitProgress;
+
+                    // 포물선 최고점 연산 수식 ($sin$ 주기)
+                    let currentHeight = Math.sin(hitProgress * Math.PI) * maxHitHeight;
+
+                    // 1) 지면 그림자 먼저 드로우
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+                    ctx.beginPath();
+                    ctx.arc(hitX, hitY, 5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 2) 실제 떠 있는 공 드로우 (높이에 따라 원형 크기가 동적으로 스케일링됨)
+                    ctx.save();
+                    ctx.translate(hitX, hitY - currentHeight);
+                    let currentBallSize = 5 + (currentHeight * 0.2); // 고도 비례 스케일 증가
+                    ctx.fillStyle = "#ffffff";
+                    ctx.beginPath();
+                    ctx.arc(0, 0, currentBallSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    // 실밥 라인 추가
+                    ctx.strokeStyle = "#ef4444";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(-currentBallSize*0.1, 0, currentBallSize * 0.7, -Math.PI*0.2, Math.PI*0.2);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 3) 낙하 시 수비수 도달 여부 계산 판정
+                    if (hitProgress >= 1.0) {{
                         hitActive = false;
+                        
+                        // 전원 복귀 지시
                         players.forEach(p => {{ p.tx = p.sx; p.ty = p.sy; }});
-                        count.s = 0; count.b = 0;
-                        document.getElementById('score-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
+                        
+                        // 낙하지점 기준 가장 가까이 온 수비수 서치
+                        let caught = false;
+                        players.forEach(pl => {{
+                            if (pl.id !== "포수" && pl.id !== "투수") {{
+                                if (Math.hypot(pl.x - hitDestX, pl.y - hitDestY) < 32) {{
+                                    caught = true;
+                                }}
+                            }}
+                        }});
 
-                        if (!runner.active) {{
-                            runner.active = true; runner.status = "stay"; runner.x = 600; runner.y = 300;
-                            addLog("📢 안타! 배트를 뚫은 정타가 그라운드에 안착합니다!");
+                        count.s = 0; count.b = 0;
+                        if (caught) {{
+                            count.o++;
+                            addLog("🧤 <span style='color:#38bdf8; font-weight:bold;'>[수비 성공] 수비수 피구어 부대가 낙하지점에 신속 기동하여 플라이 아웃 처리했습니다!</span>");
                         }} else {{
-                            runner.active = false; runner.status = "stay";
-                            addLog("<span style='color:#fbbf24; font-weight:bold;'>🎉 홈플레이트 통과 홈인! 스코어를 가뿐하게 갱신합니다!</span>");
+                            if (!runner.active) {{
+                                runner.active = true; runner.status = "stay"; runner.x = 600; runner.y = 300;
+                                addLog("📢 <span style='color:#22c55e; font-weight:bold;'>안타!! 야수진이 공을 쫓아갔으나 간발의 차로 낙하를 허용했습니다!</span>");
+                            }} else {{
+                                runner.active = false; runner.status = "stay";
+                                addLog("🎉 <span style='color:#fbbf24; font-weight:bold;'>홈인!! 외야를 완전히 갈라버린 깊숙한 장타로 득점에 성공합니다!</span>");
+                            }}
                         }}
+
+                        if (count.o >= 3) {{ count.o = 0; count.s = 0; count.b = 0; runner.active = false; runner.status = "stay"; addLog("🔄 쓰리아웃 공수 교대!"); }}
+                        document.getElementById('score-board').innerText = "B: " + count.b + " | S: " + count.s + " | O: " + count.o;
                         updateBaseUI();
                     }}
                 }}
